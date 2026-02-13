@@ -1,0 +1,34 @@
+/* Paleta de Colores CUE */
+:root {
+    --cue-primary: #03045e;
+    --cue-secondary: #0077b6;
+    --cue-hover: #00b4d8;
+    --cue-border: #90e0ef;
+    --cue-bg: #caf0f8;
+    --cue-text: #1a1a1a;
+}
+
+body {
+    background-color: var(--cue-bg);
+    color: var(--cue-text);
+    font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+.sidebar-cue {
+    background-color: var(--cue-primary);
+}
+
+.btn-institutional {
+    background-color: var(--cue-secondary);
+    transition: background 0.3s ease;
+}
+
+.btn-institutional:hover {
+    background-color: var(--cue-hover);
+}
+
+.card-mobility {
+    background: white;
+    border: 1px solid var(--cue-border);
+    border-radius: 4px; /* Minimalismo institucional */
+}

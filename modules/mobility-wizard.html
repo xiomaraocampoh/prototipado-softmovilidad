@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Solicitud - CUE Movilidad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <script src="https://unpkg.com/lucide@latest"></script> </head>
+<body class="bg-[#f0f4f8] text-[#1a1a1a]">
+
+    <nav class="bg-[#03045e] text-white p-4 shadow-md flex justify-between items-center">
+        <div class="font-bold tracking-wider flex items-center gap-2">
+            <i data-lucide="graduation-cap"></i> CUE | MOVILIDAD
+        </div>
+        <div class="text-sm opacity-90">Hola, <span id="userNameDisplay">Estudiante</span></div>
+    </nav>
+
+    <div class="max-w-4xl mx-auto mt-8 mb-12">
+        
+        <div class="flex justify-between mb-8 relative">
+            <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-300 -z-10 transform -translate-y-1/2"></div>
+            
+            <div class="step-indicator active" data-step="1">
+                <div class="w-10 h-10 rounded-full bg-[#03045e] text-white flex items-center justify-center font-bold border-4 border-[#f0f4f8]">1</div>
+                <span class="text-xs font-semibold mt-1">Datos</span>
+            </div>
+            <div class="step-indicator" data-step="2">
+                <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold border-4 border-[#f0f4f8]">2</div>
+                <span class="text-xs font-semibold mt-1">Destino</span>
+            </div>
+            <div class="step-indicator" data-step="3">
+                <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold border-4 border-[#f0f4f8]">3</div>
+                <span class="text-xs font-semibold mt-1">Detalles</span>
+            </div>
+            <div class="step-indicator" data-step="4">
+                <div class="w-10 h-10 rounded-full bg-gray-300 text-gray-600 flex items-center justify-center font-bold border-4 border-[#f0f4f8]">4</div>
+                <span class="text-xs font-semibold mt-1">Docs</span>
+            </div>
+        </div>
+
+        <form id="mobilityForm" class="bg-white p-8 rounded-lg shadow-lg border-t-4 border-[#0077b6]">
+            
+            <div class="wizard-step" id="step-1">
+                <h2 class="text-xl font-bold text-[#03045e] mb-4 border-b pb-2">Configuración Inicial</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tipo de Solicitante</label>
+                        <select id="applicantType" class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none bg-gray-50" disabled>
+                            <option value="ESTUDIANTE">Estudiante Regular</option>
+                            <option value="EXTERNO">Estudiante Externo (Entrante)</option>
+                            <option value="DOCENTE">Docente / Administrativo</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">* Pre-cargado según tus credenciales.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Modalidad</label>
+                        <select id="mobilityType" class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none" onchange="toggleTransportFields()">
+                            <option value="">Seleccione...</option>
+                            <option value="INTERCAMBIO">Intercambio Semestral</option>
+                            <option value="PRACTICA">Práctica / Pasantía</option>
+                            <option value="SALIDA_ACADEMICA">Salida Académica (Grupal)</option>
+                            <option value="INVESTIGACION">Estancia Investigación</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-step hidden" id="step-2">
+                <h2 class="text-xl font-bold text-[#03045e] mb-4 border-b pb-2">Institución Destino</h2>
+                
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Buscar Institución / Empresa</label>
+                    <input list="institutionsList" id="institutionInput" class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none" placeholder="Escribe para buscar..." onchange="checkInstitutionStatus()">
+                    <datalist id="institutionsList">
+                        <option value="BERUFSAKADEMIE MOSBACH (Alemania)">
+                        <option value="UNAM (México) - [VENCIDO]">
+                        <option value="CORHUILA (Colombia)">
+                        <option value="Otra / No listada">
+                    </datalist>
+                </div>
+
+                <div id="alertVencido" class="hidden bg-orange-50 border-l-4 border-orange-500 p-4 mb-4">
+                    <div class="flex">
+                        <i data-lucide="alert-triangle" class="text-orange-500 mr-2"></i>
+                        <div>
+                            <p class="font-bold text-orange-700 text-sm">Convenio Vencido o Inactivo</p>
+                            <p class="text-xs text-orange-600">Puedes continuar, pero la ANI deberá gestionar la renovación antes de la aprobación final.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="manualInstitutionFields" class="hidden bg-blue-50 p-4 rounded border border-blue-100 animate-fade-in">
+                    <p class="text-xs font-bold text-[#0077b6] mb-3 uppercase tracking-wide flex items-center gap-2">
+                        <i data-lucide="info"></i> Nueva Institución Detectada (Se generará alerta a ANI)
+                    </p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <input type="text" placeholder="Nombre Oficial Institución" class="w-full p-2 border rounded">
+                        <input type="text" placeholder="País" class="w-full p-2 border rounded">
+                        <input type="text" placeholder="Ciudad" class="w-full p-2 border rounded">
+                        <input type="email" placeholder="Correo Contacto (ORI Destino)" class="w-full p-2 border rounded">
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-step hidden" id="step-3">
+                <h2 class="text-xl font-bold text-[#03045e] mb-4 border-b pb-2">Logística y Fechas</h2>
+                
+                <div class="grid grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Fecha Inicio</label>
+                        <input type="date" class="w-full p-2 border rounded">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700">Fecha Fin</label>
+                        <input type="date" class="w-full p-2 border rounded">
+                    </div>
+                </div>
+
+                <div id="transportSection" class="hidden border-t pt-4 mt-4">
+                    <h3 class="font-bold text-[#0077b6] mb-3 flex items-center gap-2">
+                        <i data-lucide="bus"></i> Información de Transporte (Requerido para SST)
+                    </h3>
+                    
+                    <div class="mb-4">
+                        <label class="inline-flex items-center">
+                            <input type="checkbox" id="hiredTransport" class="form-checkbox text-[#03045e]" onchange="toggleVehicleDetails()">
+                            <span class="ml-2 text-sm text-gray-700">Requiere contratación de vehículo externo</span>
+                        </label>
+                    </div>
+
+                    <div id="vehicleDetails" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded">
+                        <input type="text" placeholder="Empresa Transportadora" class="p-2 border rounded">
+                        <input type="text" placeholder="Placa del Vehículo" class="p-2 border rounded">
+                        <input type="text" placeholder="Nombre Conductor" class="p-2 border rounded">
+                        <input type="text" placeholder="No. Licencia Conductor" class="p-2 border rounded">
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold mb-1">Póliza / Seguro Contractual</label>
+                            <input type="file" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#caf0f8] file:text-[#0077b6] hover:file:bg-[#90e0ef]"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-step hidden" id="step-4">
+                <h2 class="text-xl font-bold text-[#03045e] mb-4 border-b pb-2">Documentación Requerida</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                        <div>
+                            <p class="font-semibold text-sm">Carta de Motivación</p>
+                            <p class="text-xs text-gray-500">Formato PDF, Máx 2MB</p>
+                        </div>
+                        <input type="file" class="text-sm">
+                    </div>
+                    <div class="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                        <div>
+                            <p class="font-semibold text-sm">Historial Académico (Notas)</p>
+                            <p class="text-xs text-gray-500">Descargar de Q10</p>
+                        </div>
+                        <input type="file" class="text-sm">
+                    </div>
+                    <div class="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
+                        <div>
+                            <p class="font-semibold text-sm">Pasaporte / Documento ID</p>
+                            <p class="text-xs text-gray-500">Legible, ambas caras</p>
+                        </div>
+                        <input type="file" class="text-sm">
+                    </div>
+                </div>
+
+                <div class="mt-6 bg-[#caf0f8] p-4 rounded text-sm text-[#03045e]">
+                    <i data-lucide="check-circle" class="inline w-4 h-4 mr-1"></i>
+                    Al enviar, autorizas el tratamiento de datos según la política institucional.
+                </div>
+            </div>
+
+            <div class="mt-8 flex justify-between">
+                <button type="button" id="prevBtn" class="px-6 py-2 border border-gray-300 rounded text-gray-600 hover:bg-gray-100 hidden" onclick="changeStep(-1)">Anterior</button>
+                <button type="button" id="nextBtn" class="px-6 py-2 bg-[#0077b6] text-white rounded hover:bg-[#03045e] transition-colors shadow-md" onclick="changeStep(1)">Siguiente</button>
+                <button type="submit" id="submitBtn" class="hidden px-6 py-2 bg-[#03045e] text-white rounded hover:bg-black transition-colors shadow-md font-bold">FINALIZAR SOLICITUD</button>
+            </div>
+
+        </form>
+    </div>
+
+    <script src="../assets/js/wizard-logic.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
