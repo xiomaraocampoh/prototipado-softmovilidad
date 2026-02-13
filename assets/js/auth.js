@@ -15,7 +15,9 @@ const ROLES = {
 const MOCK_USERS = [
     { email: 'ani@cue.edu.co', pass: 'admin', role: ROLES.ANI },
     { email: 'coord@cue.edu.co', pass: 'admin', role: ROLES.ACAD, faculty: 'Ingeniería' },
-    { email: 'juan@cue.edu.co', pass: '123', role: ROLES.ESTUDIANTE, name: 'Juan Pérez' }
+    { email: 'juan@cue.edu.co', pass: '123', role: ROLES.ESTUDIANTE, name: 'Juan Pérez' },
+    { email: 'profe@cue.edu.co', pass: 'docente', role: ROLES.DOCENTE, name: 'Ing. Carlos' },
+    { email: 'externo@unam.mx', pass: '123', role: {code: 'EXTERNO', redirect: 'dashboard-estudiante.html', name: 'Estudiante Externo'}, name: 'Maria (UNAM)' }
 ];
 
 const AuthService = {

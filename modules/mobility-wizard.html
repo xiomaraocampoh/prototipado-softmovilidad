@@ -4,18 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solicitud de Movilidad - CUE</title>
+    <title>Radicar Movilidad - CUE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-
     <style>
-        .brand-logo {
-            height: 45px;
-            width: auto;
-        }
-
         .wizard-step {
             animation: fadeIn 0.4s ease-in-out;
         }
@@ -31,315 +25,539 @@
                 transform: translateY(0);
             }
         }
+
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #4b5563;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            outline: none;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #0077b6;
+            box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1);
+        }
+
+        .form-input[readonly] {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
-<body class="bg-[#f0f4f8] text-[#1a1a1a] min-h-screen flex flex-col">
+<body class="bg-[#f0f4f8] text-[#1a1a1a] min-h-screen flex flex-col font-['Inter']">
 
-    <nav class="bg-white border-b-4 border-[#03045e] shadow-lg sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-20">
-                <div class="flex items-center gap-4">
-                    <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="brand-logo"
-                        onerror="this.src='https://placehold.co/200x60?text=CUE+Humboldt'">
-                    <div class="hidden md:block border-l border-gray-300 h-10 mx-2"></div>
-                    <div>
-                        <h1 class="text-lg font-bold text-[#03045e] leading-tight">SISTEMA DE MOVILIDAD</h1>
-                        <p class="text-xs text-[#0077b6] font-semibold tracking-wider">GESTIÓN ACADÉMICA Y LABORAL</p>
-                    </div>
+    <nav class="bg-white border-b-4 border-[#03045e] shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10"
+                    onerror="this.src='https://placehold.co/100x40?text=CUE'">
+                <h1 class="font-bold text-[#03045e] text-lg border-l border-gray-200 pl-4">Formulario Institucional de
+                    Movilidad (FO-IN-012)</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="text-right text-sm">
+                    <p class="font-bold text-[#03045e]" id="userNameDisplay">Usuario</p>
+                    <p class="text-xs text-gray-500" id="userRoleDisplay">Rol</p>
                 </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-sm font-bold text-gray-700" id="userNameDisplay">Cargando...</p>
-                        <p class="text-xs text-gray-500" id="userRoleDisplay">Rol</p>
-                    </div>
-                    <button onclick="AuthService.logout()"
-                        class="text-gray-400 hover:text-red-600 transition-colors p-2" title="Cerrar Sesión">
-                        <i data-lucide="log-out"></i>
-                    </button>
-                </div>
+                <button onclick="window.location.href='dashboard-estudiante.html'"
+                    class="p-2 text-gray-400 hover:text-[#0077b6]"><i data-lucide="x-circle"></i></button>
             </div>
         </div>
     </nav>
 
     <main class="flex-grow container mx-auto px-4 py-8 max-w-5xl">
 
-        <div class="mb-10">
+        <div class="mb-8">
             <div class="flex justify-between items-center relative z-0">
-                <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 rounded"></div>
-                <div class="step-indicator active" data-step="1">
-                    <div class="step-circle">1</div><span class="step-label">General</span>
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10"></div>
+                <div class="step-indicator active w-1/4 flex flex-col items-center" data-step="1">
+                    <div
+                        class="w-10 h-10 bg-[#03045e] text-white rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">
+                        1</div>
+                    <span class="text-xs font-bold mt-1">Configuración</span>
                 </div>
-                <div class="step-indicator" data-step="2">
-                    <div class="step-circle">2</div><span class="step-label">Logística</span>
+                <div class="step-indicator opacity-50 w-1/4 flex flex-col items-center" data-step="2">
+                    <div
+                        class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">
+                        2</div>
+                    <span class="text-xs font-bold mt-1">Logística</span>
                 </div>
-                <div class="step-indicator" data-step="3">
-                    <div class="step-circle">3</div><span class="step-label">Participantes</span>
+                <div class="step-indicator opacity-50 w-1/4 flex flex-col items-center" data-step="3">
+                    <div
+                        class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">
+                        3</div>
+                    <span class="text-xs font-bold mt-1">Académico/Finanzas</span>
                 </div>
-                <div class="step-indicator" data-step="4">
-                    <div class="step-circle">4</div><span class="step-label">Documentos</span>
+                <div class="step-indicator opacity-50 w-1/4 flex flex-col items-center" data-step="4">
+                    <div
+                        class="w-10 h-10 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">
+                        4</div>
+                    <span class="text-xs font-bold mt-1">Documentos</span>
                 </div>
             </div>
         </div>
 
-        <form id="mobilityForm" class="bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 relative">
+        <form id="mobilityForm" class="bg-white rounded-xl shadow-xl border border-gray-100 relative">
 
             <div class="wizard-step p-8" id="step-1">
-                <h2 class="text-2xl font-bold text-[#03045e] mb-2 flex items-center gap-2">
-                    <i data-lucide="settings"></i> Tipo de Solicitud
-                </h2>
-                <p class="text-sm text-gray-500 mb-8 border-b pb-4">Seleccione la modalidad según su perfil académico.
-                </p>
+                <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-6">Paso 1: Naturaleza de la Movilidad</h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="space-y-4">
-                        <div>
-                            <label class="form-label">Modalidad de Movilidad</label>
-                            <select id="mobilityType" class="form-input"
-                                onchange="WizardLogic.handleMobilityTypeChange()">
-                                <option value="">Seleccione...</option>
-                            </select>
-                        </div>
-
-                        <div id="academicTripAlert"
-                            class="hidden bg-blue-50 border-l-4 border-[#0077b6] p-4 rounded text-sm text-blue-800">
-                            <div class="flex gap-2">
-                                <i data-lucide="users"></i>
-                                <div>
-                                    <strong>Salida Académica Grupal:</strong>
-                                    <p class="text-xs mt-1">Como docente, usted será el responsable de registrar el
-                                        listado de estudiantes y la logística.</p>
-                                </div>
-                            </div>
-                        </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                        <label class="form-label">Dirección (Automático)</label>
+                        <input type="text" id="mobilityDirection" class="form-input text-[#0077b6] font-bold" readonly>
+                        <p class="text-[10px] text-gray-400 mt-1">Determinado por su perfil.</p>
                     </div>
-
-                    <div
-                        class="bg-gray-50 p-6 rounded-lg border border-gray-100 flex flex-col justify-center items-center text-center">
-                        <div id="mobilityIcon" class="bg-white p-4 rounded-full shadow-sm mb-4">
-                            <i data-lucide="globe" class="w-10 h-10 text-[#00b4d8]"></i>
-                        </div>
-                        <h3 id="mobilityTitle" class="font-bold text-gray-700">Seleccione una opción</h3>
-                        <p id="mobilityDesc" class="text-xs text-gray-500 mt-2">La descripción de la modalidad aparecerá
-                            aquí.</p>
+                    <div>
+                        <label class="form-label">Modalidad (Lugar)</label>
+                        <select id="mobilityModality" class="form-input border-[#0077b6] bg-blue-50"
+                            onchange="WizardLogic.updateDynamicFields()">
+                            <option value="PRESENCIAL">Presencial</option>
+                            <option value="VIRTUAL">Virtual</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Alcance</label>
+                        <select id="mobilityScope" class="form-input">
+                            <option value="NACIONAL">Nacional</option>
+                            <option value="INTERNACIONAL">Internacional</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-3 border-t pt-4">
+                        <label class="form-label text-[#03045e]">Clasificación de la Movilidad</label>
+                        <select id="mobilityType" class="form-input w-full md:w-1/2"
+                            onchange="WizardLogic.updateDynamicFields()">
+                        </select>
                     </div>
                 </div>
             </div>
 
             <div class="wizard-step hidden p-8" id="step-2">
-                <h2 class="text-2xl font-bold text-[#03045e] mb-6 border-b pb-4">Destino y Logística</h2>
+                <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-6">Paso 2: Institución y Fechas</h2>
 
-                <div class="mb-6">
-                    <label class="form-label">Institución o Empresa Destino</label>
-                    <div class="relative">
-                        <i data-lucide="search" class="absolute left-3 top-3 text-gray-400 w-4 h-4"></i>
-                        <input list="institutionsList" id="institutionInput" class="form-input pl-10"
-                            placeholder="Ej: UNAM, Berufsakademie Mosbach..."
-                            onchange="WizardLogic.checkAgreement(this.value)">
+                <div id="origenContainer" class="hidden mb-6 bg-yellow-50 p-4 rounded border border-yellow-200">
+                    <h3 class="font-bold text-yellow-800 text-sm mb-3"><i data-lucide="building"></i> Información de
+                        Origen</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="form-label">Institución de Origen</label>
+                            <input type="text" placeholder="Ej: UNAM, Univ. de Buenos Aires..." class="form-input">
+                        </div>
+                        <div><label class="form-label">País de Origen</label><input type="text" class="form-input">
+                        </div>
                     </div>
-                    <datalist id="institutionsList">
-                        <option value="BERUFSAKADEMIE MOSBACH (Alemania) - [Vigente]">
-                        <option value="UNAM (México) - [VENCIDO]">
-                        <option value="CORHUILA (Colombia) - [Vigente]">
-                        <option value="Otra / No listada">
-                    </datalist>
-                    <p id="agreementAlert"
-                        class="hidden mt-2 text-xs font-bold text-orange-600 flex items-center gap-1">
-                        <i data-lucide="alert-triangle" class="w-3 h-3"></i> <span>Atención: Convenio Vencido o
-                            Inexistente. Requiere gestión ANI.</span>
-                    </p>
+                    <div class="mt-4">
+                        <label class="form-label">Institución de Destino</label>
+                        <input type="text" class="form-input" value="CUE Alexander von Humboldt (Automático)" readonly>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-6 mb-6">
-                    <div><label class="form-label">Fecha Inicio</label><input type="date" class="form-input"></div>
-                    <div><label class="form-label">Fecha Fin</label><input type="date" class="form-input"></div>
-                </div>
+                <div id="destinoContainer" class="hidden mb-6 bg-blue-50 p-4 rounded border border-blue-200">
+                    <h3 class="font-bold text-[#0077b6] text-sm mb-3"><i data-lucide="map-pin"></i> Información de
+                        Destino</h3>
 
-                <div id="transportSection"
-                    class="hidden border-t-2 border-dashed border-gray-200 pt-6 mt-6 bg-gray-50 -mx-8 px-8 pb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="font-bold text-[#0077b6] flex items-center gap-2"><i data-lucide="bus"></i> Logística
-                            de Transporte</h3>
-                        <label class="flex items-center gap-2 text-sm cursor-pointer">
-                            <input type="checkbox" id="hiredTransport" class="w-4 h-4 accent-[#03045e]"
-                                onchange="WizardLogic.toggleTransportDetails()">
-                            <span class="font-semibold text-gray-700">Requiere Vehículo Contratado</span>
-                        </label>
+                    <div id="destinoSearchContainer">
+                        <label class="form-label">Buscar Institución en Convenio</label>
+                        <input list="institutionsList" class="form-input"
+                            placeholder="Escriba para buscar en la base de datos de convenios...">
+                        <datalist id="institutionsList">
+                            <option value="BERUFSAKADEMIE MOSBACH (Alemania) - [Vigente]">
+                            <option value="UNAM (México) - [VENCIDO]">
+                            <option value="CORHUILA (Colombia) - [Vigente]">
+                        </datalist>
                     </div>
 
-                    <div id="vehicleDetails" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in">
-                        <input type="text" placeholder="Empresa Transportadora" class="form-input">
-                        <input type="text" placeholder="Placa Vehículo" class="form-input">
+                    <div id="destinoLibreContainer" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-3">
+                            <label class="form-label text-orange-600">Entidad / Empresa / Lugar a Visitar</label>
+                            <input type="text" placeholder="Nombre del lugar de la salida académica" class="form-input">
+                        </div>
+                        <div><label class="form-label">Ciudad Destino</label><input type="text" class="form-input">
+                        </div>
+                        <div><label class="form-label">País Destino</label><input type="text" class="form-input"></div>
+                        <div><label class="form-label">Propósito</label><input type="text" class="form-input"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-gray-50 p-4 border rounded">
+                        <div class="md:col-span-4 font-bold text-xs text-[#03045e] uppercase border-b pb-1 mb-2">
+                            Cronograma Académico y de Viaje</div>
+
+                        <div>
+                            <label class="form-label">Inicio Académico</label>
+                            <input type="date" id="fechaInicio" class="form-input"
+                                onchange="WizardLogic.calculateDuration()">
+                        </div>
+                        <div>
+                            <label class="form-label">Fin Académico</label>
+                            <input type="date" id="fechaFin" class="form-input"
+                                onchange="WizardLogic.calculateDuration()">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="form-label">Duración Calculada</label>
+                            <input type="text" id="duracionCalculada"
+                                class="form-input font-bold text-[#0077b6] bg-blue-50" readonly
+                                placeholder="Se calcula automáticamente...">
+                        </div>
+
+                        <div class="req-presencial"><label class="form-label text-orange-600">Fecha Ida
+                                (Viaje)</label><input type="date" class="form-input border-orange-200"></div>
+                        <div class="req-presencial"><label class="form-label text-orange-600">Fecha
+                                Regreso</label><input type="date" class="form-input border-orange-200"></div>
+
+                        <div class="md:col-span-2 req-presencial">
+                            <label class="form-label">Dirección de Residencia (Destino)</label>
+                            <input type="text" placeholder="Lugar donde se hospedará" class="form-input">
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-3 req-presencial">
+                        <label class="form-label">Dirección de Residencia durante Movilidad (Ciudad/Dirección)</label>
+                        <input type="text" placeholder="Lugar donde se hospedará" class="form-input">
+                    </div>
+                </div>
+
+                <div id="transportContainer" class="hidden border-t pt-4">
+                    <h3 class="font-bold text-[#03045e] flex items-center gap-2 mb-4"><i data-lucide="bus"></i> Gestión
+                        de Transporte Terrestre</h3>
+                    <label class="flex items-center gap-2 text-sm mb-4">
+                        <input type="checkbox" id="hiredTransport" class="w-4 h-4 accent-[#03045e]"
+                            onchange="WizardLogic.updateDynamicFields()">
+                        <span class="font-bold text-gray-700">La universidad debe contratar un vehículo externo (Activa
+                            requisitos SST)</span>
+                    </label>
+
+                    <div id="vehicleDetails"
+                        class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 border rounded">
+                        <div class="md:col-span-3 text-xs text-orange-600 bg-orange-50 p-2 rounded mb-2 font-bold">
+                            Nota: Se exigirá subir el SOAT, Tecnomecánica y Pólizas en el último paso (GU-DO-003).
+                        </div>
+                        <input type="text" placeholder="Empresa de Transporte" class="form-input">
+                        <input type="text" placeholder="Placa del Vehículo" class="form-input">
                         <input type="text" placeholder="Nombre Conductor" class="form-input">
                         <input type="text" placeholder="Licencia Conductor" class="form-input">
-                        <input type="text" placeholder="Celular Conductor" class="form-input">
-                        <div class="col-span-1 md:col-span-3">
-                            <label class="form-label text-xs">Póliza de Responsabilidad Civil (Puede seleccionar
-                                múltiples PDF)</label>
-                            <input type="file" multiple
-                                class="block w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#caf0f8] file:text-[#0077b6] hover:file:bg-[#90e0ef]">
-                        </div>
+                        <input type="tel" placeholder="Celular Conductor" class="form-input">
                     </div>
                 </div>
             </div>
 
-            <div class="wizard-step hidden p-8" id="step-3">
-
-                <div id="studentPersonalData">
-                    <h2 class="text-2xl font-bold text-[#03045e] mb-6 border-b pb-4">Datos Académicos y Médicos
-                        (FO-IN-012)</h2>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                        <div><label class="form-label">Programa</label><input type="text" class="form-input"
-                                value="Ing. Software" readonly></div>
-                        <div><label class="form-label">Semestre Actual</label><input type="number" class="form-input">
-                        </div>
-                        <div><label class="form-label">Promedio Acumulado</label><input type="number" step="0.1"
-                                class="form-input" placeholder="Ej: 4.2"></div>
+            <div class="bg-green-50 p-4 rounded border border-green-200 mb-8">
+                <h3 class="font-bold text-green-800 text-sm mb-4"><i data-lucide="circle-dollar-sign"
+                        class="inline"></i> Información Financiera</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="form-label">¿Genera costo de matrícula o participación?</label>
+                        <select id="hasCosto" class="form-input mb-2" onchange="WizardLogic.toggleFinanceFields()">
+                            <option value="NO">NO</option>
+                            <option value="SI">SÍ</option>
+                        </select>
+                        <input type="number" id="montoCosto" placeholder="¿Cuánto? (Valor en COP/USD)"
+                            class="form-input hidden animate-fade-in">
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 border-t pt-4">
-                        <div>
-                            <label class="form-label">¿Tuvo apoyo/beca institucional?</label>
-                            <select class="form-input">
-                                <option>NO</option>
-                                <option>SÍ</option>
-                            </select>
-                            <input type="text" placeholder="¿Cuánto?" class="form-input mt-2">
-                        </div>
-
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                            <div><label class="form-label">EPS / Seguro Médico</label><input type="text"
-                                    class="form-input" placeholder="Ej: Sanitas / Assist Card"></div>
-                            <div><label class="form-label">Tipo de Sangre</label>
-                                <select class="form-input">
-                                    <option>O+</option>
-                                    <option>O-</option>
-                                    <option>A+</option>
-                                    <option>A-</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="mb-6">
-                            <label class="form-label">Condiciones Médicas / Alergias / Medicamentos de Control</label>
-                            <textarea class="form-input h-20"
-                                placeholder="Describa si requiere medicación especial o tiene condiciones preexistentes..."></textarea>
-                        </div>
-
-                        <h3 class="font-bold text-[#0077b6] text-sm mb-3 uppercase border-b border-gray-100 pb-1">
-                            Contacto de Emergencia</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <input type="text" placeholder="Nombre Completo" class="form-input">
-                            <input type="text" placeholder="Parentesco" class="form-input">
-                            <input type="tel" placeholder="Teléfono" class="form-input">
-                        </div>
-                    </div>
-
-                    <div id="professorRosterData" class="hidden">
-                        <h2 class="text-2xl font-bold text-[#03045e] mb-2 flex items-center gap-2">
-                            <i data-lucide="users"></i> Vinculación de Estudiantes
-                        </h2>
-                        <p class="text-sm text-gray-500 mb-6">Busque y seleccione los estudiantes habilitados para esta
-                            salida académica.</p>
-
-                        <div class="bg-gray-50 p-4 rounded border border-gray-200 mb-6 flex gap-4 items-end">
-                            <div class="flex-1">
-                                <label class="form-label">Programa Académico</label>
-                                <select id="searchProgram" class="form-input bg-white">
-                                    <option value="">Seleccione...</option>
-                                    <option value="ING_SOFTWARE">Ingeniería de Software</option>
-                                    <option value="MEDICINA">Medicina</option>
-                                    <option value="DERECHO">Derecho</option>
-                                </select>
-                            </div>
-                            <div class="w-32">
-                                <label class="form-label">Semestre</label>
-                                <select id="searchSemester" class="form-input bg-white">
-                                    <option value="1">1</option>
-                                    <option value="5">5</option>
-                                    <option value="7">7</option>
-                                </select>
-                            </div>
-                            <button type="button" onclick="WizardLogic.searchStudents()"
-                                class="bg-[#0077b6] text-white px-4 py-2.5 rounded font-bold hover:bg-[#03045e] transition-colors flex items-center gap-2">
-                                <i data-lucide="search" class="w-4 h-4"></i> Consultar
-                            </button>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-80">
-                            <div class="flex flex-col border border-gray-300 rounded overflow-hidden bg-white">
-                                <div
-                                    class="bg-gray-100 p-2 border-b font-bold text-xs text-gray-600 uppercase flex justify-between">
-                                    <span>Disponibles (DB)</span>
-                                    <span class="bg-gray-200 px-2 rounded text-gray-800" id="countAvailable">0</span>
-                                </div>
-                                <div id="sourceList" class="flex-1 overflow-y-auto p-2 space-y-1">
-                                    <div class="text-center text-gray-400 text-xs mt-10">Use los filtros para buscar
-                                        estudiantes...</div>
-                                </div>
-                            </div>
-
-                            <div class="flex flex-col border-2 border-[#0077b6] rounded overflow-hidden bg-blue-50/30">
-                                <div
-                                    class="bg-[#0077b6] p-2 border-b font-bold text-xs text-white uppercase flex justify-between">
-                                    <span>VINCULADOS A LA SALIDA</span>
-                                    <span class="bg-white text-[#0077b6] px-2 rounded font-bold"
-                                        id="countSelected">0</span>
-                                </div>
-                                <div id="targetList" class="flex-1 overflow-y-auto p-2 space-y-1">
-                                    <div class="text-center text-gray-400 text-xs mt-10 italic">No hay estudiantes
-                                        vinculados aún.</div>
-                                </div>
-                            </div>
-                        </div>
+                    <div>
+                        <label class="form-label">¿Tuvo apoyo/beca institucional o externa?</label>
+                        <select id="hasBeca" class="form-input mb-2" onchange="WizardLogic.toggleFinanceFields()">
+                            <option value="NO">NO</option>
+                            <option value="SI">SÍ</option>
+                        </select>
+                        <input type="number" id="montoBeca" placeholder="¿Cuánto? (Valor en COP/USD)"
+                            class="form-input hidden animate-fade-in">
                     </div>
                 </div>
+            </div>
 
-                <div class="wizard-step hidden p-8" id="step-4">
-                    <h2 class="text-2xl font-bold text-[#03045e] mb-2 border-b pb-4">Repositorio Digital</h2>
-                    <p class="text-xs text-gray-500 mb-6">Puede seleccionar múltiples archivos a la vez si lo necesita.
-                    </p>
-
-                    <div id="docsList" class="space-y-3">
-                    </div>
-
-                    <div class="mt-8 p-4 bg-[#caf0f8] rounded-lg flex items-start gap-3">
-                        <input type="checkbox" id="terms" class="mt-1 w-4 h-4 accent-[#03045e]">
-                        <label for="terms" class="text-xs text-[#03045e]">
-                            <strong>Declaración Juramentada:</strong> Declaro que la información suministrada es
-                            verídica. Autorizo a la CUE Alexander von Humboldt el tratamiento de mis datos personales y
-                            sensibles para la gestión de esta movilidad, conforme a la política de privacidad
-                            institucional.
-                        </label>
-                    </div>
+            <div id="studentPersonalData">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div><label class="form-label">Programa</label><input type="text" class="form-input"
+                            value="Ing. Software"></div>
+                    <div><label class="form-label">Semestre</label><input type="number" class="form-input"></div>
+                    <div><label class="form-label">Promedio</label><input type="number" step="0.1" class="form-input"
+                            placeholder="Ej: 4.2"></div>
                 </div>
 
-                <div class="bg-gray-50 px-8 py-4 border-t border-gray-100 flex justify-between items-center">
-                    <button type="button" id="prevBtn" class="btn-secondary hidden"
-                        onclick="WizardLogic.changeStep(-1)">Anterior</button>
-                    <div class="flex-1 flex justify-center">
-                        <button type="button" onclick="WizardLogic.saveDraft()"
-                            class="text-sm font-bold text-gray-500 hover:text-[#0077b6] flex items-center gap-1 transition-colors">
-                            <i data-lucide="save" class="w-4 h-4"></i> Guardar Borrador
-                        </button>
+                <div class="req-presencial border-t pt-4">
+                    <h3 class="font-bold text-red-600 text-sm mb-4 uppercase"><i data-lucide="heart-pulse"
+                            class="inline"></i> Datos Médicos y Emergencia</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div><label class="form-label">EPS / Seguro Médico</label><input type="text" class="form-input">
+                        </div>
+                        <div><label class="form-label">Enfermedades Existentes / Medicamentos de Control</label><input
+                                type="text" class="form-input"></div>
                     </div>
-                    <button type="button" id="nextBtn" class="btn-primary" onclick="WizardLogic.changeStep(1)">Siguiente
-                        Paso <i data-lucide="arrow-right" class="w-4 h-4 inline ml-1"></i></button>
-                    <button type="submit" id="submitBtn" onclick="WizardLogic.submitFinal(event)"
-                        class="btn-success hidden bg-[#03045e] text-white px-6 py-2 rounded font-bold hover:bg-black shadow-md">
-                        RADICAR SOLICITUD <i data-lucide="check" class="w-4 h-4 inline ml-1"></i>
-                    </button>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded">
+                        <div class="md:col-span-4 font-bold text-xs text-gray-500 uppercase border-b pb-1">Contacto de
+                            Emergencia</div>
+                        <div class="md:col-span-2"><input type="text" placeholder="Nombre Completo" class="form-input">
+                        </div>
+                        <div><input type="text" placeholder="Parentesco" class="form-input"></div>
+                        <div><input type="tel" placeholder="Celular" class="form-input"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="professorRosterData" class="hidden border-t pt-4">
+                <h3 class="font-bold text-[#0077b6] text-sm mb-4"><i data-lucide="users" class="inline"></i> Vinculación
+                    de Estudiantes (Grupo)</h3>
+                <div class="bg-gray-50 p-4 rounded border mb-4 flex gap-4">
+                    <select id="searchProgram" class="form-input">
+                        <option value="ING_SOFTWARE">Ing. Software</option>
+                        <option value="MEDICINA">Medicina</option>
+                    </select>
+                    <select id="searchSemester" class="form-input">
+                        <option value="7">Semestre 7</option>
+                        <option value="5">Semestre 5</option>
+                    </select>
+                    <button type="button" onclick="WizardLogic.searchStudents()"
+                        class="bg-[#03045e] text-white px-4 rounded font-bold">Buscar</button>
+                </div>
+                <div class="grid grid-cols-2 gap-4 h-64">
+                    <div class="border rounded bg-white overflow-y-auto p-2" id="sourceList">
+                        <p class="text-xs text-center text-gray-400 mt-10">Realice una búsqueda para ver estudiantes.
+                        </p>
+                    </div>
+                    <div class="border-2 border-[#0077b6] rounded bg-blue-50 overflow-y-auto p-2" id="targetList">
+                        <p class="text-xs text-center text-[#0077b6] font-bold mt-10">0 Estudiantes Vinculados</p>
+                    </div>
+                </div>
+            </div>
+            </div>
+
+            <div class="wizard-step hidden p-8" id="step-4">
+                <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-2">Paso 4: Repositorio Documental</h2>
+                <p class="text-xs text-gray-500 mb-6">Los documentos exigidos varían según la modalidad, alcance y
+                    transporte seleccionado.</p>
+
+                <div id="docsList" class="space-y-3 mb-8">
                 </div>
 
+                <div class="p-4 bg-gray-50 border border-gray-200 rounded flex gap-3">
+                    <input type="checkbox" id="termsCheck" class="mt-1 w-5 h-5 accent-[#03045e]">
+                    <label for="termsCheck" class="text-xs text-gray-700">
+                        <strong>Consentimiento Proceso:</strong> Acepto términos y condiciones. Conozco la política de
+                        tratamiento de datos personales de la CUE Alexander von Humboldt (Acuerdo 001 de 2017).
+                    </label>
+                </div>
+            </div>
+
+            <div class="bg-white px-8 py-4 border-t flex justify-between items-center rounded-b-xl">
+                <button type="button" id="prevBtn"
+                    class="px-6 py-2 border rounded font-bold text-gray-600 hover:bg-gray-50 hidden"
+                    onclick="WizardLogic.changeStep(-1)">Anterior</button>
+                <div class="flex-1 flex justify-center">
+                    <button type="button" onclick="WizardLogic.saveDraft()"
+                        class="text-sm font-bold text-gray-400 hover:text-[#0077b6] flex items-center gap-1"><i
+                            data-lucide="save" class="w-4 h-4"></i> Guardar Borrador</button>
+                </div>
+                <button type="button" id="nextBtn"
+                    class="px-6 py-2 bg-[#0077b6] text-white rounded font-bold hover:bg-[#03045e]"
+                    onclick="WizardLogic.changeStep(1)">Siguiente <i data-lucide="arrow-right"
+                        class="w-4 h-4 inline"></i></button>
+                <button type="button" id="submitBtn" onclick="WizardLogic.submitFinal()"
+                    class="px-6 py-2 bg-[#03045e] text-white rounded font-bold hover:bg-black hidden shadow-lg">RADICAR
+                    SOLICITUD <i data-lucide="check" class="w-4 h-4 inline"></i></button>
+            </div>
         </form>
     </main>
 
     <script src="../assets/js/auth.js"></script>
-    <script type="module" src="../assets/js/wizard-logic.js"></script>
     <script>
-        lucide.createIcons();
+        // MOCK DATABASE PARA DOCENTES
+        const AcademicDB = {
+            students: [
+                { id: '1094001', name: 'Maria Luisa Londoño', program: 'ING_SOFTWARE', semester: '7' },
+                { id: '1094002', name: 'Derly Elena Quejada', program: 'ING_SOFTWARE', semester: '7' },
+                { id: '1094003', name: 'Jeronimo Rodriguez', program: 'ING_SOFTWARE', semester: '7' },
+                { id: '1094006', name: 'Carlos Ruiz', program: 'MEDICINA', semester: '5' }
+            ],
+            get: function (p, s) { return this.students.filter(x => x.program === p && x.semester === s); }
+        };
+
+        const WizardLogic = {
+            currentStep: 1,
+            userRole: null,
+            tripRoster: [],
+
+            init: function () {
+                const user = AuthService.checkAuth() || { role: { code: 'ESTUDIANTE', name: 'Estudiante' }, name: 'Modo Demo' };
+                this.userRole = user.role.code;
+
+                document.getElementById('userNameDisplay').textContent = user.name;
+                document.getElementById('userRoleDisplay').textContent = user.role.name;
+
+                // Definir Dirección (Entrante o Saliente)
+                const isExterno = (this.userRole === 'EXTERNO');
+                document.getElementById('mobilityDirection').value = isExterno ? 'ENTRANTE' : 'SALIENTE';
+
+                this.setupTypes();
+                this.updateDynamicFields();
+                this.updateUI();
+                lucide.createIcons();
+            },
+
+            setupTypes: function () {
+                const select = document.getElementById('mobilityType');
+                select.innerHTML = '<option value="">Seleccione...</option>';
+
+                if (this.userRole === 'DOCENTE') {
+                    select.innerHTML += `<option value="SALIDA_ACADEMICA">Salida Académica / Evento</option><option value="INVESTIGACION">Estancia Investigación</option>`;
+                } else {
+                    select.innerHTML += `<option value="INTERCAMBIO">Intercambio Semestral</option><option value="PRACTICA">Práctica / Rotación Médica</option><option value="CURSO">Curso Corto / Diplomado</option>`;
+                }
+            },
+
+            updateDynamicFields: function () {
+                const direction = document.getElementById('mobilityDirection').value;
+                const type = document.getElementById('mobilityType').value;
+                const modality = document.getElementById('mobilityModality').value;
+                const isPresencial = (modality === 'PRESENCIAL');
+
+                // 1. Mostrar/Ocultar campos de Presencialidad
+                document.querySelectorAll('.req-presencial').forEach(el => el.classList.toggle('hidden', !isPresencial));
+
+                // 2. Lógica de Destino vs Origen
+                if (direction === 'SALIENTE') {
+                    document.getElementById('origenContainer').classList.add('hidden');
+                    document.getElementById('destinoContainer').classList.remove('hidden');
+
+                    if (type === 'SALIDA_ACADEMICA') {
+                        document.getElementById('destinoSearchContainer').classList.add('hidden');
+                        document.getElementById('destinoLibreContainer').classList.remove('hidden');
+                        document.getElementById('transportContainer').classList.toggle('hidden', !isPresencial);
+                    } else {
+                        document.getElementById('destinoSearchContainer').classList.remove('hidden');
+                        document.getElementById('destinoLibreContainer').classList.add('hidden');
+                        document.getElementById('transportContainer').classList.add('hidden');
+                    }
+                } else { // ENTRANTE
+                    document.getElementById('origenContainer').classList.remove('hidden');
+                    document.getElementById('destinoContainer').classList.add('hidden');
+                    document.getElementById('transportContainer').classList.add('hidden');
+                }
+
+                // Asegurar que detalles de vehículo se oculten si se desmarca
+                const checkTransport = document.getElementById('hiredTransport');
+                if (checkTransport) {
+                    document.getElementById('vehicleDetails').classList.toggle('hidden', !checkTransport.checked);
+                }
+            },
+
+            changeStep: function (dir) {
+                if (dir === 1 && this.currentStep === 1 && !document.getElementById('mobilityType').value) {
+                    alert("Seleccione la clasificación de la movilidad."); return;
+                }
+
+                this.currentStep += dir;
+                if (this.currentStep === 4) this.loadDocs();
+                this.updateUI();
+            },
+
+            updateUI: function () {
+                for (let i = 1; i <= 4; i++) {
+                    document.getElementById(`step-${i}`).classList.toggle('hidden', i !== this.currentStep);
+                    const ind = document.querySelector(`.step-indicator[data-step="${i}"]`);
+                    ind.classList.toggle('opacity-50', i > this.currentStep);
+                    if (i === this.currentStep) ind.querySelector('div').classList.replace('bg-gray-300', 'bg-[#03045e]');
+                }
+
+                const type = document.getElementById('mobilityType').value;
+                const showDualList = (this.userRole === 'DOCENTE' && type === 'SALIDA_ACADEMICA');
+                document.getElementById('professorRosterData').classList.toggle('hidden', !showDualList);
+                document.getElementById('studentPersonalData').classList.toggle('hidden', showDualList);
+
+                document.getElementById('prevBtn').classList.toggle('hidden', this.currentStep === 1);
+                document.getElementById('nextBtn').classList.toggle('hidden', this.currentStep === 4);
+                document.getElementById('submitBtn').classList.toggle('hidden', this.currentStep !== 4);
+            },
+
+            // Lógica de Documentos Inteligente
+            loadDocs: function () {
+                const list = document.getElementById('docsList');
+                list.innerHTML = '';
+                const dir = document.getElementById('mobilityDirection').value;
+                const type = document.getElementById('mobilityType').value;
+                const isPresencial = document.getElementById('mobilityModality').value === 'PRESENCIAL';
+                const hasTransport = document.getElementById('hiredTransport')?.checked;
+
+                let docs = [
+                    { n: "Documento de Identidad", d: "Ambas Caras PDF" }
+                ];
+
+                if (this.userRole !== 'DOCENTE') docs.push({ n: "Historial Académico / Notas Q10", d: "PDF" });
+
+                if (dir === 'ENTRANTE') docs.push({ n: "Carta Postulación Universidad Origen", d: "Obligatorio" });
+                else if (type !== 'SALIDA_ACADEMICA') docs.push({ n: "Carta de Motivación", d: "PDF" });
+
+                if (isPresencial) docs.push({ n: "Certificado EPS / Seguro Médico VIGENTE", d: "PDF" });
+
+                if (type === 'SALIDA_ACADEMICA' && hasTransport && isPresencial) {
+                    docs.push(
+                        { n: "SOAT del Vehículo", d: "Seguridad Vial" },
+                        { n: "Revisión Tecnomecánica", d: "Seguridad Vial" },
+                        { n: "Póliza Responsabilidad Civil", d: "Extra Contractual" },
+                        { n: "Tarjeta Propiedad Vehículo", d: "Tránsito" },
+                        { n: "Licencia Conducción", d: "Tránsito" },
+                        { n: "Planilla Seguridad Social Conductor", d: "ARL/Salud" }
+                    );
+                }
+
+                docs.forEach(doc => {
+                    list.innerHTML += `<div class="flex items-center justify-between p-3 border rounded hover:bg-gray-50 bg-white">
+                        <div class="flex items-center gap-3"><i data-lucide="file-up" class="text-[#0077b6]"></i><div><p class="text-sm font-bold text-[#03045e]">${doc.n}</p><p class="text-xs text-gray-500">${doc.d}</p></div></div>
+                        <input type="file" class="text-xs"></div>`;
+                });
+                lucide.createIcons();
+            },
+
+            // Dual List Docentes
+            searchStudents: function () {
+                const p = document.getElementById('searchProgram').value;
+                const s = document.getElementById('searchSemester').value;
+                const res = AcademicDB.get(p, s);
+                const src = document.getElementById('sourceList');
+                src.innerHTML = '';
+                res.forEach(st => {
+                    if (!this.tripRoster.some(x => x.id === st.id)) {
+                        src.innerHTML += `<div class="flex justify-between p-2 border-b text-xs items-center"><div><b>${st.name}</b><br>ID: ${st.id}</div><button type="button" onclick="WizardLogic.addStudent('${st.id}','${st.name}')" class="bg-green-100 text-green-700 px-2 py-1 rounded">+</button></div>`;
+                    }
+                });
+            },
+            addStudent: function (id, name) { this.tripRoster.push({ id, name }); this.searchStudents(); this.renderSelected(); },
+            removeStudent: function (id) { this.tripRoster = this.tripRoster.filter(x => x.id !== id); this.searchStudents(); this.renderSelected(); },
+            renderSelected: function () {
+                const tgt = document.getElementById('targetList');
+                tgt.innerHTML = this.tripRoster.length ? '' : '<p class="text-xs text-center text-[#0077b6] font-bold mt-10">0 Estudiantes</p>';
+                this.tripRoster.forEach(st => {
+                    tgt.innerHTML += `<div class="flex justify-between p-2 border-b border-blue-200 bg-white text-xs items-center"><b>${st.name}</b><button type="button" onclick="WizardLogic.removeStudent('${st.id}')" class="text-red-500 font-bold px-2">X</button></div>`;
+                });
+            },
+
+            // Guardado
+            saveDraft: function () { alert("Borrador guardado exitosamente."); window.location.href = 'dashboard-estudiante.html'; },
+            submitFinal: function () {
+                if (!document.getElementById('termsCheck').checked) { alert("Debe aceptar el consentimiento para radicar."); return; }
+                const data = { id: 'REQ-2026-' + Math.floor(Math.random() * 900), date: new Date().toLocaleDateString(), type: document.getElementById('mobilityType').value, destination: document.getElementById('mobilityDirection').value, status: 'EN_REVISION_ANI' };
+                let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]'); reqs.push(data);
+                localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+                alert("Solicitud radicada. Creada bajo ID: " + data.id);
+                window.location.href = 'dashboard-estudiante.html';
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => WizardLogic.init());
     </script>
 </body>
 

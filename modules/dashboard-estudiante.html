@@ -25,32 +25,106 @@
 
     <main class="max-w-6xl mx-auto mt-8 px-6">
         
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
                 <h2 class="text-2xl font-bold text-[#03045e]">Mis Solicitudes</h2>
                 <p class="text-gray-500 text-sm">Gestione sus trámites de movilidad académica y laboral.</p>
             </div>
-            <a href="mobility-wizard.html" class="bg-[#0077b6] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#03045e] transition shadow-lg flex items-center gap-2">
-                <i data-lucide="plus-circle" class="w-5 h-5"></i> NUEVA SOLICITUD
-            </a>
+            <div class="flex gap-3">
+                <button onclick="openModal('modalRequisitos')" class="bg-white text-[#0077b6] border border-[#0077b6] px-4 py-2 rounded-lg font-bold hover:bg-blue-50 transition flex items-center gap-2 text-sm">
+                    <i data-lucide="book-open" class="w-4 h-4"></i> GUÍA Y REQUISITOS
+                </button>
+                <button onclick="openModal('modalPerfil')" class="bg-white text-[#03045e] border border-[#03045e] px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition flex items-center gap-2 text-sm">
+                    <i data-lucide="user-cog" class="w-4 h-4"></i> MI PERFIL
+                </button>
+                <a href="mobility-wizard.html" class="bg-[#0077b6] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#03045e] transition shadow-lg flex items-center gap-2 text-sm">
+                    <i data-lucide="plus-circle" class="w-4 h-4"></i> NUEVA SOLICITUD
+                </a>
+            </div>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <table class="w-full text-left">
-                <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
-                    <tr>
-                        <th class="p-4">ID / Fecha</th>
-                        <th class="p-4">Tipo de Movilidad</th>
-                        <th class="p-4">Destino</th>
-                        <th class="p-4">Estado</th>
-                        <th class="p-4 text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="requestsTableBody" class="divide-y divide-gray-100 text-sm">
-                    </tbody>
-            </table>
+                </table>
         </div>
     </main>
+
+    <div id="modalPerfil" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in">
+            <div class="bg-[#03045e] p-4 flex justify-between items-center text-white">
+                <h3 class="font-bold flex items-center gap-2"><i data-lucide="user"></i> Información Básica (Autocompletado)</h3>
+                <button onclick="closeModal('modalPerfil')" class="hover:text-red-400"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-6">
+                <p class="text-xs text-gray-500 mb-4">Esta información se cargará automáticamente en sus nuevas solicitudes de movilidad (FO-IN-012).</p>
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div><label class="text-xs font-bold text-gray-600">Documento de Identidad</label><input type="text" id="profDoc" class="w-full border p-2 rounded text-sm mt-1" placeholder="Ej: 1094..."></div>
+                    <div><label class="text-xs font-bold text-gray-600">Celular</label><input type="text" id="profPhone" class="w-full border p-2 rounded text-sm mt-1" placeholder="Ej: 300..."></div>
+                    <div><label class="text-xs font-bold text-gray-600">Semestre Actual</label><input type="number" id="profSem" class="w-full border p-2 rounded text-sm mt-1"></div>
+                    <div><label class="text-xs font-bold text-gray-600">Promedio Acumulado</label><input type="number" step="0.1" id="profProm" class="w-full border p-2 rounded text-sm mt-1"></div>
+                </div>
+                <button onclick="saveProfile()" class="w-full bg-[#0077b6] text-white py-2 rounded font-bold hover:bg-[#03045e]">Guardar Perfil</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalRequisitos" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
+            <div class="bg-[#0077b6] p-4 flex justify-between items-center text-white">
+                <h3 class="font-bold flex items-center gap-2"><i data-lucide="file-check"></i> Catálogo de Requisitos por Movilidad</h3>
+                <button onclick="closeModal('modalRequisitos')" class="hover:text-red-400"><i data-lucide="x"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto">
+                <div class="space-y-4">
+                    <div class="border p-4 rounded-lg bg-gray-50">
+                        <h4 class="font-bold text-[#03045e] mb-2">Salidas Académicas (Grupal)</h4>
+                        <ul class="text-xs text-gray-600 list-disc pl-5 space-y-1">
+                            <li>No requiere convenio interinstitucional.</li>
+                            <li>Listado de estudiantes (Cargado por el Docente).</li>
+                            <li>Si hay transporte contratado: SOAT, Tecnomecánica, Póliza Responsabilidad Civil, Tarjeta Propiedad, Licencia y Seguridad Social del conductor.</li>
+                        </ul>
+                    </div>
+                    <div class="border p-4 rounded-lg bg-gray-50">
+                        <h4 class="font-bold text-[#03045e] mb-2">Intercambio Académico</h4>
+                        <ul class="text-xs text-gray-600 list-disc pl-5 space-y-1">
+                            <li>Requiere Convenio Vigente.</li>
+                            <li>Carta de Motivación & Historial Académico (Notas Q10).</li>
+                            <li>Documento de identidad (Ambas caras) & Seguro Médico Vigente.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Funciones para modales
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        
+        function saveProfile() {
+            const profile = {
+                doc: document.getElementById('profDoc').value,
+                phone: document.getElementById('profPhone').value,
+                sem: document.getElementById('profSem').value,
+                prom: document.getElementById('profProm').value
+            };
+            localStorage.setItem('CUE_USER_PROFILE', JSON.stringify(profile));
+            alert('Perfil actualizado. Estos datos se cargarán en tu próxima solicitud.');
+            closeModal('modalPerfil');
+        }
+
+        // Cargar perfil si existe
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = JSON.parse(localStorage.getItem('CUE_USER_PROFILE'));
+            if(saved) {
+                document.getElementById('profDoc').value = saved.doc || '';
+                document.getElementById('profPhone').value = saved.phone || '';
+                document.getElementById('profSem').value = saved.sem || '';
+                document.getElementById('profProm').value = saved.prom || '';
+            }
+        });
+    </script>
 
     <script src="../assets/js/auth.js"></script>
     <script>
