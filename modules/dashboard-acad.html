@@ -1,122 +1,72 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coordinación Académica - CUE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
-</head>
-<body class="bg-[#f0f4f8] text-[#1a1a1a]">
-
-    <header class="bg-white shadow-sm border-b border-gray-200 px-8 py-4 flex justify-between items-center">
-        <div class="flex items-center gap-4">
-            <div class="bg-[#03045e] text-white p-2 rounded">
-                <i data-lucide="book-open"></i>
-            </div>
-            <div>
-                <h1 class="font-bold text-[#03045e] text-lg">Coordinación Académica</h1>
-                <p class="text-xs text-gray-500">Facultad de Ingeniería</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="text-sm font-semibold text-gray-600">Hola, Coordinador</span>
-            <button onclick="AuthService.logout()" class="text-xs text-red-500 hover:underline border border-red-200 px-3 py-1 rounded">
-                Cerrar Sesión
-            </button>
-        </div>
-    </header>
-
-    <main class="max-w-6xl mx-auto mt-8 p-4">
+<script>
+    // SCRIPT DE AUTO-REPARACIÓN PARA DEMO
+    // Si entras y no ves nada, esto crea una solicitud falsa para que pruebes.
+    document.addEventListener('DOMContentLoaded', () => {
+        // Verificar si hay solicitudes en memoria
+        const requests = JSON.parse(localStorage.getItem('MOBILITY_REQUESTS') || '[]');
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-[#0077b6]">
-                <h3 class="text-gray-500 text-xs font-bold uppercase">Pendientes por Revisar</h3>
-                <p class="text-3xl font-bold text-[#03045e] mt-2">1</p>
-            </div>
-            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
-                <h3 class="text-gray-500 text-xs font-bold uppercase">Avalados este mes</h3>
-                <p class="text-3xl font-bold text-green-600 mt-2">12</p>
-            </div>
-        </div>
+        if (requests.length === 0) {
+            console.log("Modo Demo: Creando solicitud de prueba...");
+            const demoRequest = {
+                id: 'REQ-DEMO-001',
+                studentName: 'Estudiante Demo',
+                program: 'Ingeniería de Software',
+                destination: 'UNAM (México)',
+                status: 'EN_REVISION_ACADEMICA', // Estado correcto para que lo vea el coordinador
+                average: '4.5'
+            };
+            localStorage.setItem('MOBILITY_REQUESTS', JSON.stringify([demoRequest]));
+            location.reload(); // Recargar para mostrarla
+        } else {
+            // Renderizar datos reales
+            renderTable(requests);
+        }
+    });
 
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="px-6 py-4 border-b flex justify-between items-center bg-gray-50">
-                <h2 class="font-bold text-[#03045e]">Solicitudes de Movilidad (Filtro Académico)</h2>
-                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Prioridad Alta</span>
-            </div>
-
-            <table class="w-full text-left">
-                <thead class="bg-gray-100 text-xs uppercase text-gray-500">
-                    <tr>
-                        <th class="p-4">Estudiante / Código</th>
-                        <th class="p-4">Programa / Semestre</th>
-                        <th class="p-4">Destino Solicitado</th>
-                        <th class="p-4">Validación Requerida</th>
-                        <th class="p-4">Acción</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100">
-                    <tr class="hover:bg-gray-50 group">
-                        <td class="p-4">
-                            <div class="font-bold text-[#0077b6]">Juan Pérez</div>
-                            <div class="text-xs text-gray-400">ID: 1094890642</div>
-                        </td>
-                        <td class="p-4 text-sm">
-                            Ing. Software<br>
-                            <span class="text-xs text-gray-500">7mo Semestre</span>
-                        </td>
-                        <td class="p-4">
-                            <div class="flex items-center gap-2">
-                                <i data-lucide="map-pin" class="w-3 h-3 text-gray-400"></i>
-                                <span class="text-sm font-semibold">UNAM (México)</span>
-                            </div>
-                        </td>
-                        <td class="p-4">
-                            <div class="flex flex-col gap-1">
-                                <span class="text-xs flex items-center text-green-700">
-                                    <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i> Promedio: 4.2
-                                </span>
-                                <span class="text-xs flex items-center text-gray-500">
-                                    <i data-lucide="circle" class="w-3 h-3 mr-1"></i> Sin Sanciones
-                                </span>
-                            </div>
-                        </td>
-                        <td class="p-4">
-                            <button onclick="approveAcademic()" class="bg-[#03045e] text-white text-xs font-bold px-4 py-2 rounded hover:bg-[#0077b6] transition shadow-md w-full mb-1">
-                                DAR AVAL ACADÉMICO
-                            </button>
-                            <button class="text-red-500 text-xs hover:underline w-full text-center">Rechazar</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
-
-    <script src="../assets/js/auth.js"></script>
-    <script>
-        lucide.createIcons();
+    function renderTable(data) {
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = ''; // Limpiar
         
-        // Verificar sesión al entrar
-        const user = AuthService.checkAuth();
-        if (user.role.code !== 'COORDINADOR') {
-            alert("Acceso denegado. Área exclusiva Coordinación.");
-            window.location.href = '../index.html';
+        // Filtrar solo lo que le corresponde al coordinador
+        const myTasks = data.filter(r => r.status === 'EN_REVISION_ACADEMICA');
+
+        if (myTasks.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">No hay solicitudes pendientes en su bandeja.</td></tr>';
+            return;
         }
 
-        function approveAcademic() {
-            if(confirm("¿Confirma que el estudiante cumple con el promedio y requisitos disciplinarios?")) {
-                // AQUÍ SE ACTUALIZARÍA LA DB SIMULADA
-                alert("Aval Académico Registrado.\n\nLa solicitud ha pasado al área Financiera/SST.");
-                
-                // Efecto visual de eliminar la fila
-                document.querySelector('tbody tr').style.opacity = '0.5';
-                document.querySelector('tbody tr').style.pointerEvents = 'none';
+        myTasks.forEach(req => {
+            const row = `
+                <tr class="hover:bg-gray-50 border-b border-gray-100">
+                    <td class="p-4">
+                        <div class="font-bold text-[#0077b6]">${req.studentName}</div>
+                        <div class="text-xs text-gray-400">${req.id}</div>
+                    </td>
+                    <td class="p-4 text-sm">${req.program}</td>
+                    <td class="p-4 text-sm">${req.destination}</td>
+                    <td class="p-4">
+                        <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">Promedio OK</span>
+                    </td>
+                    <td class="p-4">
+                        <button onclick="approve('${req.id}')" class="bg-[#03045e] text-white px-3 py-1 rounded text-xs hover:bg-blue-800">Avalar</button>
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += row;
+        });
+    }
+
+    window.approve = function(id) {
+        if(confirm('¿Avalar académicamente esta solicitud?')) {
+            // Actualizar estado en "Base de Datos" (LocalStorage)
+            const requests = JSON.parse(localStorage.getItem('MOBILITY_REQUESTS'));
+            const index = requests.findIndex(r => r.id === id);
+            if (index !== -1) {
+                requests[index].status = 'EN_REVISION_FINANCIERA'; // Avanzar al siguiente paso
+                localStorage.setItem('MOBILITY_REQUESTS', JSON.stringify(requests));
+                alert('Solicitud avalada. Enviada a Financiera.');
+                location.reload();
             }
         }
-    </script>
-</body>
-</html>
+    };
+</script>

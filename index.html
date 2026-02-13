@@ -3,46 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CUE - Digitalización Movilidad</title>
+    <title>CUE - Acceso Unificado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
-<body class="flex items-center justify-center min-h-screen">
+<body class="flex items-center justify-center min-h-screen bg-[#caf0f8]">
 
-    <div class="card-mobility p-8 w-full max-w-md shadow-lg bg-white">
+    <div class="bg-white p-8 w-full max-w-md shadow-xl rounded-lg border-t-4 border-[#03045e]">
         <div class="text-center mb-8">
             <h1 class="text-2xl font-bold text-[#03045e]">CUE Alexander von Humboldt</h1>
-            <p class="text-sm text-gray-500 text-uppercase tracking-widest">Digitalización de Movilidad</p>
+            <p class="text-xs text-gray-500 tracking-widest mt-1">SISTEMA DE GESTIÓN DE MOVILIDAD</p>
         </div>
+
+        <div id="error-msg" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm text-center"></div>
 
         <form id="loginForm" class="space-y-6">
             <div>
-                <label class="block text-xs font-semibold mb-1">CORREO INSTITUCIONAL</label>
-                <input type="email" id="email" required class="w-full border-b-2 border-[#90e0ef] focus:border-[#0077b6] outline-none py-2 px-1">
+                <label class="block text-xs font-bold text-gray-600 mb-1">USUARIO / CORREO</label>
+                <input type="email" id="email" required placeholder="ej: ani@cue.edu.co" 
+                       class="w-full border-b-2 border-[#90e0ef] focus:border-[#0077b6] outline-none py-2 px-1 text-sm">
             </div>
             <div>
-                <label class="block text-xs font-semibold mb-1">CONTRASEÑA</label>
-                <input type="password" id="password" required class="w-full border-b-2 border-[#90e0ef] focus:border-[#0077b6] outline-none py-2 px-1">
+                <label class="block text-xs font-bold text-gray-600 mb-1">CONTRASEÑA</label>
+                <input type="password" id="password" required placeholder="••••••" 
+                       class="w-full border-b-2 border-[#90e0ef] focus:border-[#0077b6] outline-none py-2 px-1 text-sm">
             </div>
             
-            <button type="submit" class="w-full bg-[#03045e] text-white py-3 font-bold hover:bg-[#0077b6] transition-colors">
-                INGRESAR AL SISTEMA 
+            <button type="submit" class="w-full bg-[#03045e] text-white py-3 font-bold hover:bg-[#0077b6] transition-all rounded shadow-lg text-sm">
+                 INGRESAR 
             </button>
         </form>
+
+        <div class="mt-8 pt-4 border-t text-xs text-gray-400">
+            <p class="font-bold mb-2">Credenciales Demo:</p>
+            <ul class="space-y-1">
+                <li class="cursor-pointer hover:text-blue-600" onclick="fill('juan@cue.edu.co', '123')">👉 Estudiante: juan@cue.edu.co / 123</li>
+                <li class="cursor-pointer hover:text-blue-600" onclick="fill('ani@cue.edu.co', 'admin')">👉 ANI: ani@cue.edu.co / admin</li>
+                <li class="cursor-pointer hover:text-blue-600" onclick="fill('coord@cue.edu.co', 'admin')">👉 Coord: coord@cue.edu.co / admin</li>
+            </ul>
+        </div>
     </div>
 
     <script src="assets/js/auth.js"></script>
+    
     <script>
+        // Lógica de Login corregida
         document.getElementById('loginForm').onsubmit = (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
-            if (AuthService.login(email, 'admin')) {
-                const user = AuthService.getCurrentUser();
-                if (user.role === 'ADMIN_TECNICO') window.location.href = 'modules/dashboard-csi.html';
-                else if (user.role === 'SECRETARIA_MOVILIDAD') window.location.href = 'modules/dashboard-ani.html';
-                else window.location.href = 'modules/registro-estudiante.html';
+            const pass = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-msg');
+
+            // Llamada al AuthService actualizado
+            const result = AuthService.login(email, pass);
+
+            if (result.success) {
+                // Éxito: Redirigir a la carpeta modules
+                console.log("Login exitoso. Redirigiendo a:", result.redirect);
+                window.location.href = 'modules/' + result.redirect;
+            } else {
+                // Error: Mostrar mensaje
+                errorDiv.textContent = result.message || "Error de credenciales";
+                errorDiv.classList.remove('hidden');
             }
         };
+
+        // Helper para llenar el formulario rápido
+        function fill(u, p) {
+            document.getElementById('email').value = u;
+            document.getElementById('password').value = p;
+        }
     </script>
 </body>
+</html>
 </html>
