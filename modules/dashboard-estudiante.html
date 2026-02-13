@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Panel - CUE Movilidad</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-[#f0f4f8] text-[#1a1a1a]">
+<body class="bg-[#f0f4f8] text-[#1a1a1a] font-['Inter']">
 
     <nav class="bg-white border-b-4 border-[#03045e] shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img id="logoImg" src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10 bg-white p-1 rounded shadow-sm">
-                <h1 class="font-bold text-[#03045e]">CUE | Mi Portal de Movilidad</h1>
+                <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10" onerror="this.src='https://placehold.co/100x40?text=CUE'">
+                <h1 class="font-bold text-[#03045e] border-l pl-3 ml-2">Mi Portal de Movilidad</h1>
             </div>
             <div class="flex items-center gap-4">
                 <span id="userNameDisplay" class="text-sm font-semibold">Cargando...</span>
@@ -23,18 +24,18 @@
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto mt-8 px-6">
+    <main class="max-w-6xl mx-auto mt-8 px-6 pb-12">
         
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
                 <h2 class="text-2xl font-bold text-[#03045e]">Mis Solicitudes</h2>
-                <p class="text-gray-500 text-sm">Gestione sus trámites de movilidad académica y laboral.</p>
+                <p class="text-gray-500 text-sm">Gestione sus trámites y actualice su información básica.</p>
             </div>
-            <div class="flex gap-3">
-                <button onclick="openModal('modalRequisitos')" class="bg-white text-[#0077b6] border border-[#0077b6] px-4 py-2 rounded-lg font-bold hover:bg-blue-50 transition flex items-center gap-2 text-sm">
+            <div class="flex gap-3 flex-wrap">
+                <button onclick="document.getElementById('modalRequisitos').classList.remove('hidden')" class="bg-white text-[#0077b6] border border-[#0077b6] px-4 py-2 rounded-lg font-bold hover:bg-blue-50 transition flex items-center gap-2 text-sm">
                     <i data-lucide="book-open" class="w-4 h-4"></i> GUÍA Y REQUISITOS
                 </button>
-                <button onclick="openModal('modalPerfil')" class="bg-white text-[#03045e] border border-[#03045e] px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition flex items-center gap-2 text-sm">
+                <button onclick="abrirPerfil()" class="bg-white text-[#03045e] border border-[#03045e] px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition flex items-center gap-2 text-sm">
                     <i data-lucide="user-cog" class="w-4 h-4"></i> MI PERFIL
                 </button>
                 <a href="mobility-wizard.html" class="bg-[#0077b6] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#03045e] transition shadow-lg flex items-center gap-2 text-sm">
@@ -45,138 +46,117 @@
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <table class="w-full text-left">
-                </table>
+                <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
+                    <tr>
+                        <th class="p-4">ID / Fecha</th>
+                        <th class="p-4">Tipo Específico</th>
+                        <th class="p-4">Destino / Origen</th>
+                        <th class="p-4">Estado</th>
+                        <th class="p-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody" class="divide-y divide-gray-100 text-sm">
+                    </tbody>
+            </table>
         </div>
     </main>
 
     <div id="modalPerfil" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-fade-in">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in">
             <div class="bg-[#03045e] p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold flex items-center gap-2"><i data-lucide="user"></i> Información Básica (Autocompletado)</h3>
-                <button onclick="closeModal('modalPerfil')" class="hover:text-red-400"><i data-lucide="x"></i></button>
+                <h3 class="font-bold flex items-center gap-2"><i data-lucide="user"></i> Mi Perfil (Autocompletado)</h3>
+                <button onclick="document.getElementById('modalPerfil').classList.add('hidden')" class="hover:text-red-400"><i data-lucide="x"></i></button>
             </div>
             <div class="p-6">
-                <p class="text-xs text-gray-500 mb-4">Esta información se cargará automáticamente en sus nuevas solicitudes de movilidad (FO-IN-012).</p>
-                <div class="grid grid-cols-2 gap-4 mb-4">
-                    <div><label class="text-xs font-bold text-gray-600">Documento de Identidad</label><input type="text" id="profDoc" class="w-full border p-2 rounded text-sm mt-1" placeholder="Ej: 1094..."></div>
-                    <div><label class="text-xs font-bold text-gray-600">Celular</label><input type="text" id="profPhone" class="w-full border p-2 rounded text-sm mt-1" placeholder="Ej: 300..."></div>
-                    <div><label class="text-xs font-bold text-gray-600">Semestre Actual</label><input type="number" id="profSem" class="w-full border p-2 rounded text-sm mt-1"></div>
-                    <div><label class="text-xs font-bold text-gray-600">Promedio Acumulado</label><input type="number" step="0.1" id="profProm" class="w-full border p-2 rounded text-sm mt-1"></div>
+                <p class="text-xs text-gray-500 mb-4 bg-blue-50 p-2 rounded border border-blue-100">Estos datos se guardarán localmente y se cargarán solos al crear una nueva solicitud (FO-IN-012).</p>
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div><label class="text-xs font-bold text-gray-600 uppercase">Documento</label><input type="text" id="profDoc" class="w-full border border-gray-300 p-2 rounded mt-1 outline-none focus:border-[#0077b6]"></div>
+                    <div><label class="text-xs font-bold text-gray-600 uppercase">Celular</label><input type="tel" id="profPhone" class="w-full border border-gray-300 p-2 rounded mt-1 outline-none focus:border-[#0077b6]"></div>
+                    <div><label class="text-xs font-bold text-gray-600 uppercase">Semestre Actual</label><input type="number" id="profSem" class="w-full border border-gray-300 p-2 rounded mt-1 outline-none focus:border-[#0077b6]"></div>
+                    <div><label class="text-xs font-bold text-gray-600 uppercase">Promedio Acumulado</label><input type="number" step="0.1" id="profProm" class="w-full border border-gray-300 p-2 rounded mt-1 outline-none focus:border-[#0077b6]"></div>
                 </div>
-                <button onclick="saveProfile()" class="w-full bg-[#0077b6] text-white py-2 rounded font-bold hover:bg-[#03045e]">Guardar Perfil</button>
+                <button onclick="guardarPerfil()" class="w-full bg-[#0077b6] text-white py-3 rounded-lg font-bold hover:bg-[#03045e] transition">Guardar y Actualizar Perfil</button>
             </div>
         </div>
     </div>
 
     <div id="modalRequisitos" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden max-h-[90vh] flex flex-col">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
             <div class="bg-[#0077b6] p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold flex items-center gap-2"><i data-lucide="file-check"></i> Catálogo de Requisitos por Movilidad</h3>
-                <button onclick="closeModal('modalRequisitos')" class="hover:text-red-400"><i data-lucide="x"></i></button>
+                <h3 class="font-bold flex items-center gap-2"><i data-lucide="file-check"></i> Requisitos de Movilidad</h3>
+                <button onclick="document.getElementById('modalRequisitos').classList.add('hidden')" class="hover:text-red-400"><i data-lucide="x"></i></button>
             </div>
-            <div class="p-6 overflow-y-auto">
-                <div class="space-y-4">
-                    <div class="border p-4 rounded-lg bg-gray-50">
-                        <h4 class="font-bold text-[#03045e] mb-2">Salidas Académicas (Grupal)</h4>
-                        <ul class="text-xs text-gray-600 list-disc pl-5 space-y-1">
-                            <li>No requiere convenio interinstitucional.</li>
-                            <li>Listado de estudiantes (Cargado por el Docente).</li>
-                            <li>Si hay transporte contratado: SOAT, Tecnomecánica, Póliza Responsabilidad Civil, Tarjeta Propiedad, Licencia y Seguridad Social del conductor.</li>
-                        </ul>
-                    </div>
-                    <div class="border p-4 rounded-lg bg-gray-50">
-                        <h4 class="font-bold text-[#03045e] mb-2">Intercambio Académico</h4>
-                        <ul class="text-xs text-gray-600 list-disc pl-5 space-y-1">
-                            <li>Requiere Convenio Vigente.</li>
-                            <li>Carta de Motivación & Historial Académico (Notas Q10).</li>
-                            <li>Documento de identidad (Ambas caras) & Seguro Médico Vigente.</li>
-                        </ul>
-                    </div>
+            <div class="p-6 overflow-y-auto space-y-4">
+                <div class="border p-4 rounded bg-gray-50">
+                    <h4 class="font-bold text-[#03045e]">Salida Académica / Eventos</h4>
+                    <ul class="text-xs text-gray-600 list-disc pl-5 mt-2 space-y-1">
+                        <li>Cargada por un docente con listado de estudiantes.</li>
+                        <li>Si requiere transporte contratado: SOAT, Tecnomecánica, Pólizas, Tarjeta Propiedad, Licencia y ARL Conductor.</li>
+                    </ul>
+                </div>
+                <div class="border p-4 rounded bg-gray-50">
+                    <h4 class="font-bold text-[#03045e]">Intercambios / Prácticas</h4>
+                    <ul class="text-xs text-gray-600 list-disc pl-5 mt-2 space-y-1">
+                        <li>Debe existir convenio interinstitucional vigente.</li>
+                        <li>Documento de Identidad e Historial Académico (Q10).</li>
+                        <li>Carta de Motivación y Certificado de EPS Vigente.</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // Funciones para modales
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-        
-        function saveProfile() {
-            const profile = {
-                doc: document.getElementById('profDoc').value,
-                phone: document.getElementById('profPhone').value,
-                sem: document.getElementById('profSem').value,
-                prom: document.getElementById('profProm').value
-            };
-            localStorage.setItem('CUE_USER_PROFILE', JSON.stringify(profile));
-            alert('Perfil actualizado. Estos datos se cargarán en tu próxima solicitud.');
-            closeModal('modalPerfil');
-        }
-
-        // Cargar perfil si existe
-        document.addEventListener('DOMContentLoaded', () => {
-            const saved = JSON.parse(localStorage.getItem('CUE_USER_PROFILE'));
-            if(saved) {
-                document.getElementById('profDoc').value = saved.doc || '';
-                document.getElementById('profPhone').value = saved.phone || '';
-                document.getElementById('profSem').value = saved.sem || '';
-                document.getElementById('profProm').value = saved.prom || '';
-            }
-        });
-    </script>
-
     <script src="../assets/js/auth.js"></script>
     <script>
-        document.getElementById('logoImg').addEventListener('error', function() {
-            this.src = 'https://placehold.co/100x40?text=CUE';
-        });
-
         lucide.createIcons();
-        
         document.addEventListener('DOMContentLoaded', () => {
             const user = AuthService.checkAuth();
             document.getElementById('userNameDisplay').textContent = user.name;
-            loadRequests(user.email);
+            cargarTabla();
         });
 
-        function loadRequests(userEmail) {
-            const tbody = document.getElementById('requestsTableBody');
-            // Cargar solicitudes de LocalStorage (o simular una si está vacío para la demo)
-            let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
-            
-            if (requests.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 italic">No tienes solicitudes activas. Haz clic en "Nueva Solicitud" para comenzar.</td></tr>`;
-                return;
-            }
-
-            tbody.innerHTML = '';
-            requests.forEach((req, index) => {
-                const isDraft = req.status === 'BORRADOR';
-                const statusBadge = isDraft 
-                    ? `<span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold border border-gray-200">Borrador Incompleto</span>`
-                    : `<span class="bg-blue-50 text-[#0077b6] px-3 py-1 rounded-full text-xs font-bold border border-blue-200">En Revisión ANI</span>`;
-
-                const actionBtn = isDraft
-                    ? `<button onclick="editDraft(${index})" class="text-[#0077b6] border border-[#0077b6] hover:bg-[#0077b6] hover:text-white px-3 py-1 rounded text-xs font-bold transition">Editar Borrador</button>`
-                    : `<button onclick="alert('Esta solicitud ya fue enviada y está en revisión.')" class="text-gray-400 px-3 py-1 rounded text-xs underline">Ver Detalles</button>`;
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 transition-colors">
-                        <td class="p-4"><span class="font-mono text-[#03045e] font-bold">${req.id || 'REQ-NUEVA'}</span><br><span class="text-xs text-gray-400">${req.date}</span></td>
-                        <td class="p-4 font-semibold">${req.type || 'No especificado'}</td>
-                        <td class="p-4">${req.destination || 'Pendiente'}</td>
-                        <td class="p-4">${statusBadge}</td>
-                        <td class="p-4 text-center">${actionBtn}</td>
-                    </tr>
-                `;
-            });
+        // Gestión de Perfil
+        function abrirPerfil() {
+            const saved = JSON.parse(localStorage.getItem('CUE_USER_PROFILE') || '{}');
+            document.getElementById('profDoc').value = saved.doc || '';
+            document.getElementById('profPhone').value = saved.phone || '';
+            document.getElementById('profSem').value = saved.sem || '';
+            document.getElementById('profProm').value = saved.prom || '';
+            document.getElementById('modalPerfil').classList.remove('hidden');
         }
 
-        function editDraft(index) {
-            // Guardar el índice que estamos editando y saltar al wizard
-            localStorage.setItem('CUE_EDITING_INDEX', index);
-            window.location.href = 'mobility-wizard.html';
+        function guardarPerfil() {
+            const profile = {
+                doc: document.getElementById('profDoc').value, phone: document.getElementById('profPhone').value,
+                sem: document.getElementById('profSem').value, prom: document.getElementById('profProm').value
+            };
+            localStorage.setItem('CUE_USER_PROFILE', JSON.stringify(profile));
+            alert('Perfil actualizado. Sus datos se autocompletarán en nuevas solicitudes.');
+            document.getElementById('modalPerfil').classList.add('hidden');
+        }
+
+        // Cargar Tabla Demo
+        function cargarTabla() {
+            const tbody = document.getElementById('requestsTableBody');
+            let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            if(reqs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">No hay solicitudes.</td></tr>`; return;
+            }
+            tbody.innerHTML = '';
+            reqs.forEach((r, i) => {
+                const isDraft = r.status === 'BORRADOR';
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-4"><span class="font-mono text-[#03045e] font-bold">${r.id}</span><br><span class="text-xs text-gray-400">${r.date}</span></td>
+                        <td class="p-4 font-semibold">${r.type || 'N/A'}</td>
+                        <td class="p-4 text-sm">${r.destination || 'N/A'}</td>
+                        <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-bold ${isDraft ? 'bg-gray-100 text-gray-600' : 'bg-blue-50 text-[#0077b6]'}">${isDraft ? 'Borrador' : 'Radicada'}</span></td>
+                        <td class="p-4 text-center">
+                            ${isDraft ? `<button class="text-[#0077b6] font-bold text-xs border border-[#0077b6] px-3 py-1 rounded hover:bg-[#0077b6] hover:text-white" onclick="window.location.href='mobility-wizard.html'">Editar</button>` 
+                                      : `<button class="text-gray-400 text-xs underline">Ver Detalles</button>`}
+                        </td>
+                    </tr>`;
+            });
         }
     </script>
 </body>
