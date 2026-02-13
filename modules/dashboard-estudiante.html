@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Panel - CUE Movilidad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#f0f4f8] text-[#1a1a1a]">
+
+    <nav class="bg-white border-b-4 border-[#03045e] shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img id="logoImg" src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10 bg-white p-1 rounded shadow-sm">
+                <h1 class="font-bold text-[#03045e]">CUE | Mi Portal de Movilidad</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <span id="userNameDisplay" class="text-sm font-semibold">Cargando...</span>
+                <button onclick="AuthService.logout()" class="text-gray-500 hover:text-red-500"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto mt-8 px-6">
+        
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-[#03045e]">Mis Solicitudes</h2>
+                <p class="text-gray-500 text-sm">Gestione sus trámites de movilidad académica y laboral.</p>
+            </div>
+            <a href="mobility-wizard.html" class="bg-[#0077b6] text-white px-6 py-3 rounded-lg font-bold hover:bg-[#03045e] transition shadow-lg flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i> NUEVA SOLICITUD
+            </a>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <table class="w-full text-left">
+                <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
+                    <tr>
+                        <th class="p-4">ID / Fecha</th>
+                        <th class="p-4">Tipo de Movilidad</th>
+                        <th class="p-4">Destino</th>
+                        <th class="p-4">Estado</th>
+                        <th class="p-4 text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="requestsTableBody" class="divide-y divide-gray-100 text-sm">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="../assets/js/auth.js"></script>
+    <script>
+        document.getElementById('logoImg').addEventListener('error', function() {
+            this.src = 'https://placehold.co/100x40?text=CUE';
+        });
+
+        lucide.createIcons();
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = AuthService.checkAuth();
+            document.getElementById('userNameDisplay').textContent = user.name;
+            loadRequests(user.email);
+        });
+
+        function loadRequests(userEmail) {
+            const tbody = document.getElementById('requestsTableBody');
+            // Cargar solicitudes de LocalStorage (o simular una si está vacío para la demo)
+            let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            
+            if (requests.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 italic">No tienes solicitudes activas. Haz clic en "Nueva Solicitud" para comenzar.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            requests.forEach((req, index) => {
+                const isDraft = req.status === 'BORRADOR';
+                const statusBadge = isDraft 
+                    ? `<span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold border border-gray-200">Borrador Incompleto</span>`
+                    : `<span class="bg-blue-50 text-[#0077b6] px-3 py-1 rounded-full text-xs font-bold border border-blue-200">En Revisión ANI</span>`;
+
+                const actionBtn = isDraft
+                    ? `<button onclick="editDraft(${index})" class="text-[#0077b6] border border-[#0077b6] hover:bg-[#0077b6] hover:text-white px-3 py-1 rounded text-xs font-bold transition">Editar Borrador</button>`
+                    : `<button onclick="alert('Esta solicitud ya fue enviada y está en revisión.')" class="text-gray-400 px-3 py-1 rounded text-xs underline">Ver Detalles</button>`;
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="p-4"><span class="font-mono text-[#03045e] font-bold">${req.id || 'REQ-NUEVA'}</span><br><span class="text-xs text-gray-400">${req.date}</span></td>
+                        <td class="p-4 font-semibold">${req.type || 'No especificado'}</td>
+                        <td class="p-4">${req.destination || 'Pendiente'}</td>
+                        <td class="p-4">${statusBadge}</td>
+                        <td class="p-4 text-center">${actionBtn}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function editDraft(index) {
+            // Guardar el índice que estamos editando y saltar al wizard
+            localStorage.setItem('CUE_EDITING_INDEX', index);
+            window.location.href = 'mobility-wizard.html';
+        }
+    </script>
+</body>
+</html>

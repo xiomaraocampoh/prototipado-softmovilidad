@@ -1,98 +1,250 @@
-let currentStep = 1;
-const totalSteps = 4;
+/**
+ * Lógica Reparada y Unificada del Wizard de Movilidad
+ * Sin dependencias de módulos ES6 para garantizar compatibilidad local.
+ */
 
-// Inicialización
-document.addEventListener('DOMContentLoaded', () => {
-    // Simular lectura de usuario autenticado
-    const userType = localStorage.getItem('userRole') || 'ESTUDIANTE';
-    document.getElementById('applicantType').value = userType;
-    updateUI();
-});
+// 1. BASE DE DATOS SIMULADA (Integrada para evitar errores de importación local)
+const AcademicDB = {
+    students: [
+        { id: '1094001', name: 'Maria Luisa Londoño', program: 'ING_SOFTWARE', semester: '7', status: 'ACTIVO' },
+        { id: '1094002', name: 'Derly Elena Quejada', program: 'ING_SOFTWARE', semester: '7', status: 'ACTIVO' },
+        { id: '1094003', name: 'Jeronimo Rodriguez', program: 'ING_SOFTWARE', semester: '7', status: 'ACTIVO' },
+        { id: '1094004', name: 'Sara Valentina Sanchez', program: 'ING_SOFTWARE', semester: '7', status: 'ACTIVO' },
+        { id: '1094006', name: 'Carlos Augusto Aranzazu', program: 'MEDICINA', semester: '5', status: 'ACTIVO' }
+    ],
+    getStudentsByCourse: function(program, semester) {
+        return this.students.filter(s => s.program === program && s.semester === semester);
+    }
+};
 
-function updateUI() {
-    // Mostrar/Ocultar Pasos
-    for (let i = 1; i <= totalSteps; i++) {
-        const stepDiv = document.getElementById(`step-${i}`);
-        const indicator = document.querySelector(`.step-indicator[data-step="${i}"] div`);
+// 2. LÓGICA DEL ASISTENTE
+const WizardLogic = {
+    currentStep: 1,
+    totalSteps: 4,
+    userRole: null,
+    tripRoster: [], // Para almacenar estudiantes seleccionados
+
+    init: function() {
+        const user = AuthService.checkAuth();
+        this.userRole = user.role.code;
         
-        if (i === currentStep) {
-            stepDiv.classList.remove('hidden');
-            indicator.classList.remove('bg-gray-300', 'text-gray-600');
-            indicator.classList.add('bg-[#03045e]', 'text-white');
+        // UI Inicial
+        document.getElementById('userNameDisplay').textContent = user.name;
+        document.getElementById('userRoleDisplay').textContent = user.role.name;
+        
+        this.setupMobilityOptions();
+        
+        // Cargar Borrador si existe (Requerimiento Histórico)
+        this.checkIfEditingDraft();
+        
+        this.updateUI();
+    },
+
+    setupMobilityOptions: function() {
+        const select = document.getElementById('mobilityType');
+        select.innerHTML = '<option value="">Seleccione Modalidad...</option>';
+        
+        if (this.userRole === 'DOCENTE') {
+            select.innerHTML += `
+                <option value="SALIDA_ACADEMICA">Visita/Salida Académica</option>
+                <option value="ESTANCIA">Estancia de Investigación</option>
+            `;
         } else {
-            stepDiv.classList.add('hidden');
-            if (i < currentStep) {
-                // Pasos completados
-                indicator.classList.add('bg-[#0077b6]', 'text-white');
-                indicator.innerHTML = '✓';
-            } else {
-                // Pasos futuros
-                indicator.classList.add('bg-gray-300', 'text-gray-600');
-                indicator.classList.remove('bg-[#03045e]', 'text-white', 'bg-[#0077b6]');
-                indicator.innerHTML = i;
+            select.innerHTML += `
+                <option value="INTERCAMBIO">Intercambio Académico</option>
+                <option value="PRACTICA">Práctica Empresarial / Pasantía</option>
+                <option value="DIPLOMADO">Diplomado Opción Grado</option>
+                <option value="CURSO">Curso Corto / Idiomas</option>
+                <option value="ROTACION">Rotación Médica</option>
+            `;
+        }
+    },
+
+    handleMobilityTypeChange: function() {
+        const type = document.getElementById('mobilityType').value;
+        const alert = document.getElementById('academicTripAlert');
+        const transportSection = document.getElementById('transportSection');
+
+        if (type === 'SALIDA_ACADEMICA') {
+            if(alert) alert.classList.remove('hidden');
+            if(transportSection) transportSection.classList.remove('hidden');
+        } else {
+            if(alert) alert.classList.add('hidden');
+            if(transportSection) transportSection.classList.add('hidden');
+        }
+    },
+
+    toggleTransportDetails: function() {
+        const check = document.getElementById('hiredTransport');
+        const section = document.getElementById('vehicleDetails');
+        if (check && check.checked) section.classList.remove('hidden');
+        else if (section) section.classList.add('hidden');
+    },
+
+    changeStep: function(direction) {
+        // Validación antes de avanzar
+        if (direction === 1 && this.currentStep === 1) {
+            if (!document.getElementById('mobilityType').value) {
+                alert("Por favor seleccione un tipo de movilidad para continuar.");
+                return;
             }
         }
+
+        this.currentStep += direction;
+        this.updateUI();
+        window.scrollTo(0, 0);
+    },
+
+    updateUI: function() {
+        // Mostrar/Ocultar Pasos
+        for (let i = 1; i <= this.totalSteps; i++) {
+            const stepDiv = document.getElementById(`step-${i}`);
+            const indicator = document.querySelector(`.step-indicator[data-step="${i}"]`);
+            if(stepDiv) stepDiv.classList.toggle('hidden', i !== this.currentStep);
+            
+            if(indicator) {
+                if(i === this.currentStep) indicator.classList.add('active');
+                else indicator.classList.remove('active');
+            }
+        }
+
+        // Condicionales Paso 3 (Dual List vs Estudiante Individual)
+        if (this.currentStep === 3) {
+            const isDocenteSalida = (this.userRole === 'DOCENTE' && document.getElementById('mobilityType').value === 'SALIDA_ACADEMICA');
+            document.getElementById('professorRosterData').classList.toggle('hidden', !isDocenteSalida);
+            document.getElementById('studentPersonalData').classList.toggle('hidden', isDocenteSalida);
+        }
+
+        // Botones Footer
+        document.getElementById('prevBtn').classList.toggle('hidden', this.currentStep === 1);
+        if (this.currentStep === this.totalSteps) {
+            document.getElementById('nextBtn').classList.add('hidden');
+            document.getElementById('submitBtn').classList.remove('hidden');
+        } else {
+            document.getElementById('nextBtn').classList.remove('hidden');
+            document.getElementById('submitBtn').classList.add('hidden');
+        }
+    },
+
+    // Funciones Dual List (Docentes)
+    searchStudents: function() {
+        const prog = document.getElementById('searchProgram').value;
+        const sem = document.getElementById('searchSemester').value;
+        const listContainer = document.getElementById('sourceList');
+
+        if (!prog) return alert("Seleccione un programa académico");
+
+        const students = AcademicDB.getStudentsByCourse(prog, sem);
+        listContainer.innerHTML = '';
+
+        if (students.length === 0) {
+            listContainer.innerHTML = '<div class="text-center text-xs text-red-500 p-4">Sin resultados.</div>';
+            return;
+        }
+
+        students.forEach(student => {
+            if (this.tripRoster.some(s => s.id === student.id)) return; // Saltar si ya está
+            listContainer.innerHTML += `
+                <div class="flex justify-between p-2 border-b hover:bg-gray-50 text-xs">
+                    <div><b>${student.name}</b><br><span class="text-gray-400">ID: ${student.id}</span></div>
+                    <button type="button" onclick="WizardLogic.addStudent('${student.id}', '${student.name}')" class="text-green-600 bg-green-50 px-2 rounded font-bold">+</button>
+                </div>`;
+        });
+    },
+
+    addStudent: function(id, name) {
+        this.tripRoster.push({ id, name });
+        this.renderSelectedList();
+        this.searchStudents();
+    },
+
+    removeStudent: function(id) {
+        this.tripRoster = this.tripRoster.filter(s => s.id !== id);
+        this.renderSelectedList();
+        this.searchStudents();
+    },
+
+    renderSelectedList: function() {
+        const targetList = document.getElementById('targetList');
+        document.getElementById('countSelected').innerText = this.tripRoster.length;
+        targetList.innerHTML = '';
+        
+        this.tripRoster.forEach(s => {
+            targetList.innerHTML += `
+                <div class="flex justify-between p-2 bg-blue-50 mb-1 border border-blue-100 rounded text-xs">
+                    <div><b>${s.name}</b></div>
+                    <button type="button" onclick="WizardLogic.removeStudent('${s.id}')" class="text-red-600 font-bold px-2">X</button>
+                </div>`;
+        });
+    },
+
+    // GUARDADO Y BORRADOR
+    saveDraft: function() {
+        const data = {
+            id: 'REQ-' + Math.floor(Math.random() * 10000),
+            date: new Date().toLocaleDateString(),
+            type: document.getElementById('mobilityType').value,
+            destination: document.getElementById('institutionInput')?.value || 'Sin definir',
+            status: 'BORRADOR'
+        };
+
+        let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+        
+        // Si estamos editando un borrador, sobreescribimos
+        const editingIndex = localStorage.getItem('CUE_EDITING_INDEX');
+        if(editingIndex !== null) {
+            requests[editingIndex] = data;
+            localStorage.removeItem('CUE_EDITING_INDEX');
+        } else {
+            requests.push(data);
+        }
+
+        localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
+        alert('Borrador guardado exitosamente.');
+        window.location.href = 'dashboard-estudiante.html';
+    },
+
+    submitFinal: function(e) {
+        e.preventDefault();
+        if(!document.getElementById('terms').checked) {
+            alert("Debe aceptar la declaración juramentada para radicar la solicitud.");
+            return;
+        }
+
+        const data = {
+            id: 'REQ-2026-' + Math.floor(Math.random() * 10000),
+            date: new Date().toLocaleDateString(),
+            type: document.getElementById('mobilityType').value,
+            destination: document.getElementById('institutionInput')?.value,
+            status: 'EN_REVISION_ANI'
+        };
+
+        let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+        const editingIndex = localStorage.getItem('CUE_EDITING_INDEX');
+        
+        if(editingIndex !== null) {
+            requests[editingIndex] = data;
+            localStorage.removeItem('CUE_EDITING_INDEX');
+        } else {
+            requests.push(data);
+        }
+
+        localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
+        alert('Solicitud Radicada Exitosamente. Será redirigido a su panel.');
+        window.location.href = 'dashboard-estudiante.html';
+    },
+
+    checkIfEditingDraft: function() {
+        const editingIndex = localStorage.getItem('CUE_EDITING_INDEX');
+        if (editingIndex !== null) {
+            // Rellenar datos mock (En prod se llena con los datos reales del borrador)
+            console.log("Cargando borrador...");
+        }
     }
+};
 
-    // Botones
-    document.getElementById('prevBtn').classList.toggle('hidden', currentStep === 1);
-    
-    if (currentStep === totalSteps) {
-        document.getElementById('nextBtn').classList.add('hidden');
-        document.getElementById('submitBtn').classList.remove('hidden');
-    } else {
-        document.getElementById('nextBtn').classList.remove('hidden');
-        document.getElementById('submitBtn').classList.add('hidden');
-    }
-}
+// Exponer al objeto global para que funcionen los onclicks en el HTML
+window.WizardLogic = WizardLogic;
 
-function changeStep(direction) {
-    // Aquí irían las validaciones (validateStep(currentStep))
-    currentStep += direction;
-    updateUI();
-    window.scrollTo(0, 0);
-}
-
-// LÓGICA DE NEGOCIO: CONVENIOS (Pregunta 2)
-function checkInstitutionStatus() {
-    const input = document.getElementById('institutionInput').value;
-    const alertDiv = document.getElementById('alertVencido');
-    const manualDiv = document.getElementById('manualInstitutionFields');
-    
-    // Reset
-    alertDiv.classList.add('hidden');
-    manualDiv.classList.add('hidden');
-
-    if (input.includes("VENCIDO")) {
-        alertDiv.classList.remove('hidden');
-    } else if (input.includes("Otra") || (input.length > 3 && !input.includes("Colombia") && !input.includes("Alemania"))) {
-        // Lógica simplificada: Si selecciona "Otra" o escribe algo nuevo
-        manualDiv.classList.remove('hidden');
-    }
-}
-
-// LÓGICA DE NEGOCIO: TRANSPORTE Y SST (Pregunta 4)
-function toggleTransportFields() {
-    const type = document.getElementById('mobilityType').value;
-    const section = document.getElementById('transportSection');
-    
-    if (type === 'SALIDA_ACADEMICA') {
-        section.classList.remove('hidden');
-    } else {
-        section.classList.add('hidden');
-        // Resetear checkbox si oculta
-        document.getElementById('hiredTransport').checked = false;
-        toggleVehicleDetails();
-    }
-}
-
-function toggleVehicleDetails() {
-    const isHired = document.getElementById('hiredTransport').checked;
-    const details = document.getElementById('vehicleDetails');
-    
-    if (isHired) {
-        details.classList.remove('hidden');
-    } else {
-        details.classList.add('hidden');
-    }
-}
+// Inicializar al cargar
+document.addEventListener('DOMContentLoaded', () => WizardLogic.init());

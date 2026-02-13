@@ -3,77 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CUE - Acceso Unificado</title>
+    <title>CUE - Acceso Unificado de Movilidad</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="flex items-center justify-center min-h-screen bg-[#caf0f8]">
+<body class="flex h-screen bg-[#f0f4f8] font-['Inter']">
 
-    <div class="bg-white p-8 w-full max-w-md shadow-xl rounded-lg border-t-4 border-[#03045e]">
-        <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-[#03045e]">CUE Alexander von Humboldt</h1>
-            <p class="text-xs text-gray-500 tracking-widest mt-1">SISTEMA DE GESTIÓN DE MOVILIDAD</p>
-        </div>
-
-        <div id="error-msg" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm text-center"></div>
-
-        <form id="loginForm" class="space-y-6">
-            <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">USUARIO / CORREO</label>
-                <input type="email" id="email" required placeholder="ej: ani@cue.edu.co" 
-                       class="w-full border-b-2 border-[#90e0ef] focus:border-[#0077b6] outline-none py-2 px-1 text-sm">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-600 mb-1">CONTRASEÑA</label>
-                <input type="password" id="password" required placeholder="••••••" 
-                       class="w-full border-b-2 border-[#90e0ef] focus:border-[#0077b6] outline-none py-2 px-1 text-sm">
-            </div>
+    <div class="hidden lg:flex w-1/2 bg-[#03045e] flex-col justify-center items-center relative overflow-hidden text-white p-12">
+        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+        <div class="z-10 text-center max-w-md">
+            <img src="assets/img/logo_avh.png" alt="Logo CUE" class="h-20 mx-auto mb-8 bg-white p-2 rounded shadow-lg" onerror="this.src='https://placehold.co/300x100?text=CUE+Humboldt'">
+            <h1 class="text-4xl font-bold mb-4 tracking-tight">Portal de Movilidad</h1>
+            <p class="text-[#90e0ef] text-lg mb-8">Gestión de movilidad académica, laboral e internacional para la comunidad Humboldt.</p>
             
-            <button type="submit" class="w-full bg-[#03045e] text-white py-3 font-bold hover:bg-[#0077b6] transition-all rounded shadow-lg text-sm">
-                 INGRESAR 
-            </button>
-        </form>
+            <div class="flex items-center justify-center gap-4 text-sm font-semibold text-[#caf0f8]">
+                <span class="flex items-center gap-1"><i data-lucide="globe" class="w-4 h-4"></i> Internacionalización</span>
+                <span class="flex items-center gap-1"><i data-lucide="briefcase" class="w-4 h-4"></i> Prácticas</span>
+                <span class="flex items-center gap-1"><i data-lucide="graduation-cap" class="w-4 h-4"></i> Académico</span>
+            </div>
+        </div>
+    </div>
 
-        <div class="mt-8 pt-4 border-t text-xs text-gray-400">
-            <p class="font-bold mb-2">Credenciales Demo:</p>
-            <ul class="space-y-1">
-                <li class="cursor-pointer hover:text-blue-600" onclick="fill('juan@cue.edu.co', '123')">👉 Estudiante: juan@cue.edu.co / 123</li>
-                <li class="cursor-pointer hover:text-blue-600" onclick="fill('ani@cue.edu.co', 'admin')">👉 ANI: ani@cue.edu.co / admin</li>
-                <li class="cursor-pointer hover:text-blue-600" onclick="fill('coord@cue.edu.co', 'admin')">👉 Coord: coord@cue.edu.co / admin</li>
-            </ul>
+    <div class="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white shadow-[-10px_0_30px_rgba(0,0,0,0.05)] z-20">
+        <div class="w-full max-w-md">
+            <div class="mb-10 text-center lg:text-left">
+                <h2 class="text-3xl font-bold text-[#03045e]">Bienvenido</h2>
+                <p class="text-gray-500 mt-2">Ingrese sus credenciales institucionales</p>
+            </div>
+
+            <div id="error-msg" class="hidden bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-6 text-sm flex items-center gap-2">
+                <i data-lucide="alert-circle" class="w-5 h-5"></i> <span id="error-text">Credenciales incorrectas</span>
+            </div>
+
+            <form id="loginForm" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Correo Institucional</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                        <input type="email" id="email" required placeholder="usuario@cue.edu.co" 
+                               class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-[#0077b6] focus:ring-2 focus:ring-[#caf0f8] outline-none transition-all">
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide">Contraseña</label>
+                        <a href="#" class="text-xs text-[#0077b6] hover:underline">¿Olvidó su contraseña?</a>
+                    </div>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5"></i>
+                        <input type="password" id="password" required placeholder="••••••••" 
+                               class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:border-[#0077b6] focus:ring-2 focus:ring-[#caf0f8] outline-none transition-all">
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-[#0077b6] text-white py-3 rounded-lg font-bold hover:bg-[#03045e] transition-colors shadow-lg flex justify-center items-center gap-2">
+                    Ingresar al Sistema <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-gray-100">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 text-center">Modo Demo - Accesos Rápidos</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="fill('juan@cue.edu.co', '123')" class="text-xs py-2 bg-gray-50 hover:bg-[#caf0f8] rounded text-[#03045e] border border-gray-200 transition-colors">👨‍🎓 Estudiante</button>
+                    <button onclick="fill('profe@cue.edu.co', 'docente')" class="text-xs py-2 bg-gray-50 hover:bg-[#caf0f8] rounded text-[#03045e] border border-gray-200 transition-colors">👨‍🏫 Docente</button>
+                    <button onclick="fill('ani@cue.edu.co', 'admin')" class="text-xs py-2 bg-gray-50 hover:bg-[#caf0f8] rounded text-[#03045e] border border-gray-200 transition-colors">👩‍💼 Secretaría ANI</button>
+                    <button onclick="fill('coord@cue.edu.co', 'admin')" class="text-xs py-2 bg-gray-50 hover:bg-[#caf0f8] rounded text-[#03045e] border border-gray-200 transition-colors">👨‍💼 Coordinador</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script src="assets/js/auth.js"></script>
-    
     <script>
-        // Lógica de Login corregida
+        lucide.createIcons();
         document.getElementById('loginForm').onsubmit = (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('password').value;
-            const errorDiv = document.getElementById('error-msg');
-
-            // Llamada al AuthService actualizado
-            const result = AuthService.login(email, pass);
-
-            if (result.success) {
-                // Éxito: Redirigir a la carpeta modules
-                console.log("Login exitoso. Redirigiendo a:", result.redirect);
-                window.location.href = 'modules/' + result.redirect;
-            } else {
-                // Error: Mostrar mensaje
-                errorDiv.textContent = result.message || "Error de credenciales";
-                errorDiv.classList.remove('hidden');
+            const result = AuthService.login(document.getElementById('email').value, document.getElementById('password').value);
+            if (result.success) window.location.href = 'modules/' + result.redirect;
+            else {
+                document.getElementById('error-msg').classList.remove('hidden');
+                document.getElementById('error-text').textContent = result.message;
             }
         };
-
-        // Helper para llenar el formulario rápido
-        function fill(u, p) {
-            document.getElementById('email').value = u;
-            document.getElementById('password').value = p;
-        }
+        function fill(u, p) { document.getElementById('email').value = u; document.getElementById('password').value = p; }
     </script>
 </body>
-</html>
 </html>

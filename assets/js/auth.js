@@ -7,10 +7,11 @@ const ROLES = {
     CSI: { code: 'ADMIN', redirect: 'dashboard-csi.html', name: 'Admin Técnico' },
     ANI: { code: 'ANI', redirect: 'dashboard-ani.html', name: 'Secretaría Movilidad' },
     ACAD: { code: 'COORDINADOR', redirect: 'dashboard-acad.html', name: 'Coord. Académico' },
-    ESTUDIANTE: { code: 'ESTUDIANTE', redirect: 'mobility-wizard.html', name: 'Estudiante' }
+    DOCENTE: { code: 'DOCENTE', redirect: 'dashboard-estudiante.html', name: 'Docente Líder' }, // Redirige al dashboard también
+    ESTUDIANTE: { code: 'ESTUDIANTE', redirect: 'dashboard-estudiante.html', name: 'Estudiante' } // <--- CAMBIO CLAVE AQUÍ
 };
 
-// Base de usuarios simulada (Credenciales para tu demo)
+// Base de usuarios simulada 
 const MOCK_USERS = [
     { email: 'ani@cue.edu.co', pass: 'admin', role: ROLES.ANI },
     { email: 'coord@cue.edu.co', pass: 'admin', role: ROLES.ACAD, faculty: 'Ingeniería' },
