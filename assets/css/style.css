@@ -30,5 +30,5 @@ body {
 .card-mobility {
     background: white;
     border: 1px solid var(--cue-border);
-    border-radius: 4px; /* Minimalismo institucional */
+    border-radius: 4px; 
 }
