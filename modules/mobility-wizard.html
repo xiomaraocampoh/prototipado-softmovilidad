@@ -24,7 +24,7 @@
         <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-4">
                 <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10">
-                <h1 class="font-bold text-[#03045e] text-lg border-l pl-4">Formulario de Movilidad (FO-IN-012)</h1>
+                <h1 class="font-bold text-[#03045e] text-lg border-l pl-4">Solicitud de Movilidad (Conexión Q10)</h1>
             </div>
             <button onclick="window.location.href='dashboard-estudiante.html'" class="text-gray-400 hover:text-red-500 flex items-center gap-1 text-sm font-bold"><i data-lucide="x-circle" class="w-4 h-4"></i> Cancelar</button>
         </div>
@@ -37,7 +37,7 @@
             <div class="flex justify-between w-full">
                 <div class="step-indicator active flex flex-col items-center w-1/4" data-step="1"><div class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">1</div><span class="text-xs text-gray-400 mt-1">Naturaleza</span></div>
                 <div class="step-indicator flex flex-col items-center w-1/4" data-step="2"><div class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">2</div><span class="text-xs text-gray-400 mt-1">Logística</span></div>
-                <div class="step-indicator flex flex-col items-center w-1/4" data-step="3"><div class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">3</div><span class="text-xs text-gray-400 mt-1">Datos y Finanzas</span></div>
+                <div class="step-indicator flex flex-col items-center w-1/4" data-step="3"><div class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">3</div><span class="text-xs text-gray-400 mt-1">Académico/Finanzas</span></div>
                 <div class="step-indicator flex flex-col items-center w-1/4" data-step="4"><div class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">4</div><span class="text-xs text-gray-400 mt-1">Documentos</span></div>
             </div>
         </div>
@@ -49,14 +49,21 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div><label class="form-label">Dirección</label><input type="text" id="mobilityDirection" class="form-input font-bold text-[#0077b6]" readonly></div>
                     <div><label class="form-label">Modalidad (Lugar)</label>
-                        <select id="mobilityModality" class="form-input" onchange="WizardLogic.updateFields()"><option value="PRESENCIAL">Presencial</option><option value="VIRTUAL">Virtual</option></select>
+                        <select id="mobilityModality" class="form-input" onchange="WizardLogic.filterTypesByModality()">
+                            <option value="PRESENCIAL">Presencial</option>
+                            <option value="VIRTUAL">Virtual</option>
+                        </select>
                     </div>
                     <div><label class="form-label">Alcance Territorial</label>
-                        <select id="mobilityScope" class="form-input" onchange="WizardLogic.updateFields()"><option value="NACIONAL">Nacional</option><option value="INTERNACIONAL">Internacional</option></select>
+                        <select id="mobilityScope" class="form-input" onchange="WizardLogic.updateFields()">
+                            <option value="NACIONAL">Nacional</option>
+                            <option value="INTERNACIONAL">Internacional</option>
+                        </select>
                     </div>
                     <div class="md:col-span-3 border-t pt-4">
                         <label class="form-label text-[#03045e]">Tipo Específico de Movilidad</label>
                         <select id="mobilityType" class="form-input md:w-1/2 border-[#0077b6] bg-blue-50" onchange="WizardLogic.updateFields()"></select>
+                        <p class="text-[10px] text-gray-400 mt-1">* Las opciones cambian según la modalidad seleccionada.</p>
                     </div>
                 </div>
             </div>
@@ -69,32 +76,39 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div><label class="form-label">Universidad / Entidad de Origen</label><input type="text" class="form-input"></div>
                         <div><label class="form-label">País de Origen</label><input type="text" class="form-input"></div>
-                        <div class="md:col-span-2"><label class="form-label">Institución Destino</label><input type="text" class="form-input font-bold" value="CUE Alexander von Humboldt" readonly></div>
                     </div>
                 </div>
 
-<<div id="destinoContainer" class="hidden mb-6 bg-blue-50 p-4 rounded border border-blue-200">
+                <div id="destinoContainer" class="hidden mb-6 bg-blue-50 p-4 rounded border border-blue-200">
                     <h3 class="font-bold text-[#0077b6] text-sm mb-3"><i data-lucide="map-pin" class="inline w-4 h-4"></i> Información de Destino</h3>
                     
-                    <div id="destinoSearchContainer" class="mb-4">
+                    <div id="destinoSearchContainer">
                         <label class="form-label">Institución en Convenio (Obligatorio)</label>
-                        <select id="entity_select" class="form-input cursor-pointer border-[#0077b6]" onchange="WizardLogic.checkOtherEntity()">
-                            </select>
+                        <select id="entity_select" class="form-input cursor-pointer border-[#0077b6]" onchange="WizardLogic.checkOtherEntity()"></select>
                     </div>
                     
-                    <div id="destinoLibreContainer" class="hidden mb-4">
-                        <label class="form-label text-orange-600">Nombre de la Institución, Entidad o Empresa</label>
-                        <input type="text" id="other_entity_name" class="form-input border-orange-200" placeholder="Escriba el nombre oficial del lugar de destino...">
+                    <div id="destinoLibreContainer" class="hidden mt-4 pt-4 border-t border-blue-200">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-3">
+                                <label class="form-label text-orange-600">Nombre Entidad / Empresa / Lugar</label>
+                                <input type="text" id="other_entity_name" class="form-input border-orange-200">
+                            </div>
+                            <div><label class="form-label">País</label><input type="text" id="field_country" class="form-input"></div>
+                            <div><label class="form-label">Ciudad</label><input type="text" id="field_city" class="form-input"></div>
+                        </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="form-label">País Destino</label>
-                            <input type="text" id="field_country" class="form-input transition-colors" placeholder="Ej: México">
-                        </div>
-                        <div>
-                            <label class="form-label">Ciudad Destino</label>
-                            <input type="text" id="field_city" class="form-input transition-colors" placeholder="Ej: Ciudad de México">
+                    <div id="practiceDetailsContainer" class="hidden mt-4 pt-4 border-t border-blue-200 bg-white p-3 rounded shadow-sm">
+                        <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3 flex items-center gap-2"><i data-lucide="briefcase" class="w-3 h-3"></i> Enfoque Académico-Laboral</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="form-label text-purple-700">Línea de Profundización / Área de Desempeño</label>
+                                <input type="text" class="form-input" placeholder="Ej: Logística, Calidad, Urgencias...">
+                            </div>
+                            <div>
+                                <label class="form-label text-purple-700">Producto / Entregable Esperado</label>
+                                <input type="text" class="form-input" placeholder="Ej: Informe Técnico, Software...">
+                            </div>
                         </div>
                     </div>
 
@@ -108,7 +122,7 @@
                     <div class="md:col-span-4 font-bold text-xs text-[#03045e] uppercase border-b pb-1 mb-2">Cronograma</div>
                     <div><label class="form-label">Inicio Académico</label><input type="date" id="fechaInicio" class="form-input" onchange="WizardLogic.calculateDuration()"></div>
                     <div><label class="form-label">Fin Académico</label><input type="date" id="fechaFin" class="form-input" onchange="WizardLogic.calculateDuration()"></div>
-                    <div class="md:col-span-2"><label class="form-label">Duración Calculada</label><input type="text" id="duracionCalculada" class="form-input font-bold" readonly placeholder="Automático"></div>
+                    <div class="md:col-span-2"><label class="form-label">Duración Calculada</label><input type="text" id="duracionCalculada" class="form-input font-bold bg-gray-100" readonly placeholder="Automático"></div>
                     
                     <div class="req-presencial"><label class="form-label text-orange-600">Fecha Ida (Viaje)</label><input type="date" class="form-input border-orange-200"></div>
                     <div class="req-presencial"><label class="form-label text-orange-600">Fecha Regreso</label><input type="date" class="form-input border-orange-200"></div>
@@ -133,12 +147,12 @@
                     <h3 class="font-bold text-green-800 text-sm mb-4"><i data-lucide="circle-dollar-sign" class="inline w-4 h-4"></i> Información Financiera</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label class="form-label">¿Genera costo de matrícula/participación?</label>
+                            <label class="form-label">¿Genera costo de matrícula?</label>
                             <select id="hasCosto" class="form-input mb-2" onchange="WizardLogic.toggleFinance()"><option value="NO">NO</option><option value="SI">SÍ</option></select>
                             <input type="number" id="montoCosto" placeholder="¿Cuánto? (Valor COP/USD)" class="form-input hidden">
                         </div>
                         <div>
-                            <label class="form-label">¿Tuvo apoyo o beca institucional/externa?</label>
+                            <label class="form-label">¿Tuvo apoyo o beca?</label>
                             <select id="hasBeca" class="form-input mb-2" onchange="WizardLogic.toggleFinance()"><option value="NO">NO</option><option value="SI">SÍ</option></select>
                             <input type="number" id="montoBeca" placeholder="¿Cuánto? (Valor COP/USD)" class="form-input hidden">
                         </div>
@@ -146,25 +160,34 @@
                 </div>
 
                 <div id="studentPersonalData">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                        <div class="md:col-span-4 font-bold text-xs text-gray-500 uppercase border-b pb-1">Perfil Académico</div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 relative">
+                        <div class="absolute top-0 right-0 bg-green-100 text-green-800 text-[10px] font-bold px-2 py-1 rounded flex items-center gap-1 border border-green-200">
+                            <i data-lucide="shield-check" class="w-3 h-3"></i> Validado por Registro y Control
+                        </div>
+
+                        <div class="md:col-span-4 font-bold text-xs text-gray-500 uppercase border-b pb-1">Perfil Académico (Solo Lectura)</div>
+                        
                         <div><label class="form-label">Documento</label><input type="text" id="autoDoc" class="form-input bg-gray-100" readonly></div>
                         <div class="md:col-span-2"><label class="form-label">Programa</label>
-                            <select class="form-input"><option>Ing. Software</option><option>Derecho</option><option>Medicina</option></select>
+                            <input type="text" value="Ingeniería de Software" class="form-input bg-gray-100" readonly>
                         </div>
-                        <div><label class="form-label">Semestre</label><input type="number" id="autoSem" class="form-input"></div>
-                        <div><label class="form-label">Promedio</label><input type="number" step="0.1" id="autoProm" class="form-input"></div>
+                        <div><label class="form-label">Semestre</label><input type="number" id="autoSem" class="form-input bg-gray-100" readonly></div>
+                        <div><label class="form-label">Promedio</label><input type="number" step="0.1" id="autoProm" class="form-input bg-gray-100" readonly></div>
                     </div>
                     
                     <div class="req-presencial border-t pt-4">
                         <h3 class="font-bold text-red-600 text-sm mb-4 uppercase"><i data-lucide="heart-pulse" class="inline w-4 h-4"></i> Riesgos y Emergencia (SST)</h3>
+                        <p class="text-xs text-gray-400 mb-2 italic" id="sstReadOnlyMsg">* Información precargada de su perfil institucional.</p>
+                        
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div><label class="form-label">EPS / Seguro Médico</label><input type="text" class="form-input"></div>
-                            <div><label class="form-label">Necesidades Médicas / Medicamentos Control</label><input type="text" class="form-input" placeholder="Alergias, condiciones..."></div>
+                            <div><label class="form-label">EPS / Seguro Médico</label><input type="text" id="sstEps" class="form-input"></div>
+                            <div><label class="form-label">Necesidades Médicas</label><input type="text" id="sstMeds" class="form-input" placeholder="Alergias, condiciones..."></div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded border">
                             <div class="md:col-span-3 font-bold text-xs text-gray-500 uppercase border-b pb-1">Contacto Emergencia</div>
-                            <input type="text" placeholder="Nombre Completo" class="form-input"><input type="text" placeholder="Parentesco" class="form-input"><input type="tel" placeholder="Teléfono" class="form-input">
+                            <input type="text" id="sstContactName" placeholder="Nombre Completo" class="form-input">
+                            <input type="text" id="sstContactRel" placeholder="Parentesco" class="form-input">
+                            <input type="tel" id="sstContactPhone" placeholder="Celular" class="form-input">
                         </div>
                     </div>
                 </div>
@@ -172,20 +195,20 @@
                 <div id="professorRosterData" class="hidden border-t pt-4">
                     <h3 class="font-bold text-[#0077b6] text-sm mb-4"><i data-lucide="users" class="inline w-4 h-4"></i> Listado de Estudiantes (Participantes)</h3>
                     <div class="bg-blue-50 p-4 rounded border border-blue-100 text-sm text-blue-800 text-center italic">
-                        [Área de selección de estudiantes simulada para el prototipo]
+                        [Área de selección de estudiantes conectada a bases de datos académicas]
                     </div>
                 </div>
             </div>
 
             <div class="hidden p-8" id="step-4">
-                <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-2">Paso 4: Repositorio Documental Específico</h2>
-                <p class="text-xs text-gray-500 mb-6 bg-yellow-50 p-2 border border-yellow-200 rounded">La lista de documentos se ha generado dinámicamente según la modalidad, alcance y tipo de movilidad seleccionados.</p>
+                <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-2">Paso 4: Repositorio Documental</h2>
+                <p class="text-xs text-gray-500 mb-6 bg-yellow-50 p-2 border border-yellow-200 rounded">La lista se genera según normativa interna (GU-DO-003 / PR-IN-002).</p>
                 
                 <div id="docsList" class="space-y-3 mb-8"></div>
                 
                 <div class="p-4 bg-blue-50 border border-[#0077b6] rounded flex gap-3">
                     <input type="checkbox" id="termsCheck" class="mt-1 w-5 h-5 accent-[#03045e]">
-                    <label for="termsCheck" class="text-xs text-[#03045e]"><strong>Consentimiento Legal:</strong> Acepto términos y condiciones. Autorizo el tratamiento de mis datos personales y médicos según la política institucional (Acuerdo 001 de 2017).</label>
+                    <label for="termsCheck" class="text-xs text-[#03045e]"><strong>Consentimiento:</strong> Acepto política de tratamiento de datos (Acuerdo 001 de 2017).</label>
                 </div>
             </div>
 
@@ -193,7 +216,7 @@
                 <button type="button" id="prevBtn" class="px-6 py-2 border bg-white rounded font-bold text-gray-600 hidden" onclick="WizardLogic.step(-1)">Anterior</button>
                 <div class="flex-1 flex justify-center"><button type="button" onclick="WizardLogic.save()" class="text-sm font-bold text-gray-500 hover:text-[#0077b6] flex items-center gap-1"><i data-lucide="save" class="w-4 h-4"></i> Guardar Borrador</button></div> 
                 <button type="button" id="nextBtn" class="px-6 py-2 bg-[#0077b6] text-white rounded font-bold hover:bg-[#03045e]" onclick="WizardLogic.step(1)">Siguiente <i data-lucide="arrow-right" class="w-4 h-4 inline"></i></button>
-                <button type="submit" id="submitBtn" class="px-8 py-2 bg-[#03045e] text-white rounded font-bold hover:bg-black hidden shadow-lg">RADICAR FO-IN-012 <i data-lucide="check" class="w-4 h-4 inline"></i></button>
+                <button type="submit" id="submitBtn" class="px-8 py-2 bg-[#03045e] text-white rounded font-bold hover:bg-black hidden shadow-lg">RADICAR SOLICITUD <i data-lucide="check" class="w-4 h-4 inline"></i></button>
             </div>
         </form>
     </main>
