@@ -23,8 +23,7 @@
     <nav class="bg-white border-b-4 border-[#03045e] shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-4">
-                <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10">
-                <h1 class="font-bold text-[#03045e] text-lg border-l pl-4">Solicitud de Movilidad (Conexión Q10)</h1>
+                <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10"><h1 id="formTitle" class="font-bold text-[#03045e] text-lg border-l pl-4">Solicitud de Movilidad</h1>
             </div>
             <button onclick="window.location.href='dashboard-estudiante.html'" class="text-gray-400 hover:text-red-500 flex items-center gap-1 text-sm font-bold"><i data-lucide="x-circle" class="w-4 h-4"></i> Cancelar</button>
         </div>
@@ -116,6 +115,7 @@
                         <div id="researchFields" class="hidden"><label class="form-label text-purple-700">Nombre del Proyecto de Investigación</label><input type="text" class="form-input"></div>
                         <div id="eventFields" class="hidden"><label class="form-label text-purple-700">Nombre del Evento / Congreso</label><input type="text" class="form-input"></div>
                     </div>
+                    
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-gray-50 p-4 border rounded">
@@ -138,6 +138,15 @@
                         <input type="text" placeholder="Empresa Transporte" class="form-input"><input type="text" placeholder="Placa" class="form-input"><input type="text" placeholder="Licencia Conductor" class="form-input">
                     </div>
                 </div>
+
+                <div class="mt-6 bg-gray-50 p-4 border border-gray-200 rounded-lg">
+                    <h3 class="font-bold text-[#03045e] text-sm mb-2 uppercase flex items-center gap-2">
+                        <i data-lucide="list-checks" class="w-4 h-4 text-[#0077b6]"></i> Descripción de actividades de la Movilidad
+                    </h3>
+                    <p class="text-xs text-gray-600 mb-3">Detalle las asignaturas a cursar, labores de práctica, investigación o cronograma general de actividades en la institución o empresa de destino.</p>
+                    <textarea id="actividadesMovilidad" rows="3" class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none" placeholder="Ejemplo:&#10;- Cursar: Ingeniería de Software II, Bases de Datos.&#10;- Apoyo en el área de desarrollo web..."></textarea>
+                </div>
+
             </div>
 
             <div class="hidden p-8" id="step-3">

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control y Registro - CUE Movilidad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-[#f0f4f8] font-['Inter']">
+
+    <nav class="bg-white border-b-4 border-green-700 shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10">
+                <h1 class="font-bold text-green-800 border-l pl-4 ml-2">Control y Registro Académico</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-right hidden md:block">
+                    <p id="userNameDisplay" class="text-sm font-bold text-[#03045e] leading-tight">Usuario</p>
+                    <p id="userRoleDisplay" class="text-[10px] text-gray-500 uppercase font-bold">Rol</p>
+                </div>
+                <button onclick="AuthService.logout()" class="text-gray-400 hover:text-red-500 p-2 bg-gray-50 rounded-full hover:bg-red-50 transition" title="Cerrar Sesión">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto mt-8 px-6 pb-12">
+        <div class="flex justify-between items-end mb-6 border-b pb-4">
+            <div>
+                <h2 class="text-2xl font-bold text-[#03045e]">Gestión Académica de Movilidad</h2>
+                <p class="text-gray-500 text-sm">Creación de matrículas para externos y despacho de certificados.</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-[#03045e] flex items-center gap-2">
+                        <i data-lucide="user-plus" class="w-5 h-5 text-green-700"></i> Entrantes por Matricular
+                    </h3>
+                </div>
+                <div class="p-4 flex-grow overflow-y-auto max-h-[600px]">
+                    <p class="text-xs text-gray-500 mb-4">Estudiantes externos aprobados por Dirección ANI. Requieren creación de usuario en Q10 y asignación de materias.</p>
+                    <div id="matriculasContainer" class="space-y-4">
+                        <div class="text-sm text-gray-700 mb-4">
+                                <span class="block font-bold text-xs text-gray-400 uppercase mb-1">Descripción de actividades de la Movilidad</span>
+                                <div class="bg-gray-50 p-2 rounded border text-xs whitespace-pre-line">${req.materias || '- Asignaturas / Actividades por definir.'}</div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
+                <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
+                    <h3 class="font-bold text-[#03045e] flex items-center gap-2">
+                        <i data-lucide="award" class="w-5 h-5 text-blue-700"></i> Tickets de Certificados
+                    </h3>
+                </div>
+                <div class="p-4 flex-grow overflow-y-auto max-h-[600px]">
+                    <p class="text-xs text-gray-500 mb-4">Solicitudes pre-aprobadas (Valor $0) generadas desde el módulo de movilidad.</p>
+                    <div id="certificadosContainer" class="space-y-4">
+                        </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="../assets/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = AuthService.checkAuth();
+            if (!user || user.role.code !== 'REGISTRO') {
+                alert("Acceso denegado. Se requiere perfil de Control y Registro.");
+                window.location.href = '../index.html';
+                return;
+            }
+            
+            document.getElementById('userNameDisplay').textContent = user.name;
+            document.getElementById('userRoleDisplay').textContent = user.role.name;
+
+            loadRegistroDashboards();
+            lucide.createIcons();
+        });
+
+        function loadRegistroDashboards() {
+            const matriculasContainer = document.getElementById('matriculasContainer');
+            const certificadosContainer = document.getElementById('certificadosContainer');
+            
+            matriculasContainer.innerHTML = '';
+            certificadosContainer.innerHTML = '';
+
+            // Mocks de base de datos
+            const mockRequests = [
+                { 
+                    id: 'REQ-2005', date: '15/02/2026', type: 'Intercambio Académico', dir: 'ENTRANTE', 
+                    status: 'PENDIENTE_MATRICULA', userEmail: 'externo@unam.mx', 
+                    materias: '- Ingeniería de Software II\n- Bases de Datos Avanzadas\n- Ética Profesional' 
+                },
+                { 
+                    id: 'REQ-1002', date: '10/01/2026', type: 'Intercambio Académico', dir: 'SALIENTE', 
+                    status: 'MOVILIDAD_ACTIVA', userEmail: 'estudiante@cue.edu.co', 
+                    certRequested: true, certReady: false, certType: 'Certificado de Notas (Historial Completo)', 
+                    certObs: 'Favor incluir el promedio ponderado acumulado.', certStatus: 'PAGADO' 
+                }
+            ];
+
+            let localReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            const allReqs = [...mockRequests];
+            
+            // Consolidar storage y mocks
+            localReqs.forEach(lr => { 
+                const index = allReqs.findIndex(ar => ar.id === lr.id);
+                if(index > -1) {
+                    // Actualizar si ya existe (para atrapar los certificados pedidos en esta sesión)
+                    allReqs[index] = {...allReqs[index], ...lr};
+                } else {
+                    allReqs.push(lr); 
+                }
+            });
+
+            // 1. Renderizar Matrículas (Solo ENTRANTES aprobados por matricular)
+            const matriculas = allReqs.filter(req => req.status === 'PENDIENTE_MATRICULA' && req.dir === 'ENTRANTE');
+            if(matriculas.length === 0) {
+                matriculasContainer.innerHTML = `<p class="text-center text-sm text-gray-400 italic py-8">Bandeja al día. No hay entrantes pendientes.</p>`;
+            } else {
+                matriculas.forEach(req => {
+                    matriculasContainer.innerHTML += `
+                        <div class="border rounded-lg p-4 bg-white shadow-sm border-l-4 border-green-500">
+                            <div class="flex justify-between items-start border-b pb-2 mb-3">
+                                <div>
+                                    <span class="font-mono text-xs font-bold text-[#03045e]">${req.id}</span>
+                                    <h4 class="font-bold text-gray-800 text-sm mt-1">${req.userEmail}</h4>
+                                    <p class="text-xs text-gray-500">${req.type}</p>
+                                </div>
+                                <span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-1 rounded font-bold uppercase tracking-wider">Por Matricular</span>
+                            </div>
+                            <div class="text-sm text-gray-700 mb-4">
+                                <span class="block font-bold text-xs text-gray-400 uppercase mb-1">Materias a Cursar (Revisión Q10)</span>
+                                <div class="bg-gray-50 p-2 rounded border text-xs whitespace-pre-line">${req.materias || '- Asignaturas por definir según plan de estudios.'}</div>
+                            </div>
+                            <button onclick="confirmMatricula('${req.id}')" class="w-full bg-green-600 text-white py-2 rounded text-xs font-bold hover:bg-green-700 transition flex items-center justify-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> Confirmar Matrícula Exitosa en Q10
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+
+            // 2. Renderizar Certificados
+            const certificados = allReqs.filter(req => req.certRequested === true && req.certReady !== true);
+            if(certificados.length === 0) {
+                certificadosContainer.innerHTML = `<p class="text-center text-sm text-gray-400 italic py-8">Bandeja al día. No hay tickets pendientes.</p>`;
+            } else {
+                certificados.forEach(req => {
+                    certificadosContainer.innerHTML += `
+                        <div class="border rounded-lg p-4 bg-white shadow-sm border-l-4 border-blue-500">
+                            <div class="flex justify-between items-start border-b pb-2 mb-3">
+                                <div>
+                                    <span class="font-mono text-xs font-bold text-[#03045e]">${req.id}</span>
+                                    <h4 class="font-bold text-gray-800 text-sm mt-1">${req.userEmail}</h4>
+                                </div>
+                                <span class="bg-green-100 text-green-800 text-[10px] px-2 py-1 rounded font-bold border border-green-200">ESTADO: ${req.certStatus || 'PAGADO'}</span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <span class="block font-bold text-xs text-gray-400 uppercase mb-1">Documento Solicitado</span>
+                                <p class="text-sm font-semibold text-blue-800 bg-blue-50 p-2 rounded">${req.certType || 'Certificado Académico'}</p>
+                            </div>
+
+                            <div class="mb-4">
+                                <span class="block font-bold text-xs text-gray-400 uppercase mb-1">Observaciones del Usuario</span>
+                                <p class="text-xs text-gray-600 bg-gray-50 p-2 rounded border">${req.certObs || 'Sin observaciones adicionales.'}</p>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <button class="flex-1 border border-gray-300 text-gray-600 py-2 rounded text-xs font-bold hover:bg-gray-50 transition flex items-center justify-center gap-2">
+                                    <i data-lucide="paperclip" class="w-4 h-4"></i> Adjuntar PDF
+                                </button>
+                                <button onclick="dispatchCertificado('${req.id}')" class="flex-1 bg-blue-600 text-white py-2 rounded text-xs font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                                    <i data-lucide="send" class="w-4 h-4"></i> Enviar a Usuario
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            lucide.createIcons();
+        }
+
+        // Acciones Funcionales
+        function confirmMatricula(id) {
+            if(confirm("¿Confirma que este estudiante ha sido creado y matriculado exitosamente en el sistema de información institucional (Q10)?")) {
+                let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+                reqs = reqs.map(req => {
+                    if (req.id === id) req.status = 'MOVILIDAD_ACTIVA';
+                    return req;
+                });
+                localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+                
+                alert("Estudiante Entrante matriculado.\nEl estado ha cambiado a MOVILIDAD ACTIVA. Se ha notificado a Dirección ANI y al estudiante.");
+                loadRegistroDashboards();
+            }
+        }
+
+        function dispatchCertificado(id) {
+            if(confirm("¿Confirma que el documento adjunto es el correcto y desea enviarlo al solicitante?")) {
+                let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+                reqs = reqs.map(req => {
+                    if (req.id === id) req.certReady = true;
+                    return req;
+                });
+                localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+                
+                alert("Certificado despachado.\nEl documento ya está disponible para su descarga en el panel del usuario.");
+                loadRegistroDashboards();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -9,155 +9,231 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-[#f0f4f8] text-[#1a1a1a] font-['Inter']">
+<body class="bg-[#f0f4f8] font-['Inter']">
 
     <nav class="bg-white border-b-4 border-[#03045e] shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10" onerror="this.src='https://placehold.co/100x40?text=CUE'">
-                <h1 class="font-bold text-[#03045e] border-l pl-3 ml-2">Mi Portal de Movilidad</h1>
+                <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10">
+                <h1 class="font-bold text-[#03045e] border-l pl-4 ml-2">Portal del Solicitante</h1>
             </div>
             <div class="flex items-center gap-4">
-                <span id="userNameDisplay" class="text-sm font-semibold">Cargando...</span>
-                <button onclick="AuthService.logout()" class="text-gray-500 hover:text-red-500"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                <div class="text-right hidden md:block">
+                    <p id="userNameDisplay" class="text-sm font-bold text-[#03045e] leading-tight">Usuario</p>
+                    <p id="userRoleDisplay" class="text-[10px] text-gray-500 uppercase font-bold">Rol</p>
+                </div>
+                <button onclick="AuthService.logout()" class="text-gray-400 hover:text-red-500 p-2 bg-gray-50 rounded-full hover:bg-red-50 transition" title="Cerrar Sesión">
+                    <i data-lucide="log-out" class="w-5 h-5"></i>
+                </button>
             </div>
         </div>
     </nav>
 
     <main class="max-w-6xl mx-auto mt-8 px-6 pb-12">
-        
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div class="flex justify-between items-center mb-8 border-b pb-4">
             <div>
-                <h2 class="text-2xl font-bold text-[#03045e]">Mis Solicitudes</h2>
-                <p class="text-gray-500 text-sm">Gestione sus trámites y actualice su información básica.</p>
+                <h2 class="text-2xl font-bold text-[#03045e]">Mis Trámites de Movilidad</h2>
+                <p class="text-gray-500 text-sm">Haga seguimiento a sus solicitudes y certificados.</p>
             </div>
-            <div class="flex gap-3 flex-wrap">
-                <button onclick="document.getElementById('modalRequisitos').classList.remove('hidden')" class="bg-white text-[#0077b6] border border-[#0077b6] px-4 py-2 rounded-lg font-bold hover:bg-blue-50 transition flex items-center gap-2 text-sm">
-                    <i data-lucide="book-open" class="w-4 h-4"></i> GUÍA Y REQUISITOS
-                </button>
-                <button onclick="abrirPerfil()" class="bg-white text-[#03045e] border border-[#03045e] px-4 py-2 rounded-lg font-bold hover:bg-gray-50 transition flex items-center gap-2 text-sm">
-                    <i data-lucide="user-cog" class="w-4 h-4"></i> MI PERFIL
-                </button>
-                <a href="mobility-wizard.html" class="bg-[#0077b6] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#03045e] transition shadow-lg flex items-center gap-2 text-sm">
-                    <i data-lucide="plus-circle" class="w-4 h-4"></i> NUEVA SOLICITUD
-                </a>
-            </div>
+            <a href="mobility-wizard.html" class="bg-[#0077b6] text-white px-6 py-2 rounded-lg font-bold hover:bg-[#03045e] transition shadow-lg flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-5 h-5"></i> NUEVA POSTULACIÓN
+            </a>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <table class="w-full text-left">
-                <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
-                    <tr>
-                        <th class="p-4">ID / Fecha</th>
-                        <th class="p-4">Tipo Específico</th>
-                        <th class="p-4">Destino / Origen</th>
-                        <th class="p-4">Estado</th>
-                        <th class="p-4 text-center">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="requestsTableBody" class="divide-y divide-gray-100 text-sm">
-                    </tbody>
-            </table>
-        </div>
-    </main>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="requestsGrid">
+            </div>
 
-    <div id="modalPerfil" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-fade-in">
+
+        <div id="certModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
             <div class="bg-[#03045e] p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold flex items-center gap-2"><i data-lucide="user"></i> Mi Perfil (Autocompletado)</h3>
-                <button onclick="document.getElementById('modalPerfil').classList.add('hidden')" class="hover:text-red-400"><i data-lucide="x"></i></button>
+                <h3 class="font-bold flex items-center gap-2"><i data-lucide="file-text" class="w-5 h-5"></i> Solicitar Certificado Académico</h3>
+                <button onclick="closeCertModal()" class="text-gray-300 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-6">
-                <p class="text-xs text-gray-500 mb-4 bg-blue-50 p-2 rounded border border-blue-100">Estos datos se guardarán localmente y se cargarán solos al crear una nueva solicitud (FO-IN-012).</p>
-                <div class="grid grid-cols-2 gap-4 mb-6">
-                    <div><label class="text-xs font-bold text-gray-600 uppercase">Documento</label><input type="text" id="profDoc" class="w-full border border-gray-300 p-2 rounded mt-1 outline-none focus:border-[#0077b6]"></div>
-                    <div><label class="text-xs font-bold text-gray-600 uppercase">Celular</label><input type="tel" id="profPhone" class="w-full border border-gray-300 p-2 rounded mt-1 outline-none focus:border-[#0077b6]"></div>
-                    <div><label class="text-xs font-bold text-gray-600 uppercase">Semestre Actual</label><input type="number" id="profSem" class="w-full border border-gray-300 p-2 rounded mt-1 outline-none focus:border-[#0077b6]"></div>
-                    <div><label class="text-xs font-bold text-gray-600 uppercase">Promedio Acumulado</label><input type="number" step="0.1" id="profProm" class="w-full border border-gray-300 p-2 rounded mt-1 outline-none focus:border-[#0077b6]"></div>
+                <div class="bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded text-sm mb-4">
+                    <strong>Beneficio de Movilidad:</strong> Al tener una movilidad en estado ACTIVO, la expedición de estos certificados tiene un valor de $0 COP por única vez.
                 </div>
-                <button onclick="guardarPerfil()" class="w-full bg-[#0077b6] text-white py-3 rounded-lg font-bold hover:bg-[#03045e] transition">Guardar y Actualizar Perfil</button>
+                
+                <form id="certForm" class="space-y-4">
+                    <input type="hidden" id="certReqId">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Tipo de Certificado Requerido</label>
+                        <select id="certType" class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                            <option value="">Seleccione el certificado...</option>
+                            <option value="Certificado de Notas (Historial Completo)">Certificado de Notas (Historial Completo)</option>
+                            <option value="Certificado de Estudio (Matrícula Activa)">Certificado de Estudio (Matrícula Activa)</option>
+                            <option value="Certificado de Buena Conducta">Certificado de Buena Conducta</option>
+                            <option value="Sábana de Notas / Contenidos Programáticos">Sábana de Notas / Contenidos Programáticos</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Observaciones Generales</label>
+                        <textarea id="certObs" rows="3" class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none" placeholder="Indique si el documento requiere ir dirigido a una entidad específica o detalles adicionales..."></textarea>
+                    </div>
+
+                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded border">
+                        <span class="text-sm font-bold text-gray-600 uppercase">Total a Pagar:</span>
+                        <span class="text-lg font-bold text-green-700">$ 0 COP</span>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-4 border-t">
+                        <button type="button" onclick="closeCertModal()" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold hover:bg-gray-50">Cancelar</button>
+                        <button type="button" onclick="confirmCertRequest()" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition flex items-center gap-2">
+                            Generar Ticket <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <div id="modalRequisitos" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col">
-            <div class="bg-[#0077b6] p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold flex items-center gap-2"><i data-lucide="file-check"></i> Requisitos de Movilidad</h3>
-                <button onclick="document.getElementById('modalRequisitos').classList.add('hidden')" class="hover:text-red-400"><i data-lucide="x"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto space-y-4">
-                <div class="border p-4 rounded bg-gray-50">
-                    <h4 class="font-bold text-[#03045e]">Salida Académica / Eventos</h4>
-                    <ul class="text-xs text-gray-600 list-disc pl-5 mt-2 space-y-1">
-                        <li>Cargada por un docente con listado de estudiantes.</li>
-                        <li>Si requiere transporte contratado: SOAT, Tecnomecánica, Pólizas, Tarjeta Propiedad, Licencia y ARL Conductor.</li>
-                    </ul>
-                </div>
-                <div class="border p-4 rounded bg-gray-50">
-                    <h4 class="font-bold text-[#03045e]">Intercambios / Prácticas</h4>
-                    <ul class="text-xs text-gray-600 list-disc pl-5 mt-2 space-y-1">
-                        <li>Debe existir convenio interinstitucional vigente.</li>
-                        <li>Documento de Identidad e Historial Académico (Q10).</li>
-                        <li>Carta de Motivación y Certificado de EPS Vigente.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <script src="../assets/js/auth.js"></script>
     <script>
         lucide.createIcons();
+        
         document.addEventListener('DOMContentLoaded', () => {
-            const user = AuthService.checkAuth();
-            document.getElementById('userNameDisplay').textContent = user.name;
-            cargarTabla();
+            const currentUser = AuthService.checkAuth();
+            
+            // Mostrar info del usuario en el navbar
+            document.getElementById('userNameDisplay').textContent = currentUser.name;
+            document.getElementById('userRoleDisplay').textContent = currentUser.role.name;
+
+            const grid = document.getElementById('requestsGrid');
+            
+           // SIMULACIÓN DE BASE DE DATOS (Mocks con dueños específicos)
+            const mockRequests = [
+                { id: 'REQ-1082', date: '18/02/2026', type: 'Práctica Empresarial', dest: 'Software SAS', status: 'EN_REVISION_POSTULACION', userEmail: 'estudiante@cue.edu.co' },
+                { id: 'REQ-1002', date: '10/01/2026', type: 'Intercambio Académico', dest: 'UNAM (México)', status: 'APROBADA_POSTULACION', userEmail: 'estudiante@cue.edu.co' },
+                { id: 'REQ-0550', date: '05/08/2025', type: 'Curso Corto', dest: 'Universidad de los Andes', status: 'MOVILIDAD_ACTIVA', userEmail: 'estudiante@cue.edu.co' },
+                { id: 'REQ-0998', date: '01/11/2025', type: 'Visita/Salida Académica', dest: 'Planta de Producción', status: 'MOVILIDAD_ACTIVA', userEmail: 'docente@cue.edu.co' },
+                { id: 'REQ-2005', date: '15/02/2026', type: 'Intercambio Académico', dest: 'CUE Alexander von Humboldt', status: 'EN_REVISION_TOTAL', userEmail: 'externo@unam.mx' }
+            ];
+
+            const localReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            const allReqs = [...mockRequests, ...localReqs];
+
+            // EL FILTRO MÁGICO: Solo mostrar las de este usuario 
+            const userReqs = allReqs.filter(req => req.userEmail === currentUser.email);
+
+            grid.innerHTML = '';
+
+            // Estado de "Bandeja Vacía"
+            if (userReqs.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-16 bg-white rounded-xl border border-dashed border-gray-300">
+                        <div class="bg-gray-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                            <i data-lucide="folder-open" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-[#03045e] mb-1">Aún no tienes trámites de movilidad</h3>
+                        <p class="text-gray-500 text-sm">Haz clic en "Nueva Postulación" para iniciar tu proceso.</p>
+                    </div>`;
+            } else {
+                // Dibujar Tarjetas
+                userReqs.forEach(req => {
+                    let statusConfig = getStatusConfig(req.status, req.id);
+                    grid.innerHTML += `
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition relative flex flex-col h-full">
+                            <div class="h-2 ${statusConfig.colorLine} w-full"></div>
+                            <div class="p-5 flex-grow">
+                                <div class="flex justify-between items-start mb-2">
+                                    <span class="font-mono text-xs font-bold text-gray-400">${req.id}</span>
+                                    <span class="text-xs text-gray-400"><i data-lucide="calendar" class="inline w-3 h-3"></i> ${req.date}</span>
+                                </div>
+                                <h3 class="font-bold text-[#03045e] text-lg leading-tight mb-1">${req.type}</h3>
+                                <p class="text-sm text-gray-500 mb-4"><i data-lucide="map-pin" class="inline w-3 h-3"></i> ${req.dest || 'Destino en proceso'}</p>
+                                
+                                <div class="mb-4">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold ${statusConfig.badgeBg} ${statusConfig.badgeText}">
+                                        ${statusConfig.label}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-gray-50 border-t border-gray-100 mt-auto">
+                                ${statusConfig.actionHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            lucide.createIcons();
         });
 
-        // Gestión de Perfil
-        function abrirPerfil() {
-            const saved = JSON.parse(localStorage.getItem('CUE_USER_PROFILE') || '{}');
-            document.getElementById('profDoc').value = saved.doc || '';
-            document.getElementById('profPhone').value = saved.phone || '';
-            document.getElementById('profSem').value = saved.sem || '';
-            document.getElementById('profProm').value = saved.prom || '';
-            document.getElementById('modalPerfil').classList.remove('hidden');
-        }
-
-        function guardarPerfil() {
-            const profile = {
-                doc: document.getElementById('profDoc').value, phone: document.getElementById('profPhone').value,
-                sem: document.getElementById('profSem').value, prom: document.getElementById('profProm').value
-            };
-            localStorage.setItem('CUE_USER_PROFILE', JSON.stringify(profile));
-            alert('Perfil actualizado. Sus datos se autocompletarán en nuevas solicitudes.');
-            document.getElementById('modalPerfil').classList.add('hidden');
-        }
-
-        // Cargar Tabla Demo
-        function cargarTabla() {
-            const tbody = document.getElementById('requestsTableBody');
-            let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
-            if(reqs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400">No hay solicitudes.</td></tr>`; return;
+        function getStatusConfig(status, id) {
+            let config = { colorLine: 'bg-gray-300', badgeBg: 'bg-gray-100', badgeText: 'text-gray-600', label: status, actionHtml: '' };
+            switch(status) {
+                case 'EN_REVISION_SECRETARIA_ANI':
+                    config.colorLine = 'bg-yellow-400'; config.badgeBg = 'bg-yellow-100'; config.badgeText = 'text-yellow-800';
+                    config.label = 'Revisión: Secretaría ANI';
+                    config.actionHtml = `<p class="text-xs text-center text-gray-400 font-semibold italic">Validación documental primaria en proceso.</p>`;
+                    break;
+                case 'EN_REVISION_DIRECCION_ANI':
+                    config.colorLine = 'bg-blue-400'; config.badgeBg = 'bg-blue-100'; config.badgeText = 'text-blue-800';
+                    config.label = 'Revisión: Dirección ANI';
+                    config.actionHtml = `<p class="text-xs text-center text-gray-400 font-semibold italic">Pendiente de aprobación final por Dirección.</p>`;
+                    break;
+                case 'EN_REVISION_TOTAL':
+                    config.colorLine = 'bg-yellow-400'; config.badgeBg = 'bg-yellow-100'; config.badgeText = 'text-yellow-800';
+                    config.label = 'En Revisión (Trámite Entrante)';
+                    config.actionHtml = `<p class="text-xs text-center text-gray-400 font-semibold italic">Evaluación de perfil externo en progreso.</p>`;
+                    break;
+                case 'APROBADA_POSTULACION':
+                    config.colorLine = 'bg-orange-500'; config.badgeBg = 'bg-orange-100'; config.badgeText = 'text-orange-800';
+                    config.label = 'Postulación Aprobada';
+                    config.actionHtml = `<a href="mobility-wizard.html?mode=docs&id=${id}" class="block text-center bg-[#0077b6] text-white py-2 rounded text-xs font-bold hover:bg-[#03045e] transition shadow-sm">CARGAR ANEXOS (FASE 2)</a>`;
+                    break;
+                case 'MOVILIDAD_ACTIVA':
+                case 'FINALIZADA':
+                    config.colorLine = 'bg-green-500'; config.badgeBg = 'bg-green-100'; config.badgeText = 'text-green-800';
+                    config.label = 'Movilidad Activa / Vigente';
+                    config.actionHtml = `<button onclick="solicitarCertificado('${id}')" class="w-full border-2 border-[#0077b6] text-[#0077b6] py-2 rounded text-xs font-bold hover:bg-blue-50 transition flex items-center justify-center gap-1"><i data-lucide="award" class="w-4 h-4"></i> SOLICITAR CERTIFICADO A REGISTRO</button>`;
+                    break;
             }
-            tbody.innerHTML = '';
-            reqs.forEach((r, i) => {
-                const isDraft = r.status === 'BORRADOR';
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50">
-                        <td class="p-4"><span class="font-mono text-[#03045e] font-bold">${r.id}</span><br><span class="text-xs text-gray-400">${r.date}</span></td>
-                        <td class="p-4 font-semibold">${r.type || 'N/A'}</td>
-                        <td class="p-4 text-sm">${r.destination || 'N/A'}</td>
-                        <td class="p-4"><span class="px-2 py-1 rounded-full text-xs font-bold ${isDraft ? 'bg-gray-100 text-gray-600' : 'bg-blue-50 text-[#0077b6]'}">${isDraft ? 'Borrador' : 'Radicada'}</span></td>
-                        <td class="p-4 text-center">
-                            ${isDraft ? `<button class="text-[#0077b6] font-bold text-xs border border-[#0077b6] px-3 py-1 rounded hover:bg-[#0077b6] hover:text-white" onclick="window.location.href='mobility-wizard.html'">Editar</button>` 
-                                      : `<button class="text-gray-400 text-xs underline">Ver Detalles</button>`}
-                        </td>
-                    </tr>`;
-            });
+            return config;
         }
+
+        function solicitarCertificado(id) {
+            // Abrir el modal en lugar de la alerta
+            document.getElementById('certReqId').value = id;
+            document.getElementById('certForm').reset();
+            document.getElementById('certModal').classList.remove('hidden');
+        }
+
+        function closeCertModal() {
+            document.getElementById('certModal').classList.add('hidden');
+        }
+
+        function confirmCertRequest() {
+            const reqId = document.getElementById('certReqId').value;
+            const certType = document.getElementById('certType').value;
+            const certObs = document.getElementById('certObs').value;
+
+            if(!certType) {
+                alert("Debe seleccionar un tipo de certificado.");
+                return;
+            }
+
+            // Simular guardado del ticket para Control y Registro
+            let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            reqs = reqs.map(req => {
+                if (req.id === reqId) {
+                    req.certRequested = true;
+                    req.certType = certType;
+                    req.certObs = certObs;
+                    req.certStatus = 'PAGADO'; // Pasa directo a pagado por ser $0
+                }
+                return req;
+            });
+            localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+
+            alert("Ticket de Certificado Generado Exitosamente.\nEl estado de la orden es: PAGADO ($0).\nLa solicitud ha sido enviada a Control y Registro Académico.");
+            closeCertModal();
+        }
+        
     </script>
 </body>
 </html>

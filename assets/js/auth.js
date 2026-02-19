@@ -1,53 +1,63 @@
 /**
- * Auth & Router Service - CUE Movilidad
- * Gestiona sesiones y redirecciona según el rol.
+ * Servicio de Autenticación y Gestión de Roles
+ * Definición estricta según requerimientos del SRS y estructura jerárquica
  */
 
 const ROLES = {
-    CSI: { code: 'ADMIN', redirect: 'dashboard-csi.html', name: 'Admin Técnico' },
-    ANI: { code: 'ANI', redirect: 'dashboard-ani.html', name: 'Secretaría Movilidad' },
-    ACAD: { code: 'COORDINADOR', redirect: 'dashboard-acad.html', name: 'Coord. Académico' },
-    DOCENTE: { code: 'DOCENTE', redirect: 'dashboard-estudiante.html', name: 'Docente Líder' }, // Redirige al dashboard también
-    ESTUDIANTE: { code: 'ESTUDIANTE', redirect: 'dashboard-estudiante.html', name: 'Estudiante' } // <--- CAMBIO CLAVE AQUÍ
+    // Solicitantes Internos
+    ESTUDIANTE: { code: 'ESTUDIANTE', redirect: 'dashboard-estudiante.html', name: 'Estudiante CUE' },
+    DOCENTE: { code: 'DOCENTE', redirect: 'dashboard-estudiante.html', name: 'Docente / Investigador' },
+    COLABORADOR: { code: 'COLABORADOR', redirect: 'dashboard-estudiante.html', name: 'Colaborador Administrativo' },
+    RECTOR: { code: 'RECTOR', redirect: 'dashboard-estudiante.html', name: 'Rectoría' },
+    
+    // Solicitantes Externos
+    EXTERNO: { code: 'EXTERNO', redirect: 'dashboard-estudiante.html', name: 'Usuario Externo (Entrante)' },
+    
+    // Perfiles Administrativos (Revisores)
+    ANI_SECRETARIA: { code: 'ANI_SECRETARIA', redirect: 'dashboard-ani.html', name: 'Secretaría ANI (Pre-revisión)' },
+    ANI_DIRECCION: { code: 'ANI_DIRECCION', redirect: 'dashboard-ani.html', name: 'Dirección ANI (Aprobación Final)' },
+    SST: { code: 'SST', redirect: 'dashboard-sst.html', name: 'Seguridad y Salud en el Trabajo' },
+    REGISTRO: { code: 'REGISTRO', redirect: 'dashboard-registro.html', name: 'Control y Registro Académico' }
 };
 
-// Base de usuarios simulada 
 const MOCK_USERS = [
-    { email: 'ani@cue.edu.co', pass: 'admin', role: ROLES.ANI },
-    { email: 'coord@cue.edu.co', pass: 'admin', role: ROLES.ACAD, faculty: 'Ingeniería' },
-    { email: 'juan@cue.edu.co', pass: '123', role: ROLES.ESTUDIANTE, name: 'Juan Pérez' },
-    { email: 'profe@cue.edu.co', pass: 'docente', role: ROLES.DOCENTE, name: 'Ing. Carlos' },
-    { email: 'externo@unam.mx', pass: '123', role: {code: 'EXTERNO', redirect: 'dashboard-estudiante.html', name: 'Estudiante Externo'}, name: 'Maria (UNAM)' }
+    { email: 'estudiante@cue.edu.co', pass: '123', role: ROLES.ESTUDIANTE, name: 'Xiomara Ocampo' },
+    { email: 'docente@cue.edu.co', pass: '123', role: ROLES.DOCENTE, name: 'Ing. Arlex' },
+    { email: 'rector@cue.edu.co', pass: '123', role: ROLES.RECTOR, name: 'Rectoría CUE' },
+    { email: 'externo@unam.mx', pass: '123', role: ROLES.EXTERNO, name: 'Carlos (UNAM)' },
+    { email: 'secretaria.ani@cue.edu.co', pass: 'admin', role: ROLES.ANI_SECRETARIA, name: 'Secretaría ANI' },
+    { email: 'direccion.ani@cue.edu.co', pass: 'admin', role: ROLES.ANI_DIRECCION, name: 'Dirección ANI' },
+    { email: 'sst@cue.edu.co', pass: 'admin', role: ROLES.SST, name: 'Gestor SST' },
+    { email: 'registro@cue.edu.co', pass: 'admin', role: ROLES.REGISTRO, name: 'Registro y Control' }
 ];
 
 const AuthService = {
-    login: (email, password) => {
+    login: function(email, password) {
         const user = MOCK_USERS.find(u => u.email === email && u.pass === password);
-        
         if (user) {
-            // Guardar sesión
-            localStorage.setItem('CUE_SESSION', JSON.stringify(user));
+            localStorage.setItem('CUE_AUTH_USER', JSON.stringify({
+                email: user.email,
+                name: user.name,
+                role: user.role
+            }));
             return { success: true, redirect: user.role.redirect };
         }
-        return { success: false, message: 'Credenciales inválidas' };
+        return { success: false, message: 'Credenciales institucionales incorrectas' };
     },
 
-    logout: () => {
-        localStorage.removeItem('CUE_SESSION');
-        // Ajustar la ruta dependiendo de si estamos en /modules o en la raíz
-        const path = window.location.pathname.includes('/modules/') ? '../index.html' : 'index.html';
-        window.location.href = path;
+    logout: function() {
+        localStorage.removeItem('CUE_AUTH_USER');
+        window.location.href = '../index.html';
     },
 
-    // Verifica si hay sesión al cargar la página
-    checkAuth: () => {
-        const session = JSON.parse(localStorage.getItem('CUE_SESSION'));
-        if (!session) {
-            // Si no hay sesión y no estamos en el login, sacar al usuario
-            if (!window.location.href.includes('index.html')) {
-                window.location.href = '../index.html';
-            }
+    checkAuth: function() {
+        const userStr = localStorage.getItem('CUE_AUTH_USER');
+        if (!userStr) {
+            window.location.href = '../index.html';
+            return null;
         }
-        return session;
+        return JSON.parse(userStr);
     }
 };
+
+window.AuthService = AuthService;
