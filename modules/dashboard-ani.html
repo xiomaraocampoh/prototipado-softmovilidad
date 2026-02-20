@@ -9,146 +9,213 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-[#f0f4f8] font-['Inter']">
+<body class="bg-[#f0f4f8] font-['Inter'] flex h-screen overflow-hidden">
 
-    <nav class="bg-white border-b-4 border-[#0077b6] shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
+    <aside class="w-64 bg-[#03045e] text-white flex flex-col hidden md:flex shadow-xl z-20">
+        <div class="h-16 flex items-center px-6 border-b border-white/10">
+            <h1 class="font-bold text-lg tracking-wide" id="aniTitle">Oficina ANI</h1>
+        </div>
+        
+        <div class="p-6 pb-2">
+            <p class="text-[10px] text-blue-300 uppercase font-bold tracking-wider mb-2">Menú Principal</p>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
+            <button onclick="switchTab('tab-bandeja')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left bg-white/10 text-white font-bold transition" data-target="tab-bandeja">
+                <i data-lucide="inbox" class="w-4 h-4"></i> Bandeja Documental
+            </button>
+            <button onclick="switchTab('tab-convenios')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition" data-target="tab-convenios">
+                <i data-lucide="building" class="w-4 h-4"></i> Gestión Convenios
+            </button>
+            <button onclick="switchTab('tab-credenciales')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition" data-target="tab-credenciales">
+                <i data-lucide="users" class="w-4 h-4"></i> Accesos Externos
+            </button>
+            <button onclick="switchTab('tab-programas')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition" data-target="tab-programas">
+                <i data-lucide="book-open" class="w-4 h-4"></i> Programas
+            </button>
+            <button onclick="switchTab('tab-tipos')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition" data-target="tab-tipos">
+                <i data-lucide="settings" class="w-4 h-4"></i> Tipos Movilidad
+            </button>
+        </nav>
+
+        <div class="p-4 border-t border-white/10">
+            <button onclick="AuthService.logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-blue-200 hover:text-white hover:bg-red-600/80 rounded transition">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión
+            </button>
+        </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        
+        <nav class="bg-white border-b shadow-sm h-16 flex justify-between items-center px-6 z-10 shrink-0">
             <div class="flex items-center gap-3">
                 <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10">
-                <h1 class="font-bold text-[#0077b6] border-l pl-4 ml-2" id="aniTitle">Oficina ANI</h1>
+                <span class="text-[#0077b6] font-bold border-l pl-3 ml-2 text-sm">Módulo Administrativo</span>
             </div>
             <div class="flex items-center gap-4">
-                <div class="text-right hidden md:block">
+                <div class="text-right">
                     <p id="userNameDisplay" class="text-sm font-bold text-[#03045e] leading-tight">Usuario</p>
                     <p id="userRoleDisplay" class="text-[10px] text-gray-500 uppercase font-bold">Rol</p>
                 </div>
-                <button onclick="AuthService.logout()" class="text-gray-400 hover:text-red-500 p-2 bg-gray-50 rounded-full hover:bg-red-50 transition" title="Cerrar Sesión">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                </button>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <main class="max-w-7xl mx-auto mt-8 px-6 pb-12">
-        <div class="flex justify-between items-end mb-6">
-            <div>
-                <h2 class="text-2xl font-bold text-[#03045e]">Bandeja de Revisión Documental</h2>
-                <p class="text-gray-500 text-sm" id="aniSubtitle">Cargando panel...</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <button id="btnManageAgreements" onclick="openAgreementsModal()" class="hidden bg-white border-2 border-[#03045e] text-[#03045e] px-4 py-2 rounded shadow-sm text-sm font-bold hover:bg-gray-50 transition">
-                    <i data-lucide="building" class="inline w-4 h-4 mr-1"></i> Gestionar Convenios
-                </button>
-                <div class="bg-white px-4 py-2 rounded shadow-sm border text-sm font-bold text-[#0077b6]">
-                    Pendientes: <span id="pendingCount">0</span>
+        <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-[#f0f4f8]">
+            
+            <div id="tab-bandeja" class="ani-content-section block animate-fade-in">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-2xl font-bold text-[#03045e]">Bandeja de Revisión Documental</h2>
+                        <p class="text-gray-500 text-sm">Evaluación de expedientes y solicitudes radicadas.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
+                            <tr>
+                                <th class="p-4 w-24">ID</th>
+                                <th class="p-4">Solicitante</th>
+                                <th class="p-4">Tipo Movilidad</th>
+                                <th class="p-4 text-center">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="aniTableBody" class="divide-y divide-gray-100 text-sm">
+                            </tbody>
+                    </table>
                 </div>
             </div>
-        </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
-                    <tr>
-                        <th class="p-4 w-24">ID Trámite</th>
-                        <th class="p-4">Solicitante</th>
-                        <th class="p-4">Tipo Movilidad</th>
-                        <th class="p-4">Fecha Radicado</th>
-                        <th class="p-4 text-center">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="aniTableBody" class="divide-y divide-gray-100 text-sm">
-                    </tbody>
-            </table>
-        </div>
-    </main>
+            <div id="tab-convenios" class="ani-content-section hidden animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-[#03045e]">Gestión de Convenios</h2>
+                    <p class="text-gray-500 text-sm">Administre las instituciones y fechas de vigencia.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border md:col-span-1 h-fit">
+                        <h4 class="font-bold text-[#03045e] border-b pb-2 mb-4">Nuevo Convenio</h4>
+                        <form onsubmit="alert('Convenio registrado.'); event.preventDefault();" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Institución</label>
+                                <input type="text" placeholder="Ej: Universidad de Lima" required class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">País</label>
+                                <input type="text" placeholder="Ej: Perú" required class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Fecha de Vigencia</label>
+                                <input type="date" required class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                            </div>
+                            <button type="submit" class="w-full bg-[#0077b6] text-white py-2 rounded text-sm font-bold hover:bg-[#03045e] transition">Guardar Convenio</button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border md:col-span-2 overflow-hidden">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
+                                <tr><th class="p-4">Institución</th><th class="p-4">Vigencia</th><th class="p-4 text-center">Estado</th></tr>
+                            </thead>
+                            <tbody class="divide-y">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-4 font-bold text-[#03045e]">UNAM (México)</td>
+                                    <td class="p-4 text-gray-600">31/12/2027</td>
+                                    <td class="p-4 text-center"><span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">Activo</span></td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="p-4 font-bold text-[#03045e]">DHBW Ravensburg</td>
+                                    <td class="p-4 text-gray-600">31/12/2023</td>
+                                    <td class="p-4 text-center"><span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">Vencido</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-credenciales" class="ani-content-section hidden animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-[#03045e]">Generación de Credenciales (Externos)</h2>
+                    <p class="text-gray-500 text-sm">Cree cuentas temporales para solicitantes de movilidad entrante.</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border max-w-xl">
+                    <form onsubmit="alert('Credenciales generadas y enviadas al correo del usuario.'); event.preventDefault();" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Nombre Completo del Externo</label>
+                            <input type="text" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Correo Electrónico (Para envío de clave)</label>
+                            <input type="email" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Institución de Origen</label>
+                            <input type="text" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                        </div>
+                        <button type="submit" class="w-full bg-[#03045e] text-white py-3 rounded text-sm font-bold flex justify-center items-center gap-2 hover:bg-black transition">
+                            <i data-lucide="mail-send" class="w-4 h-4"></i> Generar y Enviar Acceso
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="tab-programas" class="ani-content-section hidden animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-[#03045e]">Programas Académicos</h2>
+                    <p class="text-gray-500 text-sm">Gestión de facultades y programas institucionales.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden max-w-4xl">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
+                            <tr><th class="p-4">Programa</th><th class="p-4">Facultad</th><th class="p-4 text-center">Acción</th></tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr class="hover:bg-gray-50"><td class="p-4 font-bold text-[#03045e]">Ingeniería de Software</td><td class="p-4 text-gray-600">Ingenierías</td><td class="p-4 text-center"><button class="text-blue-600 font-bold text-xs hover:underline">Editar</button></td></tr>
+                            <tr class="hover:bg-gray-50"><td class="p-4 font-bold text-[#03045e]">Medicina</td><td class="p-4 text-gray-600">Ciencias de la Salud</td><td class="p-4 text-center"><button class="text-blue-600 font-bold text-xs hover:underline">Editar</button></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-tipos" class="ani-content-section hidden animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-[#03045e]">Configuración de Movilidades</h2>
+                    <p class="text-gray-500 text-sm">Habilite o pause los tipos de movilidad ofertados en el formulario.</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden max-w-4xl">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
+                            <tr><th class="p-4">Tipo de Movilidad</th><th class="p-4 text-center">Estado Actual</th><th class="p-4 text-center">Acción</th></tr>
+                        </thead>
+                        <tbody class="divide-y">
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 font-bold text-[#03045e]">Intercambio Académico</td>
+                                <td class="p-4 text-center"><span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">Habilitado</span></td>
+                                <td class="p-4 text-center"><button class="text-orange-600 font-bold text-xs border border-orange-200 px-3 py-1 rounded hover:bg-orange-50">Pausar</button></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 font-bold text-[#03045e]">Voluntariado</td>
+                                <td class="p-4 text-center"><span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">Suspendido</span></td>
+                                <td class="p-4 text-center"><button class="text-green-600 font-bold text-xs border border-green-200 px-3 py-1 rounded hover:bg-green-50">Habilitar</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </main>
+    </div>
 
     <div id="reviewModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
             <div class="bg-[#03045e] p-4 flex justify-between items-center text-white">
                 <h3 class="font-bold flex items-center gap-2"><i data-lucide="clipboard-check" class="w-5 h-5"></i> Revisión de Expediente</h3>
-                <button onclick="closeModal()" class="text-gray-300 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button onclick="document.getElementById('reviewModal').classList.add('hidden')" class="text-gray-300 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-6">
-                <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
-                    <div class="bg-gray-50 p-3 rounded border">
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">ID de Solicitud</span>
-                        <span class="font-mono font-bold text-[#03045e]" id="modalId"></span>
-                    </div>
-                    <div class="bg-gray-50 p-3 rounded border">
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Usuario</span>
-                        <span class="font-bold text-gray-800" id="modalUser"></span>
-                    </div>
+                <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
+                    <div class="bg-gray-50 p-3 rounded border"><span class="block text-[10px] font-bold text-gray-400 uppercase">ID de Solicitud</span><span class="font-mono font-bold text-[#03045e]" id="modalId"></span></div>
+                    <div class="bg-gray-50 p-3 rounded border"><span class="block text-[10px] font-bold text-gray-400 uppercase">Usuario Solicitante</span><span class="font-bold text-gray-800" id="modalUser"></span></div>
                 </div>
-                
-                <h4 class="font-bold text-gray-700 text-sm mb-3 border-b pb-1">Documentos Radicados (Fase 1)</h4>
-                <ul class="space-y-2 mb-6">
-                    <li class="flex items-center justify-between bg-blue-50 p-2 rounded border border-blue-100">
-                        <span class="text-xs font-bold text-[#0077b6] flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i> Documento de Identidad.pdf</span>
-                        <button class="text-xs bg-white border px-2 py-1 rounded text-gray-600 hover:bg-gray-100">Ver</button>
-                    </li>
-                    <li class="flex items-center justify-between bg-blue-50 p-2 rounded border border-blue-100">
-                        <span class="text-xs font-bold text-[#0077b6] flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4"></i> Carta_Motivacion_o_Postulacion.pdf</span>
-                        <button class="text-xs bg-white border px-2 py-1 rounded text-gray-600 hover:bg-gray-100">Ver</button>
-                    </li>
-                </ul>
-
-                <div id="modalActions" class="flex justify-end gap-3 pt-4 border-t">
-                    </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="agreementsModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div class="bg-[#0077b6] p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold flex items-center gap-2"><i data-lucide="building" class="w-5 h-5"></i> Gestión de Convenios Institucionales</h3>
-                <button onclick="closeAgreementsModal()" class="text-blue-100 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto flex-grow">
-                
-                <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
-                    <h4 class="font-bold text-[#03045e] text-sm mb-3 border-b pb-2">Registrar Nuevo Convenio</h4>
-                    <form id="addAgreementForm" onsubmit="addAgreement(event)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="md:col-span-2">
-                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Nombre de la Institución</label>
-                            <input type="text" id="newAgrName" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none" placeholder="Ej: Universidad de Buenos Aires">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">País</label>
-                            <input type="text" id="newAgrCountry" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none" placeholder="Ej: Argentina">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Ciudad</label>
-                            <input type="text" id="newAgrCity" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none" placeholder="Ej: Buenos Aires">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Fecha Fin de Vigencia</label>
-                            <input type="date" id="newAgrDate" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
-                        </div>
-                        <div class="flex items-end">
-                            <button type="submit" class="w-full bg-[#03045e] text-white py-2 rounded text-sm font-bold hover:bg-black transition">
-                                <i data-lucide="plus" class="inline w-4 h-4 mr-1"></i> Guardar Convenio
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <h4 class="font-bold text-gray-700 text-sm mb-3">Directorio de Convenios Vigentes</h4>
-                <div class="border rounded-lg overflow-hidden">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-100 border-b text-xs text-gray-500 uppercase">
-                            <tr>
-                                <th class="p-3">Institución</th>
-                                <th class="p-3">Ubicación</th>
-                                <th class="p-3">Vigencia</th>
-                                <th class="p-3 text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="agreementsTableBody" class="divide-y">
-                            </tbody>
-                    </table>
-                </div>
-
+                <div id="modalActions" class="flex justify-end gap-3 pt-4 border-t mt-6"></div>
             </div>
         </div>
     </div>
@@ -161,37 +228,44 @@
         document.addEventListener('DOMContentLoaded', () => {
             const user = AuthService.checkAuth();
             if (!user || (user.role.code !== 'ANI_SECRETARIA' && user.role.code !== 'ANI_DIRECCION')) {
-                alert("Acceso denegado. Se requiere perfil administrativo ANI.");
-                window.location.href = '../index.html';
-                return;
+                alert("Acceso denegado."); window.location.href = '../index.html'; return;
             }
-
             currentRole = user.role.code;
-            
             document.getElementById('userNameDisplay').textContent = user.name;
             document.getElementById('userRoleDisplay').textContent = user.role.name;
             document.getElementById('aniTitle').textContent = user.role.code === 'ANI_SECRETARIA' ? 'Secretaría ANI' : 'Dirección ANI';
-            document.getElementById('aniSubtitle').textContent = user.role.code === 'ANI_SECRETARIA' 
-                ? 'Revisión documental primaria y gestión de convenios.' 
-                : 'Aprobación final de movilidades salientes y entrantes.';
-
-            if (currentRole === 'ANI_SECRETARIA') {
-                document.getElementById('btnManageAgreements').classList.remove('hidden');
-            }
-
+            
             loadTable();
             lucide.createIcons();
         });
 
-        /* --- LÓGICA DE REVISIÓN DE SOLICITUDES --- */
+        // Lógica del Sidebar y Pestañas
+        function switchTab(targetId) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.ani-content-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(targetId).classList.remove('hidden');
+            
+            // Restablecer estilos de botones en el sidebar
+            document.querySelectorAll('.ani-tab').forEach(el => {
+                el.classList.remove('bg-white/10', 'text-white', 'font-bold');
+                el.classList.add('text-blue-200', 'font-semibold');
+            });
+            
+            // Aplicar estilo activo
+            const activeBtn = document.querySelector(`[data-target="${targetId}"]`);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-blue-200', 'font-semibold');
+                activeBtn.classList.add('bg-white/10', 'text-white', 'font-bold');
+            }
+        }
+
         function loadTable() {
             const tbody = document.getElementById('aniTableBody');
             tbody.innerHTML = '';
             
             const mockRequests = [
-                { id: 'REQ-1082', date: '18/02/2026', type: 'Práctica Empresarial', status: 'EN_REVISION_SECRETARIA_ANI', userEmail: 'estudiante@cue.edu.co' },
-                { id: 'REQ-1090', date: '19/02/2026', type: 'Intercambio Académico', status: 'EN_REVISION_DIRECCION_ANI', userEmail: 'estudiante@cue.edu.co' },
-                { id: 'REQ-2005', date: '15/02/2026', type: 'Intercambio Académico', status: 'EN_REVISION_TOTAL', userEmail: 'externo@unam.mx' }
+                { id: 'REQ-1082', type: 'Práctica Empresarial', status: 'EN_REVISION_SECRETARIA_ANI', userEmail: 'estudiante@cue.edu.co', dir: 'SALIENTE' },
+                { id: 'REQ-2005', type: 'Intercambio Académico', status: 'EN_REVISION_TOTAL', userEmail: 'externo@unam.mx', dir: 'ENTRANTE' }
             ];
 
             const localReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
@@ -204,149 +278,54 @@
                 return false;
             });
 
-            document.getElementById('pendingCount').textContent = visibleReqs.length;
-
             if (visibleReqs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 italic">No hay expedientes pendientes en su bandeja.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">No hay expedientes pendientes de revisión.</td></tr>`;
                 return;
             }
 
             visibleReqs.forEach(req => {
                 tbody.innerHTML += `
-                    <tr class="hover:bg-blue-50 transition">
-                        <td class="p-4 font-mono font-bold text-[#03045e] border-l-4 border-[#0077b6]">${req.id}</td>
-                        <td class="p-4 text-gray-700">${req.userEmail}</td>
-                        <td class="p-4 font-semibold text-gray-800">${req.type}</td>
-                        <td class="p-4 text-gray-500">${req.date}</td>
+                    <tr class="hover:bg-blue-50 transition border-b">
+                        <td class="p-4 font-mono font-bold text-[#03045e]">${req.id}</td>
+                        <td class="p-4">${req.userEmail}</td>
+                        <td class="p-4">${req.type}</td>
                         <td class="p-4 text-center">
-                            <button onclick="openReview('${req.id}', '${req.userEmail}')" class="bg-[#0077b6] text-white px-4 py-1 rounded text-xs font-bold hover:bg-[#03045e] transition">
-                                Evaluar Expediente
-                            </button>
+                            <button onclick="openReview('${req.id}', '${req.userEmail}', '${req.dir}')" class="border border-[#0077b6] text-[#0077b6] px-4 py-1.5 rounded text-xs font-bold hover:bg-blue-50 transition">Evaluar Expediente</button>
                         </td>
                     </tr>
                 `;
             });
-            lucide.createIcons();
         }
 
-        function openReview(id, userEmail) {
+        function openReview(id, userEmail, dir) {
             currentRequestId = id;
             document.getElementById('modalId').textContent = id;
             document.getElementById('modalUser').textContent = userEmail;
             
             const actionsDiv = document.getElementById('modalActions');
             if (currentRole === 'ANI_SECRETARIA') {
+                actionsDiv.innerHTML = `<button onclick="processRequest('EN_REVISION_DIRECCION_ANI')" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition">Pre-Aprobar (Enviar a Dirección)</button>`;
+            } else {
+                let btnAprobar = dir === 'ENTRANTE' 
+                    ? `<button onclick="processRequest('PENDIENTE_MATRICULA')" class="px-6 py-2 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700 transition">Aprobar y Enviar a Registro (Matrícula)</button>`
+                    : `<button onclick="processRequest('APROBADA_POSTULACION')" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition">Aprobar Postulación (Pasa a Fase 2)</button>`;
+                
                 actionsDiv.innerHTML = `
-                    <button onclick="closeModal()" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold hover:bg-gray-50">Cancelar</button>
-                    <button onclick="processRequest('DEVOLVER')" class="px-4 py-2 border border-red-500 text-red-600 rounded text-sm font-bold hover:bg-red-50">Devolver (Incompleto)</button>
-                    <button onclick="processRequest('EN_REVISION_DIRECCION_ANI')" class="px-4 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e]">Pre-Aprobar (Enviar a Dirección)</button>
-                `;
-            } else if (currentRole === 'ANI_DIRECCION') {
-                actionsDiv.innerHTML = `
-                    <button onclick="closeModal()" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold hover:bg-gray-50">Cancelar</button>
-                    <button onclick="processRequest('RECHAZADO')" class="px-4 py-2 border border-red-500 text-red-600 rounded text-sm font-bold hover:bg-red-50">Rechazar Definitivo</button>
-                    <button onclick="processRequest('APROBADA_POSTULACION')" class="px-4 py-2 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700">Aprobar Postulación (Pasa a Fase 2)</button>
+                    <button onclick="document.getElementById('reviewModal').classList.add('hidden')" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold">Cancelar</button>
+                    ${btnAprobar}
                 `;
             }
             document.getElementById('reviewModal').classList.remove('hidden');
         }
 
-        function closeModal() {
-            document.getElementById('reviewModal').classList.add('hidden');
-            currentRequestId = null;
-        }
-
         function processRequest(newStatus) {
             let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             let updated = false;
-            reqs = reqs.map(req => {
-                if (req.id === currentRequestId) { req.status = newStatus; updated = true; }
-                return req;
-            });
-            if (!updated) {
-                reqs.push({ id: currentRequestId, date: new Date().toLocaleDateString(), type: 'Trámite Procesado', status: newStatus, userEmail: document.getElementById('modalUser').textContent });
-            }
+            reqs = reqs.map(req => { if (req.id === currentRequestId) { req.status = newStatus; updated = true; } return req; });
+            if (!updated) reqs.push({ id: currentRequestId, status: newStatus, userEmail: document.getElementById('modalUser').textContent });
             localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
-            alert("Expediente actualizado exitosamente. Nuevo estado asignado.");
-            closeModal();
+            document.getElementById('reviewModal').classList.add('hidden');
             loadTable(); 
-        }
-
-        /* --- LÓGICA DE GESTIÓN DE CONVENIOS --- */
-        function openAgreementsModal() {
-            renderAgreementsTable();
-            document.getElementById('agreementsModal').classList.remove('hidden');
-        }
-
-        function closeAgreementsModal() {
-            document.getElementById('agreementsModal').classList.add('hidden');
-        }
-
-        function renderAgreementsTable() {
-            let convenios = JSON.parse(localStorage.getItem('CUE_CONVENIOS'));
-            if (!convenios) {
-                // Carga inicial de datos mock según documentos
-                convenios = [
-                    { nombre: "UNAM", pais: "México", ciudad: "Ciudad de México", vigencia: "2027-12-31" },
-                    { nombre: "BERUFSAKADEMIE MOSBACH", pais: "Alemania", ciudad: "Mosbach", vigencia: "2028-06-30" },
-                    { nombre: "CORHUILA", pais: "Colombia", ciudad: "Neiva", vigencia: "2026-12-31" },
-                    { nombre: "DHBW RAVENSBURG", pais: "Alemania", ciudad: "Ravensburg", vigencia: "2023-12-31" }, // Convenio vencido para prueba
-                    { nombre: "ISEP", pais: "España", ciudad: "Madrid", vigencia: "2029-01-01" },
-                    { nombre: "UNIVERSIDAD DE SALAMANCA", pais: "España", ciudad: "Salamanca", vigencia: "2026-08-15" }
-                ];
-                localStorage.setItem('CUE_CONVENIOS', JSON.stringify(convenios));
-            }
-            
-            const tbody = document.getElementById('agreementsTableBody');
-            tbody.innerHTML = '';
-            
-            convenios.forEach((c, index) => {
-                const isExpired = new Date(c.vigencia) < new Date();
-                const statusClass = isExpired ? 'text-red-600 font-bold bg-red-50' : 'text-green-600';
-                const statusIcon = isExpired ? 'alert-triangle' : 'check-circle';
-                const statusText = isExpired ? 'Vencido' : 'Vigente';
-                
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 border-b last:border-0">
-                        <td class="p-3 font-bold text-[#03045e]">${c.nombre}</td>
-                        <td class="p-3 text-gray-600">${c.ciudad}, ${c.pais}</td>
-                        <td class="p-3 ${statusClass} flex items-center gap-1 mt-1 rounded px-2 w-max">
-                            <i data-lucide="${statusIcon}" class="w-4 h-4"></i> ${c.vigencia} (${statusText})
-                        </td>
-                        <td class="p-3 text-center">
-                            <button onclick="deleteAgreement(${index})" class="text-gray-400 hover:text-red-600 transition" title="Eliminar Registro">
-                                <i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i>
-                            </button>
-                        </td>
-                    </tr>
-                `;
-            });
-            lucide.createIcons();
-        }
-
-        function addAgreement(e) {
-            e.preventDefault();
-            const nombre = document.getElementById('newAgrName').value;
-            const pais = document.getElementById('newAgrCountry').value;
-            const ciudad = document.getElementById('newAgrCity').value;
-            const vigencia = document.getElementById('newAgrDate').value;
-            
-            let convenios = JSON.parse(localStorage.getItem('CUE_CONVENIOS')) || [];
-            convenios.push({ nombre: nombre.toUpperCase(), pais, ciudad, vigencia });
-            localStorage.setItem('CUE_CONVENIOS', JSON.stringify(convenios));
-            
-            document.getElementById('addAgreementForm').reset();
-            renderAgreementsTable();
-            alert("Convenio registrado exitosamente en la base de datos.");
-        }
-
-        function deleteAgreement(index) {
-            if(confirm("¿Está seguro de eliminar este convenio del registro institucional?")) {
-                let convenios = JSON.parse(localStorage.getItem('CUE_CONVENIOS')) || [];
-                convenios.splice(index, 1);
-                localStorage.setItem('CUE_CONVENIOS', JSON.stringify(convenios));
-                renderAgreementsTable();
-            }
         }
     </script>
 </body>

@@ -70,11 +70,34 @@
             <div class="hidden p-8" id="step-2">
                 <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-6">Paso 2: Institución y Cronograma</h2>
 
-                <div id="origenContainer" class="hidden mb-6 bg-yellow-50 p-4 rounded border border-yellow-200">
-                    <h3 class="font-bold text-yellow-800 text-sm mb-3"><i data-lucide="building" class="inline w-4 h-4"></i> Institución de Origen</h3>
+                <div id="origenContainer" class="hidden">
+                    <h3 class="font-bold text-[#03045e] text-sm mb-4 uppercase border-b pb-2 flex items-center gap-2">
+                        <i data-lucide="globe" class="w-4 h-4"></i> Institución de Origen
+                    </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div><label class="form-label">Universidad / Entidad de Origen</label><input type="text" class="form-input"></div>
-                        <div><label class="form-label">País de Origen</label><input type="text" class="form-input"></div>
+                        <div>
+                            <label class="form-label text-xs font-bold text-gray-600 mb-1">Seleccione su Universidad / Entidad</label>
+                            <select id="entity_select_origin" class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none" onchange="WizardLogic.checkOtherEntityOrigin()">
+                                </select>
+                        </div>
+                    </div>
+                    
+                    <div id="origenLibreContainer" class="hidden mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 border border-gray-300 rounded-lg">
+                        <div class="md:col-span-3">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Registro Manual de Institución de Origen</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Nombre de la Institución</label>
+                            <input type="text" id="other_origin_name" class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">País</label>
+                            <input type="text" id="field_country_origin" class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Ciudad</label>
+                            <input type="text" id="field_city_origin" class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                        </div>
                     </div>
                 </div>
 
@@ -120,10 +143,20 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-gray-50 p-4 border rounded">
                     <div class="md:col-span-4 font-bold text-xs text-[#03045e] uppercase border-b pb-1 mb-2">Cronograma</div>
-                    <div><label class="form-label">Inicio Académico</label><input type="date" id="fechaInicio" class="form-input" onchange="WizardLogic.calculateDuration()"></div>
-                    <div><label class="form-label">Fin Académico</label><input type="date" id="fechaFin" class="form-input" onchange="WizardLogic.calculateDuration()"></div>
-                    <div class="md:col-span-2"><label class="form-label">Duración Calculada</label><input type="text" id="duracionCalculada" class="form-input font-bold bg-gray-100" readonly placeholder="Automático"></div>
-                    
+                   <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label class="form-label">Fecha de Inicio</label>
+                        <input type="date" id="fechaInicio" class="form-input" onchange="WizardLogic.calculateDuration()">
+                    </div>
+                    <div>
+                        <label class="form-label">Fecha de Finalización</label>
+                        <input type="date" id="fechaFin" class="form-input" onchange="WizardLogic.calculateDuration()">
+                    </div>
+                    <div>
+                        <label class="form-label">Duración Calculada</label>
+                        <input type="text" id="duracionCalculada" class="form-input bg-gray-100" readonly placeholder="Calculado automáticamente">
+                    </div>
+                </div>
                     <div class="req-presencial"><label class="form-label text-orange-600">Fecha Ida (Viaje)</label><input type="date" class="form-input border-orange-200"></div>
                     <div class="req-presencial"><label class="form-label text-orange-600">Fecha Regreso</label><input type="date" class="form-input border-orange-200"></div>
                     <div class="md:col-span-2 req-presencial"><label class="form-label">Dir. Residencia (Destino)</label><input type="text" class="form-input" placeholder="Lugar donde se hospedará"></div>
@@ -152,18 +185,26 @@
             <div class="hidden p-8" id="step-3">
                 <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-6">Paso 3: Detalles Académicos y Financieros</h2>
 
-                <div class="bg-green-50 p-4 rounded border border-green-200 mb-6">
-                    <h3 class="font-bold text-green-800 text-sm mb-4"><i data-lucide="circle-dollar-sign" class="inline w-4 h-4"></i> Información Financiera</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div class="border-t pt-4">
+                    <h3 class="font-bold text-[#03045e] text-sm mb-4 uppercase flex items-center gap-2">
+                        <i data-lucide="dollar-sign" class="w-4 h-4"></i> Costos y Financiación
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="form-label">¿Genera costo de matrícula?</label>
-                            <select id="hasCosto" class="form-input mb-2" onchange="WizardLogic.toggleFinance()"><option value="NO">NO</option><option value="SI">SÍ</option></select>
-                            <input type="number" id="montoCosto" placeholder="¿Cuánto? (Valor COP/USD)" class="form-input hidden">
+                            <label class="form-label text-xs font-bold text-gray-600 mb-1">¿La movilidad genera costo de matrícula o inscripción?</label>
+                            <select id="hasCosto" class="form-input" onchange="WizardLogic.toggleFinance()">
+                                <option value="NO">No</option>
+                                <option value="SI">Sí</option>
+                            </select>
+                            <input type="number" id="montoCosto" class="form-input mt-2 hidden border-blue-300 bg-blue-50" placeholder="Indique el valor aproximado en USD o COP">
                         </div>
                         <div>
-                            <label class="form-label">¿Tuvo apoyo o beca?</label>
-                            <select id="hasBeca" class="form-input mb-2" onchange="WizardLogic.toggleFinance()"><option value="NO">NO</option><option value="SI">SÍ</option></select>
-                            <input type="number" id="montoBeca" placeholder="¿Cuánto? (Valor COP/USD)" class="form-input hidden">
+                            <label class="form-label text-xs font-bold text-gray-600 mb-1">¿Cuenta con apoyo financiero institucional o beca externa?</label>
+                            <select id="hasBeca" class="form-input" onchange="WizardLogic.toggleFinance()">
+                                <option value="NO">No</option>
+                                <option value="SI">Sí</option>
+                            </select>
+                            <input type="number" id="montoBeca" class="form-input mt-2 hidden border-green-300 bg-green-50" placeholder="Indique el monto del apoyo recibido">
                         </div>
                     </div>
                 </div>
@@ -176,12 +217,20 @@
 
                         <div class="md:col-span-4 font-bold text-xs text-gray-500 uppercase border-b pb-1">Perfil Académico (Solo Lectura)</div>
                         
-                        <div><label class="form-label">Documento</label><input type="text" id="autoDoc" class="form-input bg-gray-100" readonly></div>
+                        <div>
+                        <label class="form-label">Documento de Identidad</label>
+                        <input type="text" id="autoDoc" class="form-input bg-gray-100 cursor-not-allowed" readonly placeholder="Cargando...">
+                    </div>
                         <div class="md:col-span-2"><label class="form-label">Programa</label>
                             <input type="text" value="Ingeniería de Software" class="form-input bg-gray-100" readonly>
                         </div>
-                        <div><label class="form-label">Semestre</label><input type="number" id="autoSem" class="form-input bg-gray-100" readonly></div>
-                        <div><label class="form-label">Promedio</label><input type="number" step="0.1" id="autoProm" class="form-input bg-gray-100" readonly></div>
+                       <div>
+                        <label class="form-label">Semestre Actual</label>
+                        <input type="text" id="autoSem" class="form-input bg-gray-100 cursor-not-allowed" readonly placeholder="Cargando...">
+                    </div>
+                    <div>
+                        <label class="form-label">Promedio Acumulado</label>
+                        <input type="text" id="autoProm" class="form-input bg-gray-100 cursor-not-allowed" readonly placeholder="Cargando...">
                     </div>
                     
                     <div class="req-presencial border-t pt-4">

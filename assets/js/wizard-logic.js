@@ -139,16 +139,14 @@ const WizardLogic = {
         });
     },
 
-    // =========================================================
+  // =========================================================
     // GESTIÓN DE CONVENIOS (CONEXIÓN CON SECRETARÍA ANI)
     // =========================================================
     loadAgreements: function() {
-        const select = document.getElementById('entity_select');
-        if(!select) return;
+        const selectDestino = document.getElementById('entity_select');
+        const selectOrigen = document.getElementById('entity_select_origin');
         
-        // Lee los convenios creados por Secretaría ANI
         let convenios = JSON.parse(localStorage.getItem('CUE_CONVENIOS'));
-        
         if (!convenios || convenios.length === 0) {
             convenios = [
                 { nombre: "UNAM", pais: "México", ciudad: "Ciudad de México", vigencia: "2027-12-31" },
@@ -158,27 +156,27 @@ const WizardLogic = {
             localStorage.setItem('CUE_CONVENIOS', JSON.stringify(convenios));
         }
 
-        select.innerHTML = '<option value="" selected disabled>Seleccione una Institución...</option>';
-        
+        let optionsHTML = '<option value="" selected disabled>Seleccione una Institución...</option>';
         convenios.forEach(c => {
             const isExpired = new Date(c.vigencia) < new Date();
             const optionText = isExpired ? `${c.nombre} (${c.pais}) - [CONVENIO VENCIDO]` : `${c.nombre} (${c.pais})`;
-            
-            // Si está vencido, se deshabilita para evitar que el estudiante lo elija
-            select.innerHTML += `<option value="${c.nombre}" data-pais="${c.pais}" data-ciudad="${c.ciudad}" ${isExpired ? 'disabled class="text-red-500 bg-red-50"' : ''}>${optionText}</option>`;
+            optionsHTML += `<option value="${c.nombre}" data-pais="${c.pais}" data-ciudad="${c.ciudad}" ${isExpired ? 'disabled class="text-red-500 bg-red-50"' : ''}>${optionText}</option>`;
         });
-        
-        select.innerHTML += `<option value="OTRA" class="font-bold text-[#0077b6]">-- OTRA INSTITUCIÓN / EMPRESA (Ingresar Manualmente) --</option>`;
+        optionsHTML += `<option value="OTRA" class="font-bold text-[#0077b6]">-- OTRA INSTITUCIÓN / EMPRESA (Ingresar Manualmente) --</option>`;
+
+        if(selectDestino) selectDestino.innerHTML = optionsHTML;
+        if(selectOrigen) selectOrigen.innerHTML = optionsHTML;
     },
 
     checkOtherEntity: function() {
+        // Lógica para Salientes (Destino)
         const select = document.getElementById('entity_select');
         const libreContainer = document.getElementById('destinoLibreContainer');
         const otherInput = document.getElementById('other_entity_name');
         const country = document.getElementById('field_country');
         const city = document.getElementById('field_city');
         
-        if(!select) return;
+        if(!select || !libreContainer) return;
         
         if (select.value === 'OTRA') {
             libreContainer.classList.remove('hidden');
@@ -195,6 +193,33 @@ const WizardLogic = {
             if (opt && opt.getAttribute('data-pais') && country && city) {
                 country.value = opt.getAttribute('data-pais');
                 city.value = opt.getAttribute('data-ciudad');
+                country.readOnly = true; city.readOnly = true;
+                country.classList.add('bg-gray-100', 'cursor-not-allowed');
+                city.classList.add('bg-gray-100', 'cursor-not-allowed');
+            }
+        }
+    },
+
+    checkOtherEntityOrigin: function() {
+        // Lógica para Entrantes (Origen)
+        const select = document.getElementById('entity_select_origin');
+        const libreContainer = document.getElementById('origenLibreContainer');
+        const otherInput = document.getElementById('other_origin_name');
+        const country = document.getElementById('field_country_origin');
+        const city = document.getElementById('field_city_origin');
+        
+        if(!select || !libreContainer) return;
+        
+        if (select.value === 'OTRA') {
+            libreContainer.classList.remove('hidden');
+            if(otherInput) otherInput.focus();
+        } else {
+            libreContainer.classList.add('hidden');
+            const opt = select.options[select.selectedIndex];
+            if (opt && opt.getAttribute('data-pais') && country && city) {
+                country.value = opt.getAttribute('data-pais');
+                city.value = opt.getAttribute('data-ciudad');
+                // Al ser el origen de un convenio, bloqueamos la edición del país y ciudad
                 country.readOnly = true; city.readOnly = true;
                 country.classList.add('bg-gray-100', 'cursor-not-allowed');
                 city.classList.add('bg-gray-100', 'cursor-not-allowed');
