@@ -5,16 +5,20 @@
 const WizardLogic = {
     stepIdx: 1,
     role: null,
-    isDocPhase: false, // false = Etapa 1 (Postulación), true = Etapa 2 (Carga de Anexos Finales)
+    isDocPhase: false, 
+    draftId: null, // NUEVO: Variable para rastrear si estamos editando un borrador
 
     init: function() {
         const user = AuthService.checkAuth();
+        if (!user) return; // Evita que el sistema colapse si no hay sesión
+        
         this.user = user;
         this.role = user.role.code;
         
-        // Detectar si estamos en ETAPA 2 (Aprobado inicial, requiere anexos)
+        // Detectar si estamos en ETAPA 2 o cargando un BORRADOR
         const urlParams = new URLSearchParams(window.location.search);
         this.isDocPhase = urlParams.get('mode') === 'docs';
+        this.draftId = urlParams.get('draft'); // NUEVO: Captura el ID del borrador de la URL
 
         this.setupUI();
         this.loadProfile();
@@ -32,6 +36,14 @@ const WizardLogic = {
             alert("Postulación Aprobada. Se ha habilitado la carga de sus documentos definitivos de viaje (Seguros, Aceptación, etc).");
         } else {
             this.filterTypesByModality(); 
+            
+            // NUEVO: Cargar datos si existe un borrador
+            if(this.draftId) {
+                this.loadDraft(this.draftId);
+            }
+            
+            // NUEVO: Forzar actualización de UI para que los botones aparezcan siempre
+            this.updateUI(); 
         }
         
         lucide.createIcons();
@@ -41,20 +53,21 @@ const WizardLogic = {
         const title = this.role === 'DOCENTE' ? 'Registro de Salida Académica' : 'Solicitud de Movilidad';
         const titleEl = document.getElementById('formTitle');
         if(titleEl) titleEl.innerText = title;
-        document.getElementById('mobilityDirection').value = (this.role === 'EXTERNO') ? 'ENTRANTE' : 'SALIENTE';
+        
+        const dirEl = document.getElementById('mobilityDirection');
+        if(dirEl) dirEl.value = (this.role === 'EXTERNO') ? 'ENTRANTE' : 'SALIENTE';
     },
 
-    // =========================================================
-    // MOTOR DOCUMENTAL INTELIGENTE (2 PASOS PARA TODOS)
-    // =========================================================
     loadDocs: function() {
         const list = document.getElementById('docsList');
+        if(!list) return;
+
         const type = document.getElementById('mobilityType').value;
         const dir = document.getElementById('mobilityDirection').value;
-        const isPresencial = document.getElementById('mobilityModality').value === 'PRESENCIAL';
+        const modalityEl = document.getElementById('mobilityModality');
+        const isPresencial = modalityEl ? modalityEl.value === 'PRESENCIAL' : true;
         let docs = [];
 
-        // --- EXCEPCIÓN: SALIDA ACADÉMICA (SST) ---
         if (type === 'Visita/Salida Académica') {
             list.innerHTML = `
                 <div class="bg-blue-50 p-4 rounded border border-blue-200">
@@ -65,46 +78,28 @@ const WizardLogic = {
             return; 
         }
 
-        // ==========================================
-        // ETAPA 1: POSTULACIÓN (Permiso inicial)
-        // ==========================================
         if (!this.isDocPhase) {
             docs.push({n:"Documento de Identidad", d:"Cédula, TI o Pasaporte (Ambas caras)"});
-            
             if (dir === 'ENTRANTE') {
-                // Externos SÍ suben notas y postulación
                 docs.push({n:"Carta de Postulación", d:"Emitida por su Institución de Origen"});
                 docs.push({n:"Historial Académico / Notas", d:"Expedido por su Universidad de Origen"});
             } else {
-                // Internos (Salientes) NO suben notas, el sistema ya tiene su promedio.
-                if (this.role !== 'DOCENTE') {
-                    docs.push({n:"Carta de Motivación", d:"Exposición de motivos personales"});
-                }
+                if (this.role !== 'DOCENTE') docs.push({n:"Carta de Motivación", d:"Exposición de motivos personales"});
             }
-        } 
-        // ==========================================
-        // ETAPA 2: DOCUMENTACIÓN FINAL (Ya fue aprobado)
-        // ==========================================
-        else {
-            // Aceptación oficial (Los salientes la traen de afuera, los entrantes la reciben de la CUE)
-            if (dir === 'SALIENTE') {
-                docs.push({n:"Carta de Aceptación Oficial", d:"Documento emitido por la entidad o institución destino"});
-            }
-
+        } else {
+            if (dir === 'SALIENTE') docs.push({n:"Carta de Aceptación Oficial", d:"Documento emitido por la entidad o institución destino"});
             if (['Práctica Empresarial - Pasantía', 'Rotación Médica', 'Práctica Integral'].includes(type)) {
                 docs.push({n:"Certificado de ARL", d:"Afiliación a Riesgos Laborales"});
             }
-
             if (isPresencial) {
                 docs.push({n:"Póliza o Seguro Médico", d:"Cobertura específica para el viaje (EPS o Internacional)"});
-                
-                if (document.getElementById('mobilityScope').value === 'INTERNACIONAL' || dir === 'ENTRANTE') {
+                const scopeEl = document.getElementById('mobilityScope');
+                if ((scopeEl && scopeEl.value === 'INTERNACIONAL') || dir === 'ENTRANTE') {
                     docs.push({n:"Tiquetes y/o Visa", d:"Soporte de viaje (Si aplica)"});
                 }
             }
         }
 
-        // Renderizar Lista
         list.innerHTML = docs.map(d => `
             <div class="flex justify-between items-center p-3 border border-gray-200 bg-white rounded-lg mb-2 shadow-sm hover:border-[#0077b6] transition-all">
                 <div class="flex gap-3 items-center">
@@ -113,25 +108,28 @@ const WizardLogic = {
                 </div>
                 <input type="file" class="text-xs file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
             </div>`).join('');
-        
         lucide.createIcons();
     },
 
     lockAllDataFields: function() {
         document.querySelectorAll('input, select').forEach(i => {
             if(i.type !== 'file' && i.id !== 'termsCheck') {
-                i.disabled = true;
-                i.classList.add('bg-gray-50', 'cursor-not-allowed', 'opacity-70');
+                i.disabled = true; i.classList.add('bg-gray-50', 'cursor-not-allowed', 'opacity-70');
             }
         });
     },
 
     lockContactFields: function() {
         const fields = ['sstContactName', 'sstContactRel', 'sstContactPhone', 'sstEps'];
-        document.getElementById('sstContactName').value = "Maria Pérez (Madre)";
-        document.getElementById('sstContactRel').value = "Madre";
-        document.getElementById('sstContactPhone').value = "3001234567";
-        document.getElementById('sstEps').value = "Sanitas EPS";
+        const cName = document.getElementById('sstContactName');
+        const cRel = document.getElementById('sstContactRel');
+        const cPhone = document.getElementById('sstContactPhone');
+        const cEps = document.getElementById('sstEps');
+        
+        if(cName) cName.value = "Maria Pérez (Madre)";
+        if(cRel) cRel.value = "Madre";
+        if(cPhone) cPhone.value = "3001234567";
+        if(cEps) cEps.value = "Sanitas EPS";
 
         fields.forEach(id => {
             const el = document.getElementById(id);
@@ -139,9 +137,6 @@ const WizardLogic = {
         });
     },
 
-  // =========================================================
-    // GESTIÓN DE CONVENIOS (CONEXIÓN CON SECRETARÍA ANI)
-    // =========================================================
     loadAgreements: function() {
         const selectDestino = document.getElementById('entity_select');
         const selectOrigen = document.getElementById('entity_select_origin');
@@ -169,7 +164,6 @@ const WizardLogic = {
     },
 
     checkOtherEntity: function() {
-        // Lógica para Salientes (Destino)
         const select = document.getElementById('entity_select');
         const libreContainer = document.getElementById('destinoLibreContainer');
         const otherInput = document.getElementById('other_entity_name');
@@ -201,7 +195,6 @@ const WizardLogic = {
     },
 
     checkOtherEntityOrigin: function() {
-        // Lógica para Entrantes (Origen)
         const select = document.getElementById('entity_select_origin');
         const libreContainer = document.getElementById('origenLibreContainer');
         const otherInput = document.getElementById('other_origin_name');
@@ -213,13 +206,17 @@ const WizardLogic = {
         if (select.value === 'OTRA') {
             libreContainer.classList.remove('hidden');
             if(otherInput) otherInput.focus();
+            if(country && city) {
+                country.readOnly = false; city.readOnly = false;
+                country.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                city.classList.remove('bg-gray-100', 'cursor-not-allowed');
+            }
         } else {
             libreContainer.classList.add('hidden');
             const opt = select.options[select.selectedIndex];
             if (opt && opt.getAttribute('data-pais') && country && city) {
                 country.value = opt.getAttribute('data-pais');
                 city.value = opt.getAttribute('data-ciudad');
-                // Al ser el origen de un convenio, bloqueamos la edición del país y ciudad
                 country.readOnly = true; city.readOnly = true;
                 country.classList.add('bg-gray-100', 'cursor-not-allowed');
                 city.classList.add('bg-gray-100', 'cursor-not-allowed');
@@ -229,7 +226,10 @@ const WizardLogic = {
 
     filterTypesByModality: function() {
         const select = document.getElementById('mobilityType');
-        const modality = document.getElementById('mobilityModality').value;
+        const modalityEl = document.getElementById('mobilityModality');
+        if(!select || !modalityEl) return;
+        
+        const modality = modalityEl.value;
         select.innerHTML = '<option value="">Seleccione...</option>';
         const allTypes = [
             { t: "Intercambio Académico", modes: ["PRESENCIAL", "VIRTUAL"] },
@@ -251,13 +251,19 @@ const WizardLogic = {
     },
 
     updateFields: function() {
-        const isPresencial = document.getElementById('mobilityModality').value === 'PRESENCIAL';
-        const direction = document.getElementById('mobilityDirection').value;
-        const type = document.getElementById('mobilityType').value;
+        const modalityEl = document.getElementById('mobilityModality');
+        const isPresencial = modalityEl ? modalityEl.value === 'PRESENCIAL' : true;
+        const directionEl = document.getElementById('mobilityDirection');
+        const direction = directionEl ? directionEl.value : 'SALIENTE';
+        const typeEl = document.getElementById('mobilityType');
+        const type = typeEl ? typeEl.value : '';
         
         document.querySelectorAll('.req-presencial').forEach(el => el.classList.toggle('hidden', !isPresencial));
-        document.getElementById('origenContainer').classList.toggle('hidden', direction !== 'ENTRANTE');
-        document.getElementById('destinoContainer').classList.toggle('hidden', direction !== 'SALIENTE');
+        
+        const origenCont = document.getElementById('origenContainer');
+        const destinoCont = document.getElementById('destinoContainer');
+        if(origenCont) origenCont.classList.toggle('hidden', direction !== 'ENTRANTE');
+        if(destinoCont) destinoCont.classList.toggle('hidden', direction !== 'SALIENTE');
 
         const searchCont = document.getElementById('destinoSearchContainer');
         const freeCont = document.getElementById('destinoLibreContainer');
@@ -273,7 +279,7 @@ const WizardLogic = {
                 if(c) { c.readOnly = false; c.classList.remove('bg-gray-100', 'cursor-not-allowed'); }
                 if(ci) { ci.readOnly = false; ci.classList.remove('bg-gray-100', 'cursor-not-allowed'); }
             } else {
-                if(typeof AgreementService !== 'undefined') this.checkOtherEntity();
+                this.checkOtherEntity();
             }
         }
 
@@ -283,50 +289,136 @@ const WizardLogic = {
             const showEvent = type === 'Evento Académico/Investigativo';
             const showResearch = type === 'Estancia Investigación';
             extraCont.classList.toggle('hidden', !(showEvent || showResearch));
-            document.getElementById('researchFields').classList.toggle('hidden', !showResearch);
-            document.getElementById('eventFields').classList.toggle('hidden', !showEvent);
+            
+            const rf = document.getElementById('researchFields');
+            const ef = document.getElementById('eventFields');
+            if(rf) rf.classList.toggle('hidden', !showResearch);
+            if(ef) ef.classList.toggle('hidden', !showEvent);
         }
         
         const transCont = document.getElementById('transportContainer');
         if(transCont) {
             transCont.classList.toggle('hidden', !(type === 'Visita/Salida Académica' && isPresencial));
-            const hasT = document.getElementById('hiredTransport')?.checked;
-            document.getElementById('vehicleDetails').classList.toggle('hidden', !hasT);
+            const hasT = document.getElementById('hiredTransport');
+            const vDetails = document.getElementById('vehicleDetails');
+            if(hasT && vDetails) vDetails.classList.toggle('hidden', !hasT.checked);
         }
     },
 
     step: function(dir) {
-        if(dir===1 && this.stepIdx===1 && !document.getElementById('mobilityType').value) return alert("Seleccione el Tipo Específico.");
+        // NUEVO: Validación estricta que evita avanzar sin seleccionar el tipo, pero sin congelarse.
+        if(dir === 1 && this.stepIdx === 1) {
+            const mType = document.getElementById('mobilityType');
+            if(!mType || mType.value === "") {
+                alert("Por favor, seleccione el Tipo Específico de Movilidad antes de continuar.");
+                return; // Detiene el avance sin romper el código
+            }
+        }
+        
         this.stepIdx += dir;
         if(this.stepIdx === 4) this.loadDocs();
+        
         this.updateUI();
         window.scrollTo(0,0);
     },
 
     updateUI: function() {
         for(let i=1; i<=4; i++) {
-            document.getElementById(`step-${i}`).classList.toggle('hidden', i !== this.stepIdx);
+            const stepEl = document.getElementById(`step-${i}`);
+            const fallbackEl = document.getElementById(`step${i}`); 
+            if(stepEl) stepEl.classList.toggle('hidden', i !== this.stepIdx);
+            else if (fallbackEl) fallbackEl.classList.toggle('hidden', i !== this.stepIdx);
+
             const ind = document.querySelector(`.step-indicator[data-step="${i}"]`);
-            if(i === this.stepIdx) ind.classList.add('active'); else ind.classList.remove('active');
+            if(ind) {
+                if(i === this.stepIdx) ind.classList.add('active'); 
+                else ind.classList.remove('active');
+            }
         }
 
-        const isSalida = document.getElementById('mobilityType').value === 'Visita/Salida Académica';
-        document.getElementById('professorRosterData').classList.toggle('hidden', !isSalida);
-        document.getElementById('studentPersonalData').classList.toggle('hidden', isSalida);
-
-        document.getElementById('prevBtn').classList.toggle('hidden', this.stepIdx === 1 || this.isDocPhase);
-        document.getElementById('nextBtn').classList.toggle('hidden', this.stepIdx === 4);
+        const typeEl = document.getElementById('mobilityType');
+        const isSalida = typeEl ? typeEl.value === 'Visita/Salida Académica' : false;
         
+        const profRoster = document.getElementById('professorRosterData');
+        const studPers = document.getElementById('studentPersonalData');
+        if(profRoster) profRoster.classList.toggle('hidden', !isSalida);
+        if(studPers) studPers.classList.toggle('hidden', isSalida);
+
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
         const submitBtn = document.getElementById('submitBtn');
-        submitBtn.classList.toggle('hidden', this.stepIdx !== 4);
-        submitBtn.innerHTML = this.isDocPhase 
-            ? `FINALIZAR CARGA DE DOCUMENTOS <i data-lucide="check-circle" class="w-4 h-4 ml-2 inline"></i>`
-            : `RADICAR POSTULACIÓN <i data-lucide="send" class="w-4 h-4 ml-2 inline"></i>`;
+
+        if(prevBtn) prevBtn.classList.toggle('hidden', this.stepIdx === 1 || this.isDocPhase);
+        if(nextBtn) nextBtn.classList.toggle('hidden', this.stepIdx === 4);
+        
+        if(submitBtn) {
+            submitBtn.classList.toggle('hidden', this.stepIdx !== 4);
+            submitBtn.innerHTML = this.isDocPhase 
+                ? `FINALIZAR CARGA DE DOCUMENTOS <i data-lucide="check-circle" class="w-4 h-4 ml-2 inline"></i>`
+                : `RADICAR POSTULACIÓN <i data-lucide="send" class="w-4 h-4 ml-2 inline"></i>`;
+        }
+    },
+
+    // =========================================================
+    // NUEVO: SISTEMA DE GUARDADO Y CARGA DE BORRADORES
+    // =========================================================
+    save: function() {
+        const mType = document.getElementById('mobilityType')?.value;
+        if(!mType || mType === "") {
+            alert("Para poder guardar un borrador, debe al menos seleccionar el 'Tipo Específico de Movilidad' en el Paso 1.");
+            return;
+        }
+
+        let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+        
+        const entitySelect = document.getElementById('entity_select');
+        const destValue = entitySelect && entitySelect.value === 'OTRA' ? document.getElementById('other_entity_name').value : (entitySelect ? entitySelect.value : '');
+
+        const draftData = {
+            id: this.draftId || "REQ-" + Math.floor(Math.random()*10000),
+            date: new Date().toLocaleDateString(),
+            type: mType,
+            dir: document.getElementById('mobilityDirection')?.value || 'SALIENTE',
+            dest: destValue || 'Por definir',
+            status: 'BORRADOR',
+            userEmail: this.user.email,
+            fechaInicio: document.getElementById('fechaInicio')?.value || '',
+            fechaFin: document.getElementById('fechaFin')?.value || ''
+        };
+
+        if(this.draftId) {
+            reqs = reqs.map(r => r.id === this.draftId ? { ...r, ...draftData } : r);
+        } else {
+            reqs.push(draftData);
+            this.draftId = draftData.id;
+        }
+
+        localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+        alert("Borrador guardado exitosamente. Puede retomarlo más tarde desde su panel de control.");
+        window.location.href = 'dashboard-estudiante.html';
+    },
+
+    loadDraft: function(id) {
+        const reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+        const draft = reqs.find(r => r.id === id);
+        if(draft) {
+            const typeEl = document.getElementById('mobilityType');
+            if(typeEl) typeEl.value = draft.type;
+            
+            const inicioEl = document.getElementById('fechaInicio');
+            const finEl = document.getElementById('fechaFin');
+            if(inicioEl && draft.fechaInicio) inicioEl.value = draft.fechaInicio;
+            if(finEl && draft.fechaFin) finEl.value = draft.fechaFin;
+            
+            this.updateFields();
+            this.calculateDuration();
+        }
     },
 
     submit: function(e) {
         e.preventDefault();
-        if(!document.getElementById('termsCheck').checked) return alert("Debe aceptar los términos institucionales.");
+        const terms = document.getElementById('termsCheck');
+        if(terms && !terms.checked) return alert("Debe aceptar los términos institucionales.");
         
         let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')||'[]');
         
@@ -334,32 +426,105 @@ const WizardLogic = {
             alert("Movilidad Registrada Automáticamente (Perfil Directivo).");
         } else if (this.isDocPhase) {
             alert("Anexos Documentales cargados. Su movilidad pasará a estado ACTIVO.");
+            const urlParams = new URLSearchParams(window.location.search);
+            const reqId = urlParams.get('id');
+            if(reqId) {
+                reqs = reqs.map(r => {
+                    if(r.id === reqId) r.status = 'EN_REVISION_LEGALIZACION';
+                    return r;
+                });
+                localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+            }
         } else {
-            const dir = document.getElementById('mobilityDirection').value;
+            const dirEl = document.getElementById('mobilityDirection');
+            const dir = dirEl ? dirEl.value : 'SALIENTE';
             const initialStatus = (dir === 'ENTRANTE') ? 'EN_REVISION_TOTAL' : 'EN_REVISION_POSTULACION';
             
-            // Captura universal de la descripción de actividades
             const actividadesInput = document.getElementById('actividadesMovilidad');
-            const actividadesTexto = actividadesInput && actividadesInput.value.trim() !== '' 
-                ? actividadesInput.value 
-                : 'Actividades por definir según revisión académica.';
+            const actividadesTexto = actividadesInput && actividadesInput.value.trim() !== '' ? actividadesInput.value : 'Actividades por definir según revisión académica.';
 
-            alert("Postulación Radicada. Será notificado cuando el área encargada revise su solicitud.");
-            reqs.push({
-                id: "REQ-"+Math.floor(Math.random()*10000),
-                date: new Date().toLocaleDateString(),
-                type: document.getElementById('mobilityType').value,
-                dir: dir,
-                materias: actividadesTexto, // Guardado universal para que llegue a Registro y ANI
-                status: initialStatus,
-                userEmail: this.user.email
-            });
+            const entitySelect = document.getElementById('entity_select');
+            const destValue = entitySelect && entitySelect.value === 'OTRA' ? document.getElementById('other_entity_name').value : (entitySelect ? entitySelect.value : '');
+
+            // NUEVO: Si existía como borrador, lo actualizamos y cambiamos el estado. Si es nuevo, lo creamos.
+            if(this.draftId) {
+                reqs = reqs.map(r => {
+                    if(r.id === this.draftId) {
+                        r.status = initialStatus; r.dest = destValue; r.materias = actividadesTexto;
+                    }
+                    return r;
+                });
+            } else {
+                reqs.push({
+                    id: "REQ-"+Math.floor(Math.random()*10000),
+                    date: new Date().toLocaleDateString(),
+                    type: document.getElementById('mobilityType').value,
+                    dir: dir,
+                    dest: destValue,
+                    materias: actividadesTexto, 
+                    status: initialStatus,
+                    userEmail: this.user.email
+                });
+            }
+
             localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+            alert("Postulación Radicada. Será notificado cuando el área encargada revise su solicitud.");
         }
         window.location.href='dashboard-estudiante.html';
     },
     
-    loadProfile: function() {}, calculateDuration: function() {}, toggleFinance: function() {}
+    loadProfile: function() {
+        if (this.role !== 'EXTERNO') {
+            const doc = document.getElementById('autoDoc');
+            const sem = document.getElementById('autoSem');
+            const prom = document.getElementById('autoProm');
+            if(doc) doc.value = "1094000000"; 
+            if(sem) sem.value = "7";
+            if(prom) prom.value = "4.2";
+        }
+    },
+
+    calculateDuration: function() {
+        const start = document.getElementById('fechaInicio')?.value;
+        const end = document.getElementById('fechaFin')?.value;
+        const out = document.getElementById('duracionCalculada');
+        
+        if(start && end && out) {
+            const d1 = new Date(start);
+            const d2 = new Date(end);
+            if(d2 >= d1) {
+                const diffTime = Math.abs(d2 - d1);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const months = Math.floor(diffDays / 30);
+                const days = diffDays % 30;
+                
+                let result = [];
+                if (months > 0) result.push(`${months} Mes(es)`);
+                if (days > 0 || months === 0) result.push(`${days} Día(s)`);
+                
+                out.value = result.join(' y ');
+            } else {
+                out.value = "Error: Fechas inválidas";
+            }
+        }
+    },
+
+    toggleFinance: function() {
+        const hasCosto = document.getElementById('hasCosto');
+        const hasBeca = document.getElementById('hasBeca');
+        const montoCosto = document.getElementById('montoCosto');
+        const montoBeca = document.getElementById('montoBeca');
+        
+        if (hasCosto && montoCosto) {
+            montoCosto.classList.toggle('hidden', hasCosto.value !== 'SI');
+            if (hasCosto.value === 'SI') montoCosto.focus();
+        }
+        
+        if (hasBeca && montoBeca) {
+            montoBeca.classList.toggle('hidden', hasBeca.value !== 'SI');
+            if (hasBeca.value === 'SI') montoBeca.focus();
+        }
+    }
 };
 
 document.addEventListener('DOMContentLoaded', () => WizardLogic.init());

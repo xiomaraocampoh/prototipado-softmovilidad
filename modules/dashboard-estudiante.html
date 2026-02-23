@@ -299,17 +299,26 @@
                 case 'EN_REVISION_TOTAL':
                 case 'PENDIENTE_MATRICULA':
                     config.badgeClass = 'bg-yellow-100 text-yellow-800 border-yellow-200';
-                    config.label = 'En Revisión / Trámite';
+                    config.label = 'En Revisión Inicial';
                     break;
                 case 'APROBADA_POSTULACION':
                     config.badgeClass = 'bg-orange-100 text-orange-800 border-orange-200';
-                    config.label = 'Requiere Anexos';
-                    config.actionHtml = `<a href="mobility-wizard.html?mode=docs&id=${id}" class="inline-block bg-[#0077b6] text-white px-3 py-1 rounded text-xs font-bold hover:bg-[#03045e] transition">Fase 2: Adjuntar Docs</a>`;
+                    config.label = 'Aprobada / Requiere Anexos';
+                    config.actionHtml = `
+                        <div class="flex flex-col gap-1">
+                            <a href="mobility-wizard.html?mode=docs&id=${id}" class="inline-block bg-[#0077b6] text-white px-3 py-1 rounded text-xs font-bold hover:bg-[#03045e] transition text-center">Fase 2: Adjuntar Docs</a>
+                            <button onclick="solicitarCertificado('${id}')" class="border border-[#0077b6] text-[#0077b6] px-3 py-1 rounded text-xs font-bold hover:bg-blue-50 transition">Pedir Certificado</button>
+                        </div>`;
+                    break;
+                case 'EN_REVISION_LEGALIZACION':
+                    config.badgeClass = 'bg-blue-100 text-blue-800 border-blue-200';
+                    config.label = 'En Legalización';
+                    config.actionHtml = `<button onclick="solicitarCertificado('${id}')" class="border border-[#0077b6] text-[#0077b6] px-3 py-1 rounded text-xs font-bold hover:bg-blue-50 transition">Pedir Certificado</button>`;
                     break;
                 case 'MOVILIDAD_ACTIVA':
                     config.badgeClass = 'bg-green-100 text-green-800 border-green-200';
                     config.label = 'Activa / Vigente';
-                    config.actionHtml = `<button onclick="solicitarCertificado('${id}')" class="border border-[#0077b6] text-[#0077b6] px-3 py-1 rounded text-xs font-bold hover:bg-blue-50 transition">Pedir Certificado</button>`;
+                    config.actionHtml = `<button onclick="solicitarCertificado('${id}')" class="border border-green-600 text-green-600 px-3 py-1 rounded text-xs font-bold hover:bg-green-50 transition">Pedir Certificado</button>`;
                     break;
             }
             return config;
