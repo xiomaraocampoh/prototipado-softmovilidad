@@ -6,7 +6,7 @@
 const ROLES = {
     // Solicitantes Internos
     ESTUDIANTE: { code: 'ESTUDIANTE', redirect: 'dashboard-estudiante.html', name: 'Estudiante CUE' },
-    DOCENTE: { code: 'DOCENTE', redirect: 'dashboard-estudiante.html', name: 'Docente / Investigador' },
+    DOCENTE: { code: 'DOCENTE', redirect: 'dashboard-estudiante.html', name: 'Profesor / Investigador' },
     COLABORADOR: { code: 'COLABORADOR', redirect: 'dashboard-estudiante.html', name: 'Colaborador Administrativo' },
     RECTOR: { code: 'RECTOR', redirect: 'dashboard-estudiante.html', name: 'Rectoría' },
     
@@ -16,6 +16,7 @@ const ROLES = {
     // Perfiles Administrativos (Revisores)
     ANI_SECRETARIA: { code: 'ANI_SECRETARIA', redirect: 'dashboard-ani.html', name: 'Secretaría ANI (Pre-revisión)' },
     ANI_DIRECCION: { code: 'ANI_DIRECCION', redirect: 'dashboard-ani.html', name: 'Dirección ANI (Aprobación Final)' },
+    COORD_ACAD: { code: 'COORD_ACAD', redirect: 'dashboard-acad.html', name: 'Coordinación Académica' },
     SST: { code: 'SST', redirect: 'dashboard-sst.html', name: 'Seguridad y Salud en el Trabajo' },
     REGISTRO: { code: 'REGISTRO', redirect: 'dashboard-registro.html', name: 'Control y Registro Académico' }
 };
@@ -27,6 +28,7 @@ const MOCK_USERS = [
     { email: 'externo@unam.mx', pass: '123', role: ROLES.EXTERNO, name: 'Carlos (UNAM)' },
     { email: 'secretaria.ani@cue.edu.co', pass: 'admin', role: ROLES.ANI_SECRETARIA, name: 'Secretaría ANI' },
     { email: 'direccion.ani@cue.edu.co', pass: 'admin', role: ROLES.ANI_DIRECCION, name: 'Dirección ANI' },
+    { email: 'coordinacion.acad@cue.edu.co', pass: 'admin', role: ROLES.COORD_ACAD, name: 'Coordinación Académica' },
     { email: 'sst@cue.edu.co', pass: 'admin', role: ROLES.SST, name: 'Gestor SST' },
     { email: 'registro@cue.edu.co', pass: 'admin', role: ROLES.REGISTRO, name: 'Registro y Control' }
 ];

@@ -45,7 +45,7 @@
                 <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
                     <tr>
                         <th class="p-4 w-24">ID Salida</th>
-                        <th class="p-4">Docente Responsable</th>
+                        <th class="p-4">Profesor responsable</th>
                         <th class="p-4">Destino / Fechas</th>
                         <th class="p-4">Estado Revisión</th>
                         <th class="p-4 text-center">Acción</th>
@@ -71,7 +71,7 @@
                         <span class="font-mono font-bold text-[#03045e] text-lg" id="modalSstId"></span>
                     </div>
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Responsable (Docente)</span>
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Responsable (Profesor)</span>
                         <span class="font-bold text-gray-800" id="modalSstUser"></span>
                     </div>
                     <div>
@@ -106,6 +106,21 @@
                     </div>
 
                     <div>
+                        <h4 class="font-bold text-gray-700 text-sm mb-3 border-b pb-1 flex items-center gap-2"><i data-lucide="file-text" class="w-4 h-4 text-[#0077b6]"></i> Datos del vehículo / póliza</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Placa del vehículo</label>
+                                <input id="vehPlaca" type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-red-500" placeholder="Ej: ABC123">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Número de póliza</label>
+                                <input id="polizaNumero" type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-red-500" placeholder="Ej: POL-2026-001">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Entidad aseguradora</label>
+                                <input id="aseguradoraNombre" type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-red-500" placeholder="Ej: Aseguradora XYZ">
+                            </div>
+                        </div>
                         <div class="flex justify-between items-end border-b pb-1 mb-3">
                             <h4 class="font-bold text-gray-700 text-sm flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-[#0077b6]"></i> 2. Pólizas y Consentimientos</h4>
                             <button onclick="sendConsents()" class="text-xs bg-[#0077b6] text-white px-2 py-1 rounded font-bold hover:bg-[#03045e] transition flex items-center gap-1">
@@ -153,6 +168,7 @@
     <script src="../assets/js/auth.js"></script>
     <script>
         let currentSstId = null;
+        const LS_SALIDAS = 'CUE_SALIDAS_ACADEMICAS';
 
         document.addEventListener('DOMContentLoaded', () => {
             const user = AuthService.checkAuth();
@@ -174,54 +190,44 @@
             const tbody = document.getElementById('sstTableBody');
             tbody.innerHTML = '';
             
-            const mockRequests = [
-                { 
-                    id: 'REQ-3010', date: '20/02/2026', type: 'Visita/Salida Académica', userEmail: 'docente@cue.edu.co', 
-                    dest: 'Planta Nestlé', sstStatus: 'PENDIENTE',
-                    fechaIda: '2026-03-10', fechaRegreso: '2026-03-10'
-                },
-                { 
-                    id: 'REQ-3015', date: '22/02/2026', type: 'Visita/Salida Académica', userEmail: 'docente@cue.edu.co', 
-                    dest: 'Congreso Bogotá', sstStatus: 'APROBADO',
-                    fechaIda: '2026-04-05', fechaRegreso: '2026-04-08'
-                }
-            ];
+            const salidas = safeParseArray(LS_SALIDAS)
+                .filter(s => s && s.requiereSST === true);
 
-            const localReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
-            const allReqs = [...mockRequests];
-            
-            localReqs.forEach(lr => { 
-                if(!allReqs.find(ar => ar.id === lr.id)) allReqs.push(lr); 
-            });
-
-            const salidasAcademicas = allReqs.filter(req => req.type === 'Visita/Salida Académica');
-            const pendientes = salidasAcademicas.filter(req => req.sstStatus !== 'APROBADO' && req.sstStatus !== 'RECHAZADO').length;
+            const pendientes = salidas.filter(s => {
+                const estadoAcad = String(s.estadoAcad || '').toUpperCase();
+                const st = String(s.sstReview?.estado || 'PENDIENTE').toUpperCase();
+                return estadoAcad === 'EN_REVISION_SST' && st === 'PENDIENTE';
+            }).length;
             document.getElementById('pendingSSTCount').textContent = pendientes;
 
-            if (salidasAcademicas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 italic">No hay salidas académicas registradas.</td></tr>`;
+            if (salidas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 italic">No hay salidas académicas que requieran revisión SST.</td></tr>`;
                 return;
             }
 
-            salidasAcademicas.forEach(req => {
+            salidas.forEach(salida => {
+                const sstStatus = String(salida.sstReview?.estado || 'PENDIENTE').toUpperCase();
                 let statusBadge = `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-bold border border-orange-200">Pendiente</span>`;
-                let actionButton = `<button onclick="openSSTModal('${req.id}', '${req.userEmail}', '${req.fechaIda || 'N/A'}', '${req.fechaRegreso || 'N/A'}')" class="bg-red-700 text-white px-4 py-1 rounded text-xs font-bold hover:bg-red-800 transition shadow-sm">Revisar Requisitos</button>`;
+                let actionButton = `<button onclick="openSSTModal('${salida.id}')" class="bg-red-700 text-white px-4 py-1 rounded text-xs font-bold hover:bg-red-800 transition shadow-sm">Revisar Requisitos</button>`;
 
-                if (req.sstStatus === 'APROBADO') {
+                if (sstStatus === 'APROBADO') {
                     statusBadge = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold border border-green-200">Aprobado</span>`;
                     actionButton = `<button disabled class="bg-gray-100 text-gray-400 px-4 py-1 rounded text-xs font-bold border cursor-not-allowed">Completado</button>`;
-                } else if (req.sstStatus === 'RECHAZADO') {
+                } else if (sstStatus === 'RECHAZADO') {
                     statusBadge = `<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold border border-red-200">Rechazado</span>`;
                     actionButton = `<button disabled class="bg-gray-100 text-gray-400 px-4 py-1 rounded text-xs font-bold border cursor-not-allowed">Cerrado</button>`;
                 }
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 transition border-b">
-                        <td class="p-4 font-mono font-bold text-[#03045e]">${req.id}</td>
-                        <td class="p-4 text-gray-700">${req.userEmail}</td>
+                        <td class="p-4 font-mono font-bold text-[#03045e]">${salida.id}</td>
+                        <td class="p-4 text-gray-700">
+                            <div class="font-bold text-gray-800">${escapeHtml(salida.profesorResponsable?.nombre || 'Profesor')}</div>
+                            <div class="text-[10px] text-gray-500">${escapeHtml(salida.profesorResponsable?.email || '')}</div>
+                        </td>
                         <td class="p-4 text-gray-600 text-xs">
-                            <strong>Lugar:</strong> ${req.dest || 'Campo'}<br>
-                            <strong>Ida:</strong> ${req.fechaIda || 'N/A'} | <strong>Regreso:</strong> ${req.fechaRegreso || 'N/A'}
+                            <strong>Lugar:</strong> ${escapeHtml(salida.destino || 'N/A')}<br>
+                            <strong>Inicio:</strong> ${escapeHtml(salida.fechaInicio || 'N/A')} | <strong>Fin:</strong> ${escapeHtml(salida.fechaFin || 'N/A')}
                         </td>
                         <td class="p-4">${statusBadge}</td>
                         <td class="p-4 text-center">${actionButton}</td>
@@ -232,13 +238,23 @@
         }
 
         // 2. APERTURA DE MODAL Y SIMULACIÓN DE BD
-        function openSSTModal(id, userEmail, fIda, fRegreso) {
+        function openSSTModal(id) {
             currentSstId = id;
+            const salida = safeParseArray(LS_SALIDAS).find(s => s.id === id);
+            if (!salida) {
+                alert("No se encontró la salida académica.");
+                currentSstId = null;
+                return;
+            }
+
             document.getElementById('modalSstId').textContent = id;
-            document.getElementById('modalSstUser').textContent = userEmail;
-            document.getElementById('modalSstDates').textContent = `Ida: ${fIda} / Reg: ${fRegreso}`;
+            document.getElementById('modalSstUser').textContent = `${salida.profesorResponsable?.nombre || 'Profesor'} (${salida.profesorResponsable?.email || 'N/A'})`;
+            document.getElementById('modalSstDates').textContent = `Inicio: ${salida.fechaInicio || 'N/A'} / Fin: ${salida.fechaFin || 'N/A'}`;
             
             document.querySelectorAll('.sst-check').forEach(cb => cb.checked = false);
+            document.getElementById('vehPlaca').value = salida.sstReview?.placaVehiculo || '';
+            document.getElementById('polizaNumero').value = salida.sstReview?.numeroPoliza || '';
+            document.getElementById('aseguradoraNombre').value = salida.sstReview?.entidadAseguradora || '';
             
             // Reiniciar caja de rechazo
             document.getElementById('rejectContainer').classList.add('hidden');
@@ -246,11 +262,10 @@
             document.getElementById('rejectReason').value = '';
 
             // Simulación de BD de Estudiantes y Pólizas
-            const mockStudents = [
-                { nombre: 'Juan Pérez', edad: 20, polizaOk: true },
-                { nombre: 'Ana Gómez', edad: 17, polizaOk: true }, // Menor de edad (Requiere Acudiente)
-                { nombre: 'Carlos Ruiz', edad: 22, polizaOk: false } // Póliza vencida
-            ];
+            const participants = Array.isArray(salida.participantes) ? salida.participantes : [];
+            const mockStudents = participants
+                .filter(p => (p.rol || 'ESTUDIANTE') === 'ESTUDIANTE')
+                .map(p => ({ nombre: p.nombre || 'Estudiante', edad: null, polizaOk: true }));
 
             const tbodyList = document.getElementById('studentPolicyList');
             tbodyList.innerHTML = '';
@@ -260,9 +275,11 @@
                     ? `<i data-lucide="check-circle" class="w-4 h-4 text-green-600 mx-auto" title="Vigente"></i>` 
                     : `<i data-lucide="x-circle" class="w-4 h-4 text-red-600 mx-auto" title="Vencida"></i>`;
                 
-                const edadBadge = st.edad < 18 
-                    ? `<span class="bg-yellow-100 text-yellow-800 px-2 py-[2px] rounded text-[10px] font-bold" title="Consentimiento a Acudiente">Menor (Acudiente)</span>` 
-                    : `<span class="text-gray-500">${st.edad} años</span>`;
+                const edadBadge = st.edad === null
+                    ? `<span class="text-gray-400 text-[10px] italic">N/D</span>`
+                    : (st.edad < 18
+                        ? `<span class="bg-yellow-100 text-yellow-800 px-2 py-[2px] rounded text-[10px] font-bold" title="Consentimiento a acudiente">Menor (Acudiente)</span>`
+                        : `<span class="text-gray-500">${st.edad} años</span>`);
 
                 tbodyList.innerHTML += `
                     <tr>
@@ -272,6 +289,9 @@
                     </tr>
                 `;
             });
+            if (mockStudents.length === 0) {
+                tbodyList.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-400 italic">No hay estudiantes participantes registrados.</td></tr>`;
+            }
 
             document.getElementById('sstModal').classList.remove('hidden');
             lucide.createIcons();
@@ -298,7 +318,7 @@
                 return;
             }
 
-            updateRequestStatus('APROBADO', 'Validación exitosa.');
+            updateSalidaSst('APROBADO', 'Validación exitosa.');
             alert("Aprobación Registrada.\nLa salida académica cuenta con el aval de Seguridad y Salud en el Trabajo.");
         }
 
@@ -313,42 +333,67 @@
         function confirmReject() {
             const reason = document.getElementById('rejectReason').value.trim();
             if(reason === '') {
-                alert("Por favor, ingrese el motivo del rechazo para notificar al docente.");
+                alert("Por favor, ingrese el motivo del rechazo para notificar al profesor responsable.");
                 return;
             }
-            updateRequestStatus('RECHAZADO', reason);
-            alert(`Salida Rechazada.\nMotivo registrado: "${reason}"\nSe ha notificado al docente responsable.`);
+            updateSalidaSst('RECHAZADO', reason);
+            alert(`Salida Rechazada.\nMotivo registrado: "${reason}"\nSe ha notificado al profesor responsable.`);
         }
 
         // Helper para actualizar la BD local
-        function updateRequestStatus(newStatus, sstNote = '') {
-            let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
-            let updated = false;
-            
-            reqs = reqs.map(req => {
-                if (req.id === currentSstId) { 
-                    req.sstStatus = newStatus;
-                    req.sstObservation = sstNote;
-                    updated = true; 
-                }
-                return req;
-            });
-
-            if (!updated) {
-                reqs.push({ 
-                    id: currentSstId, 
-                    date: new Date().toLocaleDateString(), 
-                    type: 'Visita/Salida Académica', 
-                    status: newStatus === 'APROBADO' ? 'MOVILIDAD_ACTIVA' : 'CANCELADA', 
-                    sstStatus: newStatus,
-                    sstObservation: sstNote,
-                    userEmail: document.getElementById('modalSstUser').textContent 
-                });
+        function updateSalidaSst(newStatus, sstNote = '') {
+            const reviewer = AuthService.checkAuth();
+            const salidas = safeParseArray(LS_SALIDAS);
+            const idx = salidas.findIndex(s => s.id === currentSstId);
+            if (idx === -1) {
+                alert("No se pudo actualizar: no se encontró la salida en el almacenamiento.");
+                return;
             }
 
-            localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+            const checklist = {
+                soat: document.querySelectorAll('.sst-check')[0]?.checked === true,
+                tecnomecanica: document.querySelectorAll('.sst-check')[1]?.checked === true,
+                polizaRc: document.querySelectorAll('.sst-check')[2]?.checked === true,
+                licenciaConductor: document.querySelectorAll('.sst-check')[3]?.checked === true
+            };
+
+            salidas[idx].sstReview = {
+                ...(salidas[idx].sstReview || {}),
+                estado: newStatus,
+                observaciones: sstNote,
+                placaVehiculo: document.getElementById('vehPlaca').value.trim(),
+                entidadAseguradora: document.getElementById('aseguradoraNombre').value.trim(),
+                numeroPoliza: document.getElementById('polizaNumero').value.trim(),
+                checklist,
+                reviewedAt: new Date().toISOString(),
+                reviewerEmail: reviewer?.email || ''
+            };
+
+            salidas[idx].estadoAcad = newStatus === 'APROBADO' ? 'APROBADA' : 'CANCELADA';
+            salidas[idx].updatedAt = new Date().toISOString();
+            localStorage.setItem(LS_SALIDAS, JSON.stringify(salidas));
             closeSSTModal();
             loadSSTTable(); 
+        }
+
+        function safeParseArray(key) {
+            try {
+                const raw = localStorage.getItem(key);
+                if (!raw) return [];
+                const data = JSON.parse(raw);
+                return Array.isArray(data) ? data : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
         }
     </script>
 </body>

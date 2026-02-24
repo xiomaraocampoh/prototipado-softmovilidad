@@ -51,7 +51,7 @@ const WizardLogic = {
 
     setupUI: function() {
         const titleEl = document.getElementById('formTitle');
-        if(titleEl) titleEl.innerText = this.role === 'DOCENTE' ? 'Registro de Salida Académica' : 'Solicitud de Movilidad';
+        if (titleEl) titleEl.innerText = 'Solicitud de Movilidad';
         
         const dirEl = document.getElementById('mobilityDirection');
         if(dirEl) dirEl.value = (this.role === 'EXTERNO') ? 'ENTRANTE' : 'SALIENTE';
@@ -172,7 +172,6 @@ const WizardLogic = {
             { t: "Curso Corto", m: ["PRESENCIAL", "VIRTUAL"] },
             { t: "Estancia Investigación", m: ["PRESENCIAL", "VIRTUAL"] },
             { t: "Rotación Médica", m: ["PRESENCIAL"] },
-            { t: "Visita/Salida Académica", m: ["PRESENCIAL"] }, // Añadido para todos
             { t: "Evento Académico/Investigativo", m: ["PRESENCIAL", "VIRTUAL"] },
             { t: "Otro", m: ["PRESENCIAL", "VIRTUAL"] }
         ];
@@ -195,19 +194,16 @@ const WizardLogic = {
         document.getElementById('origenContainer')?.classList.toggle('hidden', dir !== 'ENTRANTE');
         document.getElementById('destinoContainer')?.classList.toggle('hidden', dir !== 'SALIENTE');
 
-        // 2. Si es Salida Académica, el estudiante/profesor NO llena la entidad destino, solo se inscribe
-        const isSalida = type === 'Visita/Salida Académica';
-        
-        // Si no requiere convenio o es salida, habilitamos campos libres o los ocultamos
+        // 2. Tipos que no exigen convenio (destino libre)
         const noConv = ['Evento Académico/Investigativo', 'Diplomado', 'Curso Corto', 'Otro'].includes(type);
         
-        // Ocultamos la búsqueda de convenios si es salida o si no requiere convenio
-        document.getElementById('destinoSearchContainer')?.classList.toggle('hidden', noConv || isSalida);
+        // Ocultamos la búsqueda de convenios si no requiere convenio
+        document.getElementById('destinoSearchContainer')?.classList.toggle('hidden', noConv);
         
-        // Mostramos destino libre solo si no requiere convenio y NO es salida (la salida la define el coord)
-        document.getElementById('destinoLibreContainer')?.classList.toggle('hidden', !noConv || isSalida);
+        // Mostramos destino libre solo si no requiere convenio
+        document.getElementById('destinoLibreContainer')?.classList.toggle('hidden', !noConv);
         
-        if(!noConv && !isSalida) this.checkOtherEntity();
+        if(!noConv) this.checkOtherEntity();
 
         document.getElementById('practiceDetailsContainer')?.classList.toggle('hidden', !['Práctica Empresarial - Pasantía', 'Práctica Integral', 'Rotación Médica', 'Estancia Investigación'].includes(type));
         
@@ -253,9 +249,10 @@ const WizardLogic = {
             }
         }
 
-        const type = document.getElementById('mobilityType')?.value || '';
-        document.getElementById('professorRosterData')?.classList.toggle('hidden', type !== 'Visita/Salida Académica');
-        document.getElementById('studentPersonalData')?.classList.toggle('hidden', type === 'Visita/Salida Académica');
+        // Las Salidas Académicas con grupos NO se crean desde este wizard (se crean desde Coordinación Académica).
+        // Por lo tanto, no se muestra el UI especial de “salida” aquí.
+        document.getElementById('professorRosterData')?.classList.add('hidden');
+        document.getElementById('studentPersonalData')?.classList.remove('hidden');
 
         const prev = document.getElementById('prevBtn');
         const next = document.getElementById('nextBtn');
@@ -310,6 +307,10 @@ const WizardLogic = {
         e.preventDefault();
         let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')||'[]');
         const type = document.getElementById('mobilityType').value;
+        if (type === 'Visita/Salida Académica') {
+            alert("Las Salidas Académicas con grupos se crean únicamente desde el panel de Coordinación Académica.");
+            return;
+        }
         
         if (this.isDocPhase) {
             alert("Anexos cargados con éxito.");
