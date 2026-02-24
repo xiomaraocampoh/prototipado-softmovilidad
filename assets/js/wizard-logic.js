@@ -163,22 +163,24 @@ const WizardLogic = {
         
         const mod = modEl.value;
         select.innerHTML = '<option value="">Seleccione...</option>';
+        
+        // Catálogo general de movilidades (Virtuales y Presenciales)
         const types = [
             { t: "Intercambio Académico", m: ["PRESENCIAL", "VIRTUAL"] },
             { t: "Práctica Empresarial - Pasantía", m: ["PRESENCIAL"] },
-            { t: "Diplomado", m: ["PRESENCIAL", "VIRTUAL"] },
+            { t: "Diplomado", m: ["PRESENCIAL"] }, // Modificado según acta: no virtual
             { t: "Curso Corto", m: ["PRESENCIAL", "VIRTUAL"] },
             { t: "Estancia Investigación", m: ["PRESENCIAL", "VIRTUAL"] },
             { t: "Rotación Médica", m: ["PRESENCIAL"] },
+            { t: "Visita/Salida Académica", m: ["PRESENCIAL"] }, // Añadido para todos
+            { t: "Evento Académico/Investigativo", m: ["PRESENCIAL", "VIRTUAL"] },
             { t: "Otro", m: ["PRESENCIAL", "VIRTUAL"] }
         ];
         
-        if (this.role === 'DOCENTE') {
-            select.innerHTML += `<option value="Visita/Salida Académica">Visita/Salida Académica</option>`;
-            select.innerHTML += `<option value="Evento Académico/Investigativo">Evento Académico/Investigativo</option>`;
-        } else {
-            types.forEach(op => { if(op.m.includes(mod)) select.innerHTML += `<option value="${op.t}">${op.t}</option>`; });
-        }
+        types.forEach(op => { 
+            if(op.m.includes(mod)) select.innerHTML += `<option value="${op.t}">${op.t}</option>`; 
+        });
+        
         this.updateFields();
     },
 
@@ -186,16 +188,26 @@ const WizardLogic = {
         const type = document.getElementById('mobilityType')?.value || '';
         const isPre = document.getElementById('mobilityModality')?.value === 'PRESENCIAL';
         
+        // 1. Ocultar o mostrar campos que exigen presencialidad (Vuelos, Residencia, SST Médico)
         document.querySelectorAll('.req-presencial').forEach(el => el.classList.toggle('hidden', !isPre));
         
         const dir = document.getElementById('mobilityDirection')?.value || 'SALIENTE';
         document.getElementById('origenContainer')?.classList.toggle('hidden', dir !== 'ENTRANTE');
         document.getElementById('destinoContainer')?.classList.toggle('hidden', dir !== 'SALIENTE');
 
-        const noConv = ['Visita/Salida Académica', 'Evento Académico/Investigativo', 'Diplomado', 'Curso Corto', 'Otro'].includes(type);
-        document.getElementById('destinoSearchContainer')?.classList.toggle('hidden', noConv);
-        document.getElementById('destinoLibreContainer')?.classList.toggle('hidden', !noConv);
-        if(!noConv) this.checkOtherEntity();
+        // 2. Si es Salida Académica, el estudiante/profesor NO llena la entidad destino, solo se inscribe
+        const isSalida = type === 'Visita/Salida Académica';
+        
+        // Si no requiere convenio o es salida, habilitamos campos libres o los ocultamos
+        const noConv = ['Evento Académico/Investigativo', 'Diplomado', 'Curso Corto', 'Otro'].includes(type);
+        
+        // Ocultamos la búsqueda de convenios si es salida o si no requiere convenio
+        document.getElementById('destinoSearchContainer')?.classList.toggle('hidden', noConv || isSalida);
+        
+        // Mostramos destino libre solo si no requiere convenio y NO es salida (la salida la define el coord)
+        document.getElementById('destinoLibreContainer')?.classList.toggle('hidden', !noConv || isSalida);
+        
+        if(!noConv && !isSalida) this.checkOtherEntity();
 
         document.getElementById('practiceDetailsContainer')?.classList.toggle('hidden', !['Práctica Empresarial - Pasantía', 'Práctica Integral', 'Rotación Médica', 'Estancia Investigación'].includes(type));
         
@@ -206,9 +218,10 @@ const WizardLogic = {
             document.getElementById('eventFields')?.classList.toggle('hidden', type !== 'Evento Académico/Investigativo');
         }
         
-        document.getElementById('transportContainer')?.classList.toggle('hidden', !(type === 'Visita/Salida Académica' && isPre));
-        const hasT = document.getElementById('hiredTransport');
-        document.getElementById('vehicleDetails')?.classList.toggle('hidden', !(hasT && hasT.checked));
+        // 3. Eliminamos la lógica de preguntar por transporte aquí. 
+        // El contenedor 'transportContainer' debe estar oculto siempre en el wizard del solicitante.
+        const transCont = document.getElementById('transportContainer');
+        if(transCont) transCont.classList.add('hidden');
     },
 
     step: function(dir) {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,44 +10,56 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body class="bg-[#f0f4f8] font-['Inter'] flex h-screen overflow-hidden">
 
     <aside class="w-64 bg-[#03045e] text-white flex flex-col hidden md:flex shadow-xl z-20">
         <div class="h-16 flex items-center px-6 border-b border-white/10">
             <h1 class="font-bold text-lg tracking-wide" id="aniTitle">Oficina ANI</h1>
         </div>
-        
+
         <div class="p-6 pb-2">
             <p class="text-[10px] text-blue-300 uppercase font-bold tracking-wider mb-2">Menú Principal</p>
         </div>
 
         <nav class="flex-1 px-4 space-y-2 overflow-y-auto">
-            <button onclick="switchTab('tab-bandeja')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left bg-white/10 text-white font-bold transition" data-target="tab-bandeja">
+            <button onclick="switchTab('tab-bandeja')"
+                class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left bg-white/10 text-white font-bold transition"
+                data-target="tab-bandeja">
                 <i data-lucide="inbox" class="w-4 h-4"></i> Bandeja Documental
             </button>
-            <button onclick="switchTab('tab-convenios')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition" data-target="tab-convenios">
+            <button onclick="switchTab('tab-convenios')"
+                class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
+                data-target="tab-convenios">
                 <i data-lucide="building" class="w-4 h-4"></i> Gestión Convenios
             </button>
-            <button onclick="switchTab('tab-credenciales')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition" data-target="tab-credenciales">
+            <button onclick="switchTab('tab-credenciales')"
+                class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
+                data-target="tab-credenciales">
                 <i data-lucide="users" class="w-4 h-4"></i> Accesos Externos
             </button>
-            <button onclick="switchTab('tab-programas')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition" data-target="tab-programas">
+            <button onclick="switchTab('tab-programas')"
+                class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
+                data-target="tab-programas">
                 <i data-lucide="book-open" class="w-4 h-4"></i> Programas
             </button>
-            <button onclick="switchTab('tab-tipos')" class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition" data-target="tab-tipos">
+            <button onclick="switchTab('tab-tipos')"
+                class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
+                data-target="tab-tipos">
                 <i data-lucide="settings" class="w-4 h-4"></i> Tipos Movilidad
             </button>
         </nav>
 
         <div class="p-4 border-t border-white/10">
-            <button onclick="AuthService.logout()" class="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-blue-200 hover:text-white hover:bg-red-600/80 rounded transition">
+            <button onclick="AuthService.logout()"
+                class="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm text-blue-200 hover:text-white hover:bg-red-600/80 rounded transition">
                 <i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión
             </button>
         </div>
     </aside>
 
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-        
+
         <nav class="bg-white border-b shadow-sm h-16 flex justify-between items-center px-6 z-10 shrink-0">
             <div class="flex items-center gap-3">
                 <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10">
@@ -61,7 +74,7 @@
         </nav>
 
         <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-[#f0f4f8]">
-            
+
             <div id="tab-bandeja" class="ani-content-section block animate-fade-in">
                 <div class="flex justify-between items-end mb-6">
                     <div>
@@ -80,7 +93,7 @@
                             </tr>
                         </thead>
                         <tbody id="aniTableBody" class="divide-y divide-gray-100 text-sm">
-                            </tbody>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -96,38 +109,52 @@
                         <form onsubmit="alert('Convenio registrado.'); event.preventDefault();" class="space-y-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1">Institución</label>
-                                <input type="text" placeholder="Ej: Universidad de Lima" required class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                                <input type="text" placeholder="Ej: Universidad de Lima" required
+                                    class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1">País</label>
-                                <input type="text" placeholder="Ej: Perú" required class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                                <input type="text" placeholder="Ej: Perú" required
+                                    class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1">Ciudad</label>
-                                <input type="text" placeholder="Ej: Lima" required class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                                <input type="text" placeholder="Ej: Lima" required
+                                    class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1">Fecha de Vigencia</label>
-                                <input type="date" required class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                                <input type="date" required
+                                    class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
                             </div>
-                            <button type="submit" class="w-full bg-[#0077b6] text-white py-2 rounded text-sm font-bold hover:bg-[#03045e] transition">Guardar Convenio</button>
+                            <button type="submit"
+                                class="w-full bg-[#0077b6] text-white py-2 rounded text-sm font-bold hover:bg-[#03045e] transition">Guardar
+                                Convenio</button>
                         </form>
                     </div>
                     <div class="bg-white rounded-xl shadow-sm border md:col-span-2 overflow-hidden">
                         <table class="w-full text-left text-sm">
                             <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
-                                <tr><th class="p-4">Institución</th><th class="p-4">Vigencia</th><th class="p-4 text-center">Estado</th></tr>
+                                <tr>
+                                    <th class="p-4">Institución</th>
+                                    <th class="p-4">Vigencia</th>
+                                    <th class="p-4 text-center">Estado</th>
+                                </tr>
                             </thead>
                             <tbody class="divide-y">
                                 <tr class="hover:bg-gray-50">
                                     <td class="p-4 font-bold text-[#03045e]">UNAM (México)</td>
                                     <td class="p-4 text-gray-600">31/12/2027</td>
-                                    <td class="p-4 text-center"><span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">Activo</span></td>
+                                    <td class="p-4 text-center"><span
+                                            class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">Activo</span>
+                                    </td>
                                 </tr>
                                 <tr class="hover:bg-gray-50">
                                     <td class="p-4 font-bold text-[#03045e]">DHBW Ravensburg</td>
                                     <td class="p-4 text-gray-600">31/12/2023</td>
-                                    <td class="p-4 text-center"><span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">Vencido</span></td>
+                                    <td class="p-4 text-center"><span
+                                            class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">Vencido</span>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -138,23 +165,32 @@
             <div id="tab-credenciales" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-[#03045e]">Generación de Credenciales (Externos)</h2>
-                    <p class="text-gray-500 text-sm">Cree cuentas temporales para solicitantes de movilidad entrante.</p>
+                    <p class="text-gray-500 text-sm">Cree cuentas temporales para solicitantes de movilidad entrante.
+                    </p>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border max-w-xl">
-                    <form onsubmit="alert('Credenciales generadas y enviadas al correo del usuario.'); event.preventDefault();" class="space-y-4">
+                    <form
+                        onsubmit="alert('Credenciales generadas y enviadas al correo del usuario.'); event.preventDefault();"
+                        class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Nombre Completo del Externo</label>
-                            <input type="text" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Nombre Completo del
+                                Externo</label>
+                            <input type="text" required
+                                class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Correo Electrónico (Para envío de clave)</label>
-                            <input type="email" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Correo Electrónico (Para envío de
+                                clave)</label>
+                            <input type="email" required
+                                class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-600 mb-1">Institución de Origen</label>
-                            <input type="text" required class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                            <input type="text" required
+                                class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
                         </div>
-                        <button type="submit" class="w-full bg-[#03045e] text-white py-3 rounded text-sm font-bold flex justify-center items-center gap-2 hover:bg-black transition">
+                        <button type="submit"
+                            class="w-full bg-[#03045e] text-white py-3 rounded text-sm font-bold flex justify-center items-center gap-2 hover:bg-black transition">
                             <i data-lucide="mail-send" class="w-4 h-4"></i> Generar y Enviar Acceso
                         </button>
                     </form>
@@ -169,11 +205,25 @@
                 <div class="bg-white rounded-xl shadow-sm border overflow-hidden max-w-4xl">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
-                            <tr><th class="p-4">Programa</th><th class="p-4">Facultad</th><th class="p-4 text-center">Acción</th></tr>
+                            <tr>
+                                <th class="p-4">Programa</th>
+                                <th class="p-4">Facultad</th>
+                                <th class="p-4 text-center">Acción</th>
+                            </tr>
                         </thead>
                         <tbody class="divide-y">
-                            <tr class="hover:bg-gray-50"><td class="p-4 font-bold text-[#03045e]">Ingeniería de Software</td><td class="p-4 text-gray-600">Ingenierías</td><td class="p-4 text-center"><button class="text-blue-600 font-bold text-xs hover:underline">Editar</button></td></tr>
-                            <tr class="hover:bg-gray-50"><td class="p-4 font-bold text-[#03045e]">Medicina</td><td class="p-4 text-gray-600">Ciencias de la Salud</td><td class="p-4 text-center"><button class="text-blue-600 font-bold text-xs hover:underline">Editar</button></td></tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 font-bold text-[#03045e]">Ingeniería de Software</td>
+                                <td class="p-4 text-gray-600">Ingenierías</td>
+                                <td class="p-4 text-center"><button
+                                        class="text-blue-600 font-bold text-xs hover:underline">Editar</button></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 font-bold text-[#03045e]">Medicina</td>
+                                <td class="p-4 text-gray-600">Ciencias de la Salud</td>
+                                <td class="p-4 text-center"><button
+                                        class="text-blue-600 font-bold text-xs hover:underline">Editar</button></td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -182,23 +232,36 @@
             <div id="tab-tipos" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-[#03045e]">Configuración de Movilidades</h2>
-                    <p class="text-gray-500 text-sm">Habilite o pause los tipos de movilidad ofertados en el formulario.</p>
+                    <p class="text-gray-500 text-sm">Habilite o pause los tipos de movilidad ofertados en el formulario.
+                    </p>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border overflow-hidden max-w-4xl">
                     <table class="w-full text-left text-sm">
                         <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
-                            <tr><th class="p-4">Tipo de Movilidad</th><th class="p-4 text-center">Estado Actual</th><th class="p-4 text-center">Acción</th></tr>
+                            <tr>
+                                <th class="p-4">Tipo de Movilidad</th>
+                                <th class="p-4 text-center">Estado Actual</th>
+                                <th class="p-4 text-center">Acción</th>
+                            </tr>
                         </thead>
                         <tbody class="divide-y">
                             <tr class="hover:bg-gray-50">
                                 <td class="p-4 font-bold text-[#03045e]">Intercambio Académico</td>
-                                <td class="p-4 text-center"><span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">Habilitado</span></td>
-                                <td class="p-4 text-center"><button class="text-orange-600 font-bold text-xs border border-orange-200 px-3 py-1 rounded hover:bg-orange-50">Pausar</button></td>
+                                <td class="p-4 text-center"><span
+                                        class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">Habilitado</span>
+                                </td>
+                                <td class="p-4 text-center"><button
+                                        class="text-orange-600 font-bold text-xs border border-orange-200 px-3 py-1 rounded hover:bg-orange-50">Pausar</button>
+                                </td>
                             </tr>
                             <tr class="hover:bg-gray-50">
                                 <td class="p-4 font-bold text-[#03045e]">Voluntariado</td>
-                                <td class="p-4 text-center"><span class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">Suspendido</span></td>
-                                <td class="p-4 text-center"><button class="text-green-600 font-bold text-xs border border-green-200 px-3 py-1 rounded hover:bg-green-50">Habilitar</button></td>
+                                <td class="p-4 text-center"><span
+                                        class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">Suspendido</span>
+                                </td>
+                                <td class="p-4 text-center"><button
+                                        class="text-green-600 font-bold text-xs border border-green-200 px-3 py-1 rounded hover:bg-green-50">Habilitar</button>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -208,16 +271,23 @@
         </main>
     </div>
 
-    <div id="reviewModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+    <div id="reviewModal"
+        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
             <div class="bg-[#03045e] p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold flex items-center gap-2"><i data-lucide="clipboard-check" class="w-5 h-5"></i> Revisión de Expediente</h3>
-                <button onclick="document.getElementById('reviewModal').classList.add('hidden')" class="text-gray-300 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <h3 class="font-bold flex items-center gap-2"><i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                    Revisión de Expediente</h3>
+                <button onclick="document.getElementById('reviewModal').classList.add('hidden')"
+                    class="text-gray-300 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-6">
                 <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
-                    <div class="bg-gray-50 p-3 rounded border"><span class="block text-[10px] font-bold text-gray-400 uppercase">ID de Solicitud</span><span class="font-mono font-bold text-[#03045e]" id="modalId"></span></div>
-                    <div class="bg-gray-50 p-3 rounded border"><span class="block text-[10px] font-bold text-gray-400 uppercase">Usuario Solicitante</span><span class="font-bold text-gray-800" id="modalUser"></span></div>
+                    <div class="bg-gray-50 p-3 rounded border"><span
+                            class="block text-[10px] font-bold text-gray-400 uppercase">ID de Solicitud</span><span
+                            class="font-mono font-bold text-[#03045e]" id="modalId"></span></div>
+                    <div class="bg-gray-50 p-3 rounded border"><span
+                            class="block text-[10px] font-bold text-gray-400 uppercase">Usuario Solicitante</span><span
+                            class="font-bold text-gray-800" id="modalUser"></span></div>
                 </div>
                 <div id="modalActions" class="flex justify-end gap-3 pt-4 border-t mt-6"></div>
             </div>
@@ -238,7 +308,7 @@
             document.getElementById('userNameDisplay').textContent = user.name;
             document.getElementById('userRoleDisplay').textContent = user.role.name;
             document.getElementById('aniTitle').textContent = user.role.code === 'ANI_SECRETARIA' ? 'Secretaría ANI' : 'Dirección ANI';
-            
+
             loadTable();
             lucide.createIcons();
         });
@@ -248,16 +318,16 @@
             // Ocultar todas las secciones
             document.querySelectorAll('.ani-content-section').forEach(el => el.classList.add('hidden'));
             document.getElementById(targetId).classList.remove('hidden');
-            
+
             // Restablecer estilos de botones en el sidebar
             document.querySelectorAll('.ani-tab').forEach(el => {
                 el.classList.remove('bg-white/10', 'text-white', 'font-bold');
                 el.classList.add('text-blue-200', 'font-semibold');
             });
-            
+
             // Aplicar estilo activo
             const activeBtn = document.querySelector(`[data-target="${targetId}"]`);
-            if(activeBtn) {
+            if (activeBtn) {
                 activeBtn.classList.remove('text-blue-200', 'font-semibold');
                 activeBtn.classList.add('bg-white/10', 'text-white', 'font-bold');
             }
@@ -266,7 +336,7 @@
         function loadTable() {
             const tbody = document.getElementById('aniTableBody');
             tbody.innerHTML = '';
-            
+
             const mockRequests = [
                 { id: 'REQ-1082', type: 'Práctica Empresarial', status: 'EN_REVISION_SECRETARIA_ANI', userEmail: 'estudiante@cue.edu.co', dir: 'SALIENTE' },
                 { id: 'REQ-2005', type: 'Intercambio Académico', status: 'EN_REVISION_TOTAL', userEmail: 'externo@unam.mx', dir: 'ENTRANTE' }
@@ -274,7 +344,7 @@
 
             const localReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             const allReqs = [...mockRequests];
-            localReqs.forEach(lr => { if(!allReqs.find(ar => ar.id === lr.id)) allReqs.push(lr); });
+            localReqs.forEach(lr => { if (!allReqs.find(ar => ar.id === lr.id)) allReqs.push(lr); });
 
             const visibleReqs = allReqs.filter(req => {
                 if (currentRole === 'ANI_SECRETARIA') return req.status === 'EN_REVISION_SECRETARIA_ANI';
@@ -305,15 +375,15 @@
             currentRequestId = id;
             document.getElementById('modalId').textContent = id;
             document.getElementById('modalUser').textContent = userEmail;
-            
+
             const actionsDiv = document.getElementById('modalActions');
             if (currentRole === 'ANI_SECRETARIA') {
                 actionsDiv.innerHTML = `<button onclick="processRequest('EN_REVISION_DIRECCION_ANI')" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition">Pre-Aprobar (Enviar a Dirección)</button>`;
             } else {
-                let btnAprobar = dir === 'ENTRANTE' 
+                let btnAprobar = dir === 'ENTRANTE'
                     ? `<button onclick="processRequest('PENDIENTE_MATRICULA')" class="px-6 py-2 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700 transition">Aprobar y Enviar a Registro (Matrícula)</button>`
                     : `<button onclick="processRequest('APROBADA_POSTULACION')" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition">Aprobar Postulación (Pasa a Fase 2)</button>`;
-                
+
                 actionsDiv.innerHTML = `
                     <button onclick="document.getElementById('reviewModal').classList.add('hidden')" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold">Cancelar</button>
                     ${btnAprobar}
@@ -329,8 +399,136 @@
             if (!updated) reqs.push({ id: currentRequestId, status: newStatus, userEmail: document.getElementById('modalUser').textContent });
             localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
             document.getElementById('reviewModal').classList.add('hidden');
-            loadTable(); 
+            loadTable();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar iconos de Lucide si los estás usando
+            if (typeof lucide !== 'undefined') { lucide.createIcons(); }
+
+            // Cargar listas al iniciar la página
+            cargarProgramas();
+            cargarTiposMovilidad();
+        });
+
+        // ==========================================
+        // 1. LÓGICA DE ACCESOS PARA EXTERNOS
+        // ==========================================
+        function generarAccesoExterno(e) {
+            e.preventDefault(); // Evita que la página se recargue
+
+            // Capturamos los datos de tus inputs actuales
+            const nombre = document.getElementById('extName') ? document.getElementById('extName').value : '';
+            const correo = document.getElementById('extEmail') ? document.getElementById('extEmail').value : '';
+            const institucion = document.getElementById('extInst') ? document.getElementById('extInst').value : '';
+
+            if (!nombre || !correo || !institucion) {
+                return alert("Por favor, complete todos los campos para generar el acceso.");
+            }
+
+            // Generar una contraseña aleatoria de 8 caracteres (letras y números)
+            const randomPassword = Math.random().toString(36).substring(2, 10);
+
+            // Simulación del envío de correo con la alerta
+            const mensajeCorreo = `¡Simulación de Envío de Correo Exitosa!\n\n` +
+                `Para: ${correo}\n` +
+                `Asunto: Credenciales de Acceso - Movilidad CUE\n\n` +
+                `Hola ${nombre},\n` +
+                `La Corporación Universitaria Empresarial Alexander von Humboldt le ha generado un acceso para gestionar su movilidad entrante desde ${institucion}.\n\n` +
+                `Usuario: ${correo}\n` +
+                `Contraseña temporal: ${randomPassword}\n\n` +
+                `Por favor ingrese al portal para continuar su proceso.`;
+
+            alert(mensajeCorreo);
+
+            // Limpiamos el formulario para uno nuevo
+            e.target.reset();
+        }
+
+        // ==========================================
+        // 2. LÓGICA DE PROGRAMAS ACADÉMICOS
+        // ==========================================
+        function cargarProgramas() {
+            const lista = document.getElementById('listaProgramas'); // Asegúrate de que el ul/tbody tenga este ID
+            if (!lista) return;
+
+            // Cargar de LocalStorage o poner valores por defecto
+            let programas = JSON.parse(localStorage.getItem('CUE_PROGRAMAS') || '["Ingeniería de Software", "Ingeniería Industrial", "Enfermería", "Medicina", "Derecho"]');
+            localStorage.setItem('CUE_PROGRAMAS', JSON.stringify(programas));
+
+            lista.innerHTML = programas.map((p, index) => `
+        <li class="flex justify-between items-center p-3 border-b text-sm text-gray-700 bg-white">
+            <span class="font-bold">${p}</span>
+            <button onclick="eliminarPrograma(${index})" class="text-red-500 hover:text-red-700" title="Eliminar Programa">Eliminar</button>
+        </li>
+    `).join('');
+        }
+
+        function agregarPrograma(e) {
+            e.preventDefault();
+            const input = document.getElementById('nuevoPrograma'); // Asegúrate de que el input tenga este ID
+            if (!input || input.value.trim() === '') return;
+
+            let programas = JSON.parse(localStorage.getItem('CUE_PROGRAMAS') || '[]');
+            programas.push(input.value.trim());
+            localStorage.setItem('CUE_PROGRAMAS', JSON.stringify(programas));
+
+            input.value = '';
+            cargarProgramas();
+            alert("Programa académico agregado exitosamente.");
+        }
+
+        function eliminarPrograma(index) {
+            if (confirm("¿Está seguro de eliminar este programa?")) {
+                let programas = JSON.parse(localStorage.getItem('CUE_PROGRAMAS') || '[]');
+                programas.splice(index, 1);
+                localStorage.setItem('CUE_PROGRAMAS', JSON.stringify(programas));
+                cargarProgramas();
+            }
+        }
+
+        // ==========================================
+        // 3. LÓGICA DE TIPOS DE MOVILIDAD
+        // ==========================================
+        function cargarTiposMovilidad() {
+            const lista = document.getElementById('listaTiposMovilidad'); // Asegúrate de que el ul/tbody tenga este ID
+            if (!lista) return;
+
+            // Cargar de LocalStorage o poner valores por defecto
+            let tipos = JSON.parse(localStorage.getItem('CUE_TIPOS_MOVILIDAD') || '["Intercambio Académico", "Práctica Empresarial - Pasantía", "Estancia Investigación", "Diplomado"]');
+            localStorage.setItem('CUE_TIPOS_MOVILIDAD', JSON.stringify(tipos));
+
+            lista.innerHTML = tipos.map((t, index) => `
+        <li class="flex justify-between items-center p-3 border-b text-sm text-gray-700 bg-white">
+            <span class="font-bold">${t}</span>
+            <button onclick="eliminarTipoMovilidad(${index})" class="text-red-500 hover:text-red-700" title="Eliminar Tipo">Eliminar</button>
+        </li>
+    `).join('');
+        }
+
+        function agregarTipoMovilidad(e) {
+            e.preventDefault();
+            const input = document.getElementById('nuevoTipoMovilidad'); // Asegúrate de que el input tenga este ID
+            if (!input || input.value.trim() === '') return;
+
+            let tipos = JSON.parse(localStorage.getItem('CUE_TIPOS_MOVILIDAD') || '[]');
+            tipos.push(input.value.trim());
+            localStorage.setItem('CUE_TIPOS_MOVILIDAD', JSON.stringify(tipos));
+
+            input.value = '';
+            cargarTiposMovilidad();
+            alert("Tipo de Movilidad agregado exitosamente.");
+        }
+
+        function eliminarTipoMovilidad(index) {
+            if (confirm("¿Está seguro de eliminar este tipo de movilidad?")) {
+                let tipos = JSON.parse(localStorage.getItem('CUE_TIPOS_MOVILIDAD') || '[]');
+                tipos.splice(index, 1);
+                localStorage.setItem('CUE_TIPOS_MOVILIDAD', JSON.stringify(tipos));
+                cargarTiposMovilidad();
+            }
         }
     </script>
 </body>
+
 </html>

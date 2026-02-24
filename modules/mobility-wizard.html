@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,15 +10,54 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        .form-label { display: block; font-size: 0.75rem; font-weight: 700; color: #4b5563; margin-bottom: 0.25rem; text-transform: uppercase; }
-        .form-input { width: 100%; padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; outline: none; background: white; transition: all 0.2s; font-size: 0.875rem; }
-        .form-input:focus { border-color: #0077b6; box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1); }
-        .form-input[readonly] { background-color: #f3f4f6; cursor: not-allowed; color: #6b7280; }
-        .step-indicator { transition: all 0.3s; }
-        .step-indicator.active div { background-color: #03045e; color: white; border-color: #03045e; }
-        .step-indicator.active span { color: #03045e; font-weight: 800; }
+        .form-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #4b5563;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            outline: none;
+            background: white;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .form-input:focus {
+            border-color: #0077b6;
+            box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.1);
+        }
+
+        .form-input[readonly] {
+            background-color: #f3f4f6;
+            cursor: not-allowed;
+            color: #6b7280;
+        }
+
+        .step-indicator {
+            transition: all 0.3s;
+        }
+
+        .step-indicator.active div {
+            background-color: #03045e;
+            color: white;
+            border-color: #03045e;
+        }
+
+        .step-indicator.active span {
+            color: #03045e;
+            font-weight: 800;
+        }
     </style>
 </head>
+
 <body class="bg-[#f0f4f8] text-[#1a1a1a] min-h-screen flex flex-col font-['Inter']">
 
     <nav class="bg-white border-b-4 border-[#03045e] shadow-md sticky top-0 z-50">
@@ -26,30 +66,49 @@
                 <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10">
                 <h1 id="formTitle" class="font-bold text-[#03045e] text-lg border-l pl-4">Solicitud de Movilidad</h1>
             </div>
-            <button onclick="window.location.href='dashboard-estudiante.html'" class="text-gray-400 hover:text-red-500 flex items-center gap-1 text-sm font-bold">
+            <button onclick="window.location.href='dashboard-estudiante.html'"
+                class="text-gray-400 hover:text-red-500 flex items-center gap-1 text-sm font-bold">
                 <i data-lucide="x-circle" class="w-4 h-4"></i> Cancelar
             </button>
         </div>
     </nav>
 
     <main class="flex-grow container mx-auto px-4 py-8 max-w-5xl">
-        
+
         <div class="mb-8 relative z-0">
             <div class="absolute top-5 left-0 w-full h-1 bg-gray-200 -z-10"></div>
             <div class="flex justify-between w-full">
-                <div class="step-indicator active flex flex-col items-center w-1/4" data-step="1"><div class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">1</div><span class="text-xs text-gray-400 mt-1">Naturaleza</span></div>
-                <div class="step-indicator flex flex-col items-center w-1/4" data-step="2"><div class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">2</div><span class="text-xs text-gray-400 mt-1">Logística</span></div>
-                <div class="step-indicator flex flex-col items-center w-1/4" data-step="3"><div class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">3</div><span class="text-xs text-gray-400 mt-1">Académico/Finanzas</span></div>
-                <div class="step-indicator flex flex-col items-center w-1/4" data-step="4"><div class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">4</div><span class="text-xs text-gray-400 mt-1">Documentos</span></div>
+                <div class="step-indicator active flex flex-col items-center w-1/4" data-step="1">
+                    <div
+                        class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">
+                        1</div><span class="text-xs text-gray-400 mt-1">Naturaleza</span>
+                </div>
+                <div class="step-indicator flex flex-col items-center w-1/4" data-step="2">
+                    <div
+                        class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">
+                        2</div><span class="text-xs text-gray-400 mt-1">Logística</span>
+                </div>
+                <div class="step-indicator flex flex-col items-center w-1/4" data-step="3">
+                    <div
+                        class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">
+                        3</div><span class="text-xs text-gray-400 mt-1">Académico/Finanzas</span>
+                </div>
+                <div class="step-indicator flex flex-col items-center w-1/4" data-step="4">
+                    <div
+                        class="w-10 h-10 bg-gray-300 text-gray-500 rounded-full flex items-center justify-center font-bold border-4 border-[#f0f4f8]">
+                        4</div><span class="text-xs text-gray-400 mt-1">Documentos</span>
+                </div>
             </div>
         </div>
 
-        <form id="mobilityForm" class="bg-white rounded-xl shadow-lg border border-gray-100" onsubmit="WizardLogic.submit(event)">
-            
+        <form id="mobilityForm" class="bg-white rounded-xl shadow-lg border border-gray-100"
+            onsubmit="WizardLogic.submit(event)">
+
             <div class="p-8" id="step-1">
                 <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-6">Paso 1: Naturaleza de la Movilidad</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div><label class="form-label">Dirección</label><input type="text" id="mobilityDirection" class="form-input font-bold text-[#0077b6]" readonly></div>
+                    <div><label class="form-label">Dirección</label><input type="text" id="mobilityDirection"
+                            class="form-input font-bold text-[#0077b6]" readonly></div>
                     <div><label class="form-label">Modalidad (Lugar)</label>
                         <select id="mobilityModality" class="form-input" onchange="WizardLogic.filterTypesByModality()">
                             <option value="PRESENCIAL">Presencial</option>
@@ -64,10 +123,13 @@
                     </div>
                     <div class="md:col-span-3 border-t pt-4">
                         <label class="form-label text-[#03045e]">Tipo Específico de Movilidad (Requerido)</label>
-                        <select id="mobilityType" class="form-input md:w-1/2 border-[#0077b6] bg-blue-50 focus:ring-2 focus:ring-[#0077b6]" onchange="WizardLogic.updateFields()" required>
+                        <select id="mobilityType"
+                            class="form-input md:w-1/2 border-[#0077b6] bg-blue-50 focus:ring-2 focus:ring-[#0077b6]"
+                            onchange="WizardLogic.updateFields()" required>
                             <option value="">Seleccione...</option>
                         </select>
-                        <p class="text-[10px] text-gray-400 mt-1">* Debe seleccionar un tipo para poder avanzar a la siguiente etapa.</p>
+                        <p class="text-[10px] text-gray-400 mt-1">* Debe seleccionar un tipo para poder avanzar a la
+                            siguiente etapa.</p>
                     </div>
                 </div>
             </div>
@@ -80,115 +142,174 @@
                     </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="form-label text-xs font-bold text-gray-600 mb-1">Seleccione su Universidad / Entidad</label>
-                            <select id="entity_select_origin" class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none" onchange="WizardLogic.checkOtherEntityOrigin()"></select>
+                            <label class="form-label text-xs font-bold text-gray-600 mb-1">Seleccione su Universidad /
+                                Entidad</label>
+                            <select id="entity_select_origin"
+                                class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none"
+                                onchange="WizardLogic.checkOtherEntityOrigin()"></select>
                         </div>
                     </div>
-                    
-                    <div id="origenLibreContainer" class="hidden mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 border border-gray-300 rounded-lg">
-                        <div class="md:col-span-3"><p class="text-xs font-bold text-gray-500 uppercase">Registro Manual de Institución de Origen</p></div>
-                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Nombre</label><input type="text" id="other_origin_name" class="w-full border p-2 rounded text-sm"></div>
-                        <div><label class="block text-xs font-bold text-gray-600 mb-1">País</label><input type="text" id="field_country_origin" class="w-full border p-2 rounded text-sm"></div>
-                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Ciudad</label><input type="text" id="field_city_origin" class="w-full border p-2 rounded text-sm"></div>
+
+                    <div id="origenLibreContainer"
+                        class="hidden mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 border border-gray-300 rounded-lg">
+                        <div class="md:col-span-3">
+                            <p class="text-xs font-bold text-gray-500 uppercase">Registro Manual de Institución de
+                                Origen</p>
+                        </div>
+                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Nombre</label><input type="text"
+                                id="other_origin_name" class="w-full border p-2 rounded text-sm"></div>
+                        <div><label class="block text-xs font-bold text-gray-600 mb-1">País</label><input type="text"
+                                id="field_country_origin" class="w-full border p-2 rounded text-sm"></div>
+                        <div><label class="block text-xs font-bold text-gray-600 mb-1">Ciudad</label><input type="text"
+                                id="field_city_origin" class="w-full border p-2 rounded text-sm"></div>
                     </div>
                 </div>
 
                 <div id="destinoContainer" class="hidden mb-6 bg-blue-50 p-4 rounded border border-blue-200">
-                    <h3 class="font-bold text-[#0077b6] text-sm mb-3"><i data-lucide="map-pin" class="inline w-4 h-4"></i> Información de Destino</h3>
+                    <h3 class="font-bold text-[#0077b6] text-sm mb-3"><i data-lucide="map-pin"
+                            class="inline w-4 h-4"></i> Información de Destino</h3>
                     <div id="destinoSearchContainer">
                         <label class="form-label">Institución en Convenio</label>
-                        <select id="entity_select" class="form-input cursor-pointer border-[#0077b6]" onchange="WizardLogic.checkOtherEntity()"></select>
+                        <select id="entity_select" class="form-input cursor-pointer border-[#0077b6]"
+                            onchange="WizardLogic.checkOtherEntity()"></select>
                     </div>
                     <div id="destinoLibreContainer" class="hidden mt-4 pt-4 border-t border-blue-200">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="md:col-span-3"><label class="form-label text-orange-600">Nombre Entidad / Empresa</label><input type="text" id="other_entity_name" class="form-input border-orange-200"></div>
-                            <div><label class="form-label">País</label><input type="text" id="field_country" class="form-input"></div>
-                            <div><label class="form-label">Ciudad</label><input type="text" id="field_city" class="form-input"></div>
+                            <div class="md:col-span-3"><label class="form-label text-orange-600">Nombre Entidad /
+                                    Empresa</label><input type="text" id="other_entity_name"
+                                    class="form-input border-orange-200"></div>
+                            <div><label class="form-label">País</label><input type="text" id="field_country"
+                                    class="form-input"></div>
+                            <div><label class="form-label">Ciudad</label><input type="text" id="field_city"
+                                    class="form-input"></div>
                         </div>
                     </div>
-                    <div id="practiceDetailsContainer" class="hidden mt-4 pt-4 border-t border-blue-200 bg-white p-3 rounded shadow-sm">
-                        <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3"><i data-lucide="briefcase" class="w-3 h-3 inline"></i> Enfoque Académico-Laboral</h4>
+                    <div id="practiceDetailsContainer"
+                        class="hidden mt-4 pt-4 border-t border-blue-200 bg-white p-3 rounded shadow-sm">
+                        <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3"><i data-lucide="briefcase"
+                                class="w-3 h-3 inline"></i> Enfoque Académico-Laboral</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div><label class="form-label text-purple-700">Línea de Profundización</label><input type="text" class="form-input"></div>
-                            <div><label class="form-label text-purple-700">Entregable Esperado</label><input type="text" class="form-input"></div>
+                            <div><label class="form-label text-purple-700">Línea de Profundización</label><input
+                                    type="text" class="form-input"></div>
+                            <div><label class="form-label text-purple-700">Entregable Esperado</label><input type="text"
+                                    class="form-input"></div>
                         </div>
                     </div>
                     <div id="extraFieldsContainer" class="hidden mt-4 pt-4 border-t border-blue-200">
-                        <div id="researchFields" class="hidden"><label class="form-label text-purple-700">Proyecto Investigación</label><input type="text" class="form-input"></div>
-                        <div id="eventFields" class="hidden"><label class="form-label text-purple-700">Evento / Congreso</label><input type="text" class="form-input"></div>
+                        <div id="researchFields" class="hidden"><label class="form-label text-purple-700">Proyecto
+                                Investigación</label><input type="text" class="form-input"></div>
+                        <div id="eventFields" class="hidden"><label class="form-label text-purple-700">Evento /
+                                Congreso</label><input type="text" class="form-input"></div>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-gray-50 p-4 border rounded">
-                    <div class="md:col-span-4 font-bold text-xs text-[#03045e] uppercase border-b pb-1 mb-2">Cronograma</div>
-                    <div class="md:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div><label class="form-label">Fecha de Inicio</label><input type="date" id="fechaInicio" class="form-input" onchange="WizardLogic.calculateDuration()"></div>
-                        <div><label class="form-label">Fecha de Finalización</label><input type="date" id="fechaFin" class="form-input" onchange="WizardLogic.calculateDuration()"></div>
-                        <div><label class="form-label">Duración Calculada</label><input type="text" id="duracionCalculada" class="form-input bg-gray-100" readonly></div>
+                    <div class="md:col-span-4 font-bold text-xs text-[#03045e] uppercase border-b pb-1 mb-2">Cronograma
                     </div>
-                    <div class="req-presencial md:col-span-2"><label class="form-label text-orange-600">Fecha Ida (Viaje)</label><input type="date" class="form-input border-orange-200"></div>
-                    <div class="req-presencial md:col-span-2"><label class="form-label text-orange-600">Fecha Regreso</label><input type="date" class="form-input border-orange-200"></div>
-                    <div class="req-presencial md:col-span-4 mt-2"><label class="form-label">Dir. Residencia (Destino)</label><input type="text" class="form-input"></div>
+                    <div class="md:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div><label class="form-label">Fecha de Inicio</label><input type="date" id="fechaInicio"
+                                class="form-input" onchange="WizardLogic.calculateDuration()"></div>
+                        <div><label class="form-label">Fecha de Finalización</label><input type="date" id="fechaFin"
+                                class="form-input" onchange="WizardLogic.calculateDuration()"></div>
+                        <div><label class="form-label">Duración Calculada</label><input type="text"
+                                id="duracionCalculada" class="form-input bg-gray-100" readonly></div>
+                    </div>
+                    <div class="req-presencial md:col-span-2"><label class="form-label text-orange-600">Fecha Ida
+                            (Viaje)</label><input type="date" class="form-input border-orange-200"></div>
+                    <div class="req-presencial md:col-span-2"><label class="form-label text-orange-600">Fecha
+                            Regreso</label><input type="date" class="form-input border-orange-200"></div>
+                    <div class="req-presencial md:col-span-4 mt-2"><label class="form-label">Dir. Residencia
+                            (Destino)</label><input type="text" class="form-input"></div>
                 </div>
 
                 <div id="transportContainer" class="hidden border-t pt-4">
                     <label class="flex items-center gap-2 text-sm font-bold text-[#03045e] mb-4 cursor-pointer">
-                        <input type="checkbox" id="hiredTransport" class="w-4 h-4 accent-[#03045e]" onchange="WizardLogic.updateFields()"> Se contratará Transporte (Activa SST)
+                        <input type="checkbox" id="hiredTransport" class="w-4 h-4 accent-[#03045e]"
+                            onchange="WizardLogic.updateFields()"> Se contratará Transporte (Activa SST)
                     </label>
-                    <div id="vehicleDetails" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 bg-orange-50 p-4 rounded border border-orange-200">
-                        <div class="md:col-span-3 text-xs text-orange-800 font-bold mb-2">Deberá subir documentos en el Paso 4.</div>
-                        <input type="text" placeholder="Empresa" class="form-input"><input type="text" placeholder="Placa" class="form-input"><input type="text" placeholder="Licencia" class="form-input">
+                    <div id="vehicleDetails"
+                        class="hidden grid grid-cols-1 md:grid-cols-3 gap-4 bg-orange-50 p-4 rounded border border-orange-200">
+                        <div class="md:col-span-3 text-xs text-orange-800 font-bold mb-2">Deberá subir documentos en el
+                            Paso 4.</div>
+                        <input type="text" placeholder="Empresa" class="form-input"><input type="text"
+                            placeholder="Placa" class="form-input"><input type="text" placeholder="Licencia"
+                            class="form-input">
                     </div>
                 </div>
 
                 <div class="mt-6 bg-gray-50 p-4 border border-gray-200 rounded-lg">
-                    <h3 class="font-bold text-[#03045e] text-sm mb-2 uppercase"><i data-lucide="list-checks" class="w-4 h-4 inline text-[#0077b6]"></i> Descripción de actividades</h3>
-                    <textarea id="actividadesMovilidad" rows="3" class="w-full border p-2 rounded text-sm focus:border-[#0077b6]" placeholder="Asignaturas a cursar, labores..."></textarea>
+                    <h3 class="font-bold text-[#03045e] text-sm mb-2 uppercase"><i data-lucide="list-checks"
+                            class="w-4 h-4 inline text-[#0077b6]"></i> Descripción de actividades</h3>
+                    <textarea id="actividadesMovilidad" rows="3"
+                        class="w-full border p-2 rounded text-sm focus:border-[#0077b6]"
+                        placeholder="Asignaturas a cursar, labores..."></textarea>
                 </div>
             </div>
 
             <div class="hidden p-8" id="step-3">
-                <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-6">Paso 3: Detalles Académicos y Financieros</h2>
+                <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-6">Paso 3: Detalles Académicos y
+                    Financieros</h2>
                 <div class="border-t pt-4">
-                    <h3 class="font-bold text-[#03045e] text-sm mb-4 uppercase"><i data-lucide="dollar-sign" class="w-4 h-4 inline"></i> Costos y Financiación</h3>
+                    <h3 class="font-bold text-[#03045e] text-sm mb-4 uppercase"><i data-lucide="dollar-sign"
+                            class="w-4 h-4 inline"></i> Costos y Financiación</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="form-label text-xs font-bold text-gray-600">¿Genera costo de matrícula?</label>
-                            <select id="hasCosto" class="form-input" onchange="WizardLogic.toggleFinance()"><option value="NO">No</option><option value="SI">Sí</option></select>
-                            <input type="number" id="montoCosto" class="form-input mt-2 hidden border-blue-300 bg-blue-50" placeholder="Valor USD/COP">
+                            <label class="form-label text-xs font-bold text-gray-600">¿Genera costo de
+                                matrícula?</label>
+                            <select id="hasCosto" class="form-input" onchange="WizardLogic.toggleFinance()">
+                                <option value="NO">No</option>
+                                <option value="SI">Sí</option>
+                            </select>
+                            <input type="number" id="montoCosto"
+                                class="form-input mt-2 hidden border-blue-300 bg-blue-50" placeholder="Valor USD/COP">
                         </div>
                         <div>
                             <label class="form-label text-xs font-bold text-gray-600">¿Cuenta con beca?</label>
-                            <select id="hasBeca" class="form-input" onchange="WizardLogic.toggleFinance()"><option value="NO">No</option><option value="SI">Sí</option></select>
-                            <input type="number" id="montoBeca" class="form-input mt-2 hidden border-green-300 bg-green-50" placeholder="Monto apoyo">
+                            <select id="hasBeca" class="form-input" onchange="WizardLogic.toggleFinance()">
+                                <option value="NO">No</option>
+                                <option value="SI">Sí</option>
+                            </select>
+                            <input type="number" id="montoBeca"
+                                class="form-input mt-2 hidden border-green-300 bg-green-50" placeholder="Monto apoyo">
                         </div>
                     </div>
                 </div>
 
                 <div id="studentPersonalData" class="mt-8">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 relative">
-                        <div class="md:col-span-4 font-bold text-xs text-gray-500 uppercase border-b pb-1">Perfil Académico (Solo Lectura)</div>
-                        <div><label class="form-label">Documento</label><input type="text" id="autoDoc" class="form-input bg-gray-100" readonly></div>
-                        <div class="md:col-span-2"><label class="form-label">Programa</label><input type="text" value="Ingeniería de Software" class="form-input bg-gray-100" readonly></div>
-                        <div><label class="form-label">Semestre / Promedio</label><input type="text" id="autoSem" class="form-input bg-gray-100" readonly></div>
-                        
+                        <div class="md:col-span-4 font-bold text-xs text-gray-500 uppercase border-b pb-1">Perfil
+                            Académico (Solo Lectura)</div>
+                        <div><label class="form-label">Documento</label><input type="text" id="autoDoc"
+                                class="form-input bg-gray-100" readonly></div>
+                        <div class="md:col-span-2"><label class="form-label">Programa</label><input type="text"
+                                value="Ingeniería de Software" class="form-input bg-gray-100" readonly></div>
+                        <div><label class="form-label">Semestre / Promedio</label><input type="text" id="autoSem"
+                                class="form-input bg-gray-100" readonly></div>
+
                         <div class="req-presencial md:col-span-4 border-t pt-4">
-                            <h3 class="font-bold text-red-600 text-sm mb-4 uppercase"><i data-lucide="heart-pulse" class="inline w-4 h-4"></i> Riesgos (SST)</h3>
+                            <h3 class="font-bold text-red-600 text-sm mb-4 uppercase"><i data-lucide="heart-pulse"
+                                    class="inline w-4 h-4"></i> Riesgos </h3>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div><label class="form-label">EPS</label><input type="text" id="sstEps" class="form-input"></div>
-                                <div><label class="form-label">Alergias/Meds</label><input type="text" id="sstMeds" class="form-input"></div>
+                                <div><label class="form-label">EPS</label><input type="text" id="sstEps"
+                                        class="form-input"></div>
+                                <div><label class="form-label">Alergias/Meds</label><input type="text" id="sstMeds"
+                                        class="form-input"></div>
                             </div>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded border">
                                 <div class="md:col-span-3 font-bold text-xs">Contacto Emergencia</div>
-                                <input type="text" id="sstContactName" placeholder="Nombre" class="form-input"><input type="text" id="sstContactRel" placeholder="Parentesco" class="form-input"><input type="tel" id="sstContactPhone" placeholder="Celular" class="form-input">
+                                <input type="text" id="sstContactName" placeholder="Nombre" class="form-input">
+                                <input type="text" id="sstContactRel" placeholder="Parentesco" class="form-input">
+                                <input type="tel" id="sstContactPhone" placeholder="Celular" class="form-input">
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div id="professorRosterData" class="hidden border-t pt-4">
-                    <h3 class="font-bold text-[#0077b6] text-sm mb-4"><i data-lucide="users" class="inline w-4 h-4"></i> Participantes</h3>
-                    <div class="bg-blue-50 p-4 rounded text-sm text-blue-800 text-center">[Selección conectada a Q10]</div>
+                    <h3 class="font-bold text-[#0077b6] text-sm mb-4"><i data-lucide="users" class="inline w-4 h-4"></i>
+                        Participantes</h3>
+                    <div class="bg-blue-50 p-4 rounded text-sm text-blue-800 text-center">Selección conectada a Q10
+                    </div>
                 </div>
             </div>
 
@@ -197,31 +318,47 @@
                 <div id="docsList" class="space-y-3 mb-8"></div>
                 <div class="p-4 bg-blue-50 border border-[#0077b6] rounded flex gap-3">
                     <input type="checkbox" id="termsCheck" class="mt-1 w-5 h-5 accent-[#03045e]">
-                    <label for="termsCheck" class="text-xs text-[#03045e]">Acepto política de tratamiento de datos.</label>
+                    <label for="termsCheck" class="text-xs text-[#03045e]">Acepto política de tratamiento de
+                        datos.</label>
                 </div>
             </div>
 
             <div class="bg-gray-50 px-8 py-4 flex justify-between items-center rounded-b-xl border-t mt-4">
-                <button type="button" id="prevBtn" class="px-6 py-2 border bg-white rounded font-bold text-gray-600 hidden" onclick="WizardLogic.step(-1)">Anterior</button>
-                
+                <button type="button" id="prevBtn"
+                    class="px-6 py-2 border bg-white rounded font-bold text-gray-600 hidden"
+                    onclick="WizardLogic.step(-1)">Anterior</button>
+
                 <div class="flex-1 flex justify-center">
-                    <button type="button" id="btnDraft" onclick="WizardLogic.save()" class="text-sm font-bold text-gray-500 hover:text-[#0077b6] flex items-center gap-1">
+                    <button type="button" id="btnDraft" onclick="WizardLogic.save()"
+                        class="text-sm font-bold text-gray-500 hover:text-[#0077b6] flex items-center gap-1">
                         <i data-lucide="save" class="w-4 h-4"></i> Guardar Borrador
                     </button>
-                </div> 
-                
-                <button type="button" id="nextBtn" class="px-6 py-2 bg-[#0077b6] text-white rounded font-bold hover:bg-[#03045e] flex items-center gap-1" onclick="WizardLogic.step(1)">
+                </div>
+
+                <button type="button" id="nextBtn"
+                    class="px-6 py-2 bg-[#0077b6] text-white rounded font-bold hover:bg-[#03045e] flex items-center gap-1"
+                    onclick="WizardLogic.step(1)">
                     Siguiente <i data-lucide="arrow-right" class="w-4 h-4"></i>
                 </button>
-                
-                <button type="submit" id="submitBtn" class="px-8 py-2 bg-[#03045e] text-white rounded font-bold hover:bg-black hidden shadow-lg flex items-center gap-2">
+
+                <button type="submit" id="submitBtn"
+                    class="px-8 py-2 bg-[#03045e] text-white rounded font-bold hover:bg-black hidden shadow-lg flex items-center gap-2">
                     <span id="submitText">RADICAR SOLICITUD</span> <i data-lucide="check" class="w-4 h-4"></i>
                 </button>
             </div>
         </form>
     </main>
 
+
+    <select id="profRolExt" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#03045e]">
+        <option value="Estudiante">Estudiante</option>
+        <option value="Profesor">Profesor no docente / Investigador</option>
+        <option value="Administrativo">Administrativo</option>
+    </select>
+
+
     <script src="../assets/js/auth.js"></script>
     <script src="../assets/js/wizard-logic.js"></script>
 </body>
+
 </html>
