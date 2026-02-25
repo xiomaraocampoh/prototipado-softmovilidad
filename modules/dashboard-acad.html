@@ -333,10 +333,10 @@
         let selectedParticipants = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            const user = AuthService.checkAuth();
+            const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
             if (!user || user.role.code !== 'COORD_ACAD') {
                 alert("Acceso denegado. Se requiere perfil de Coordinación Académica.");
-                window.location.href = '../index.html';
+                window.location.href = '../index-sistema.html';
                 return;
             }
             document.getElementById('userNameDisplay').textContent = user.name;

@@ -70,10 +70,10 @@
     <script src="../assets/js/auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const user = AuthService.checkAuth();
+            const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
             if (!user || user.role.code !== 'REGISTRO') {
                 alert("Acceso denegado. Se requiere perfil de Control y Registro.");
-                window.location.href = '../index.html';
+                window.location.href = '../index-sistema.html';
                 return;
             }
             

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso al sistema</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body class="bg-[#8f8f8f] font-['Inter'] min-h-screen">
+    <div class="w-full max-w-5xl mx-auto px-4 py-10">
+        <div class="bg-[#f5f5f5] rounded shadow-[0_10px_30px_rgba(0,0,0,0.25)] overflow-hidden border border-[#c7c7c7]">
+            <div class="p-10">
+                <h1 class="text-4xl font-light text-center text-gray-500 mb-10">Acceso al sistema</h1>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
+                    <div class="flex items-center justify-center gap-8 md:col-span-2">
+                        <div class="text-center">
+                            <img src="assets/img/logo_avh.png" alt="Logo AVH" class="h-28 mx-auto">
+                            <p class="text-[10px] text-gray-500 mt-2">Corporación Universitaria Empresarial</p>
+                        </div>
+                        <div class="h-28 w-px bg-gray-300"></div>
+                        <div class="text-center">
+                            <img src="assets/img/logo_camara.png" alt="Cámara de Comercio" class="h-24 mx-auto"
+                                 onerror="this.style.display='none'">
+                            <p class="text-[10px] text-gray-500 mt-2">Filial de:</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div id="error-msg" class="hidden bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4 text-sm">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                <span id="error-text">Error</span>
+                            </div>
+                        </div>
+
+                        <form id="backofficeForm" class="space-y-3">
+                            <div class="grid grid-cols-[110px_1fr] items-center gap-3">
+                                <label class="text-sm text-gray-700 font-semibold">Usuario:</label>
+                                <input type="email" id="backofficeEmail" required class="border border-gray-300 px-3 py-2 text-sm bg-white">
+                            </div>
+                            <div class="grid grid-cols-[110px_1fr] items-center gap-3">
+                                <label class="text-sm text-gray-700 font-semibold">Contraseña:</label>
+                                <input type="password" id="backofficePassword" required class="border border-gray-300 px-3 py-2 text-sm bg-white">
+                            </div>
+
+                            <div class="flex items-center justify-end gap-2 pt-2">
+                                <button type="submit" class="px-6 py-2 bg-gray-200 border border-gray-400 text-gray-700 text-sm hover:bg-gray-300">Enviar</button>
+                                <button type="button" id="btnCancel" class="px-6 py-2 bg-gray-200 border border-gray-400 text-gray-700 text-sm hover:bg-gray-300">Cancelar</button>
+                            </div>
+                            <div class="text-right">
+                                <a href="#" class="text-xs text-gray-500 hover:underline">Olvidó su usuario y clave ?</a>
+                            </div>
+                        </form>
+
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Modo demo (Gestores)</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button" onclick="demoBackoffice('secretaria.ani@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">Secretaría ANI</button>
+                                <button type="button" onclick="demoBackoffice('direccion.ani@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">Dirección ANI</button>
+                                <button type="button" onclick="demoBackoffice('coordinacion.acad@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">Coord. Acad.</button>
+                                <button type="button" onclick="demoBackoffice('sst@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">SST</button>
+                                <button type="button" onclick="demoBackoffice('registro@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">Registro</button>
+                            </div>
+                            <p class="text-[11px] text-gray-600 mt-3">Solicitantes: ingrese por <a class="text-[#2b6ea3] font-bold hover:underline" href="index.html">Portal CUE</a>.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-10 pb-8">
+                <div class="text-center text-[10px] text-gray-500 leading-relaxed">
+                    <div class="font-semibold">MiCUEOnline v4.0</div>
+                    <div>Desarrollado por: Departamento de Desarrollo y Sistemas de Información</div>
+                    <div>Armenia, 2026</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/auth.js"></script>
+    <script>
+        lucide.createIcons();
+        const errorBox = document.getElementById('error-msg');
+        const errorText = document.getElementById('error-text');
+
+        function showError(msg) {
+            errorText.textContent = msg;
+            errorBox.classList.remove('hidden');
+        }
+        function clearError() {
+            errorBox.classList.add('hidden');
+        }
+
+        document.getElementById('backofficeForm').onsubmit = (e) => {
+            e.preventDefault();
+            clearError();
+            const res = AuthService.loginBackoffice(
+                document.getElementById('backofficeEmail').value,
+                document.getElementById('backofficePassword').value
+            );
+            if (!res.success) return showError(res.message);
+            window.location.href = 'modules/' + res.redirect;
+        };
+
+        document.getElementById('btnCancel').onclick = () => {
+            document.getElementById('backofficeEmail').value = '';
+            document.getElementById('backofficePassword').value = '';
+            clearError();
+        };
+
+        window.demoBackoffice = (email, pass) => {
+            document.getElementById('backofficeEmail').value = email;
+            document.getElementById('backofficePassword').value = pass;
+        };
+    </script>
+</body>
+</html>
+

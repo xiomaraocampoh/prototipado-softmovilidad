@@ -171,10 +171,10 @@
         const LS_SALIDAS = 'CUE_SALIDAS_ACADEMICAS';
 
         document.addEventListener('DOMContentLoaded', () => {
-            const user = AuthService.checkAuth();
+            const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
             if (!user || user.role.code !== 'SST') {
                 alert("Acceso denegado. Se requiere perfil de Seguridad y Salud en el Trabajo.");
-                window.location.href = '../index.html';
+                window.location.href = '../index-sistema.html';
                 return;
             }
             

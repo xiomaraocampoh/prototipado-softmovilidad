@@ -300,9 +300,9 @@
         let currentRequestId = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            const user = AuthService.checkAuth();
+            const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
             if (!user || (user.role.code !== 'ANI_SECRETARIA' && user.role.code !== 'ANI_DIRECCION')) {
-                alert("Acceso denegado."); window.location.href = '../index.html'; return;
+                alert("Acceso denegado."); window.location.href = '../index-sistema.html'; return;
             }
             currentRole = user.role.code;
             document.getElementById('userNameDisplay').textContent = user.name;
