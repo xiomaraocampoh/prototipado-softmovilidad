@@ -3,92 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal CUE</title>
+    <title>Portal CUE - Movilidad</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #e5e7eb; }
+        .bg-cue { background-color: #00529C; }
+        .text-cue { color: #00529C; }
+    </style>
 </head>
 
-<body class="bg-[#0b4f7a] font-['Inter'] min-h-screen">
-    <div class="w-full max-w-5xl mx-auto px-4 py-10">
-        <div class="bg-white rounded shadow-[0_10px_30px_rgba(0,0,0,0.25)] overflow-hidden border border-[#c7c7c7]">
-            <div class="h-10 bg-[#0b4f7a]"></div>
-            <div class="p-10">
-                <h1 id="portalTitle" class="text-5xl font-light text-center text-gray-500 mb-10">Portal CUE</h1>
+<body class="min-h-screen flex flex-col">
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
-                    <div class="flex items-center justify-center gap-8 md:col-span-2">
-                        <div class="text-center">
-                            <img src="assets/img/logo_avh.png" alt="Logo AVH" class="h-28 mx-auto">
-                            <p class="text-[10px] text-gray-400 mt-2">Corporación Universitaria Empresarial</p>
-                        </div>
-                        <div class="h-28 w-px bg-gray-200"></div>
-                        <div class="text-center">
-                            <img src="assets/img/logo_camara.png" alt="Cámara de Comercio" class="h-24 mx-auto"
-                                 onerror="this.style.display='none'">
-                            <p class="text-[10px] text-gray-400 mt-2">Filial de:</p>
-                        </div>
-                    </div>
+    <header class="fixed top-0 left-0 w-full h-[50px] bg-cue z-50 flex items-center px-4 md:px-8 shadow-md">
+        <span class="text-white text-[13px] md:text-[15px] tracking-[4px] font-semibold uppercase">
+            CORPORACIÓN UNIVERSITARIA EMPRESARIAL
+        </span>
+    </header>
 
-                    <div>
-                        <div id="error-msg" class="hidden bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4 text-sm">
-                            <div class="flex items-center gap-2">
-                                <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                                <span id="error-text">Error</span>
-                            </div>
-                        </div>
+    <main class="flex-grow pt-[50px] pb-[50px] flex items-center justify-center p-4">
+        
+        <div class="bg-white rounded-lg shadow-2xl flex flex-col md:flex-row w-full max-w-4xl border border-gray-200 overflow-hidden">
+            
+            <div class="md:w-5/12 bg-gray-50 flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-gray-200">
+                <img src="assets/img/logo_camara.png" alt="Cámara de Comercio" class="max-w-full h-auto max-h-40" onerror="this.style.display='none'">
+            </div>
 
-                        <!-- Paso 1 -->
-                        <form id="portalStep1" class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-600 mb-2">Correo:</label>
-                                <input type="email" id="portalEmail" required class="w-full border border-gray-300 px-3 py-2 text-sm">
-                            </div>
-                            <label class="flex items-center gap-2 text-xs text-gray-600">
-                                <input id="reuseLastCode" type="checkbox" class="w-3.5 h-3.5">
-                                Usar el último código generado
-                            </label>
-                            <button type="submit" class="w-full bg-[#2b6ea3] hover:bg-[#245d8a] text-white py-2 text-sm font-semibold">
-                                Ingresar
-                            </button>
-                        </form>
+            <div class="md:w-7/12 p-8 md:p-12 flex flex-col justify-center">
+                <h1 id="portalTitle" class="text-3xl font-light text-center text-gray-500 mb-8">Portal CUE</h1>
 
-                        <!-- Paso 2 -->
-                        <form id="portalStep2" class="hidden space-y-4">
-                            <p class="text-sm text-gray-600">El código de seguridad se envió al correo</p>
-                            <p id="portalEmailEcho" class="text-sm font-semibold text-gray-700"></p>
-                            <input inputmode="numeric" maxlength="4" id="portalCode" class="w-full border border-gray-300 px-3 py-2 text-sm">
-                            <button type="submit" class="w-full bg-[#2b6ea3] hover:bg-[#245d8a] text-white py-2 text-sm font-semibold">
-                                Ingresar
-                            </button>
-                            <button type="button" id="backToStep1" class="w-full border border-gray-300 text-gray-600 py-2 text-sm font-semibold hover:bg-gray-50">
-                                Volver
-                            </button>
-                        </form>
-
-                        <div class="mt-6 pt-4 border-t border-gray-100">
-                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Modo demo</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button type="button" onclick="demoPortal('estudiante@cue.edu.co')" class="text-[10px] py-2 border border-gray-200 hover:bg-gray-50 font-bold text-gray-700">Estudiante</button>
-                                <button type="button" onclick="demoPortal('docente@cue.edu.co')" class="text-[10px] py-2 border border-gray-200 hover:bg-gray-50 font-bold text-gray-700">Profesor</button>
-                                <button type="button" onclick="demoPortal('administrativo@cue.edu.co')" class="text-[10px] py-2 border border-gray-200 hover:bg-gray-50 font-bold text-gray-700">Administrativo</button>
-                                <button type="button" onclick="demoPortal('egresado@cue.edu.co')" class="text-[10px] py-2 border border-gray-200 hover:bg-gray-50 font-bold text-gray-700">Egresado</button>
-                                <button type="button" onclick="demoPortal('externo@unam.mx')" class="text-[10px] py-2 border border-gray-200 hover:bg-gray-50 font-bold text-gray-700">Externo</button>
-                                <button type="button" onclick="demoPortal('rector@cue.edu.co')" class="text-[10px] py-2 border border-gray-200 hover:bg-gray-50 font-bold text-gray-700">Rector</button>
-                            </div>
-                            <p class="text-[11px] text-gray-500 mt-3">Gestores/Back‑Office: ingrese por <a class="text-[#2b6ea3] font-bold hover:underline" href="index-sistema.html">Acceso al sistema</a>.</p>
-                        </div>
+                <div id="error-msg" class="hidden bg-red-50 border border-red-200 text-red-700 p-2 rounded mb-4 text-xs">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                        <span id="error-text">Error</span>
                     </div>
                 </div>
+
+                <form id="portalStep1" class="w-full">
+                    <div class="flex items-center gap-3 mb-2">
+                        <label class="w-16 text-right text-sm font-semibold text-gray-700">Correo:</label>
+                        <input type="email" id="portalEmail" required class="flex-1 border border-gray-300 px-3 py-1.5 text-sm bg-white outline-none focus:border-[#00529C] transition-colors">
+                        <button type="submit" class="px-5 py-1.5 bg-cue text-white font-semibold text-sm hover:bg-blue-800 transition-colors shadow-sm cursor-pointer">
+                            Ingresar
+                        </button>
+                    </div>
+                    <div class="flex justify-start pl-[76px] mt-2">
+                        <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer hover:text-gray-800">
+                            <input id="reuseLastCode" type="checkbox" class="w-3.5 h-3.5 accent-[#00529C]">
+                            Usar el último código generado
+                        </label>
+                    </div>
+                </form>
+
+                <form id="portalStep2" class="w-full hidden text-center">
+                    <p class="text-sm text-gray-600 mb-1">El código de seguridad se envió al correo</p>
+                    <p id="portalEmailEcho" class="text-sm font-bold text-cue mb-6"></p>
+                    
+                    <div class="flex items-center justify-center gap-3 mb-5">
+                        <label class="text-sm font-semibold text-gray-700">Código:</label>
+                        <input inputmode="numeric" maxlength="4" id="portalCode" class="w-24 text-center tracking-[4px] border border-gray-400 px-3 py-1.5 text-base font-bold outline-none focus:border-[#00529C]">
+                    </div>
+                    <div class="flex items-center justify-center gap-2">
+                        <button type="button" id="backToStep1" class="px-6 py-1.5 bg-gray-200 border border-gray-400 text-gray-700 text-sm hover:bg-gray-300 font-semibold cursor-pointer">Volver</button>
+                        <button type="submit" class="px-6 py-1.5 bg-cue text-white text-sm hover:bg-blue-800 font-semibold shadow-sm cursor-pointer">Validar</button>
+                    </div>
+                </form>
             </div>
-            <div class="h-28 bg-[#0b4f7a] flex items-center justify-center">
-                <div class="text-center text-[10px] text-white/80 leading-relaxed px-6">
-                    <div class="font-semibold">MiCUEOnline v4.0</div>
-                    <div>Desarrollado por: Departamento de Desarrollo y Sistemas de Información</div>
-                    <div>Armenia, 2026</div>
-                </div>
-            </div>
+        </div>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 w-full h-[50px] bg-cue z-50 flex flex-col items-center justify-center text-white/80 text-[10px] leading-tight">
+        <div class="font-semibold">MiCUEOnline v4.0</div>
+        <div>Desarrollado por: Departamento de Desarrollo y Sistemas de Información</div>
+        <div>Armenia, 2026</div>
+    </footer>
+
+    <div class="fixed bottom-[60px] left-4 bg-white/95 border border-gray-300 shadow-lg p-3 rounded opacity-20 hover:opacity-100 transition-opacity duration-300 z-40">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Modo Demo</p>
+        <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" onclick="demoPortal('estudiante@cue.edu.co')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded">Estudiante</button>
+            <button type="button" onclick="demoPortal('docente@cue.edu.co')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded">Profesor</button>
+            <button type="button" onclick="demoPortal('administrativo@cue.edu.co')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded">Admin.</button>
+            <button type="button" onclick="demoPortal('egresado@cue.edu.co')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded">Egresado</button>
+            <button type="button" onclick="demoPortal('externo@unam.mx')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded">Externo</button>
+            <button type="button" onclick="demoPortal('rector@cue.edu.co')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded">Rector</button>
+        </div>
+        <div class="mt-3 pt-2 border-t border-gray-100 text-center">
+            <a href="index-sistema.html" class="text-[10px] text-cue font-bold hover:underline">Ir a Acceso al Sistema</a>
         </div>
     </div>
 
@@ -115,7 +118,7 @@
             errorBox.classList.add('hidden');
         }
         function showStep2(email) {
-            portalTitle.textContent = 'Portal CUE: Validación';
+            portalTitle.textContent = 'Validación CUE';
             portalEmailEcho.textContent = email;
             step1.classList.add('hidden');
             step2.classList.remove('hidden');

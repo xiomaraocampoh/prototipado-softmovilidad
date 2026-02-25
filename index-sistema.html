@@ -10,75 +10,81 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-<body class="bg-[#8f8f8f] font-['Inter'] min-h-screen">
-    <div class="w-full max-w-5xl mx-auto px-4 py-10">
-        <div class="bg-[#f5f5f5] rounded shadow-[0_10px_30px_rgba(0,0,0,0.25)] overflow-hidden border border-[#c7c7c7]">
-            <div class="p-10">
-                <h1 class="text-4xl font-light text-center text-gray-500 mb-10">Acceso al sistema</h1>
+<body class="bg-[#8f8f8f] font-['Inter'] min-h-screen flex flex-col justify-center relative">
+    
+    <div class="w-full max-w-5xl mx-auto px-4 py-8 relative z-10">
+        <div class="bg-[#f5f5f5] rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.4)] overflow-hidden border border-[#c7c7c7]">
+            
+            <div class="pt-12 pb-6">
+                <h1 class="text-4xl md:text-5xl font-light text-center text-gray-600 tracking-wide">Acceso al sistema</h1>
+            </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 items-center">
-                    <div class="flex items-center justify-center gap-8 md:col-span-2">
-                        <div class="text-center">
-                            <img src="assets/img/logo_avh.png" alt="Logo AVH" class="h-28 mx-auto">
-                            <p class="text-[10px] text-gray-500 mt-2">Corporación Universitaria Empresarial</p>
-                        </div>
-                        <div class="h-28 w-px bg-gray-300"></div>
-                        <div class="text-center">
-                            <img src="assets/img/logo_camara.png" alt="Cámara de Comercio" class="h-24 mx-auto"
-                                 onerror="this.style.display='none'">
-                            <p class="text-[10px] text-gray-500 mt-2">Filial de:</p>
+            <div class="flex flex-col md:flex-row items-center p-8 md:p-12 gap-10">
+                
+                <div class="w-full md:w-1/2 flex justify-center items-center md:border-r border-gray-300 pb-8 md:pb-0">
+                    <img src="assets/img/logo_camara.png" alt="Cámara de Comercio - CUE" class="max-w-full h-auto max-h-48" onerror="this.style.display='none'">
+                </div>
+
+                <div class="w-full md:w-1/2 flex flex-col justify-center px-4 md:px-8">
+                    
+                    <div id="error-msg" class="hidden bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4 text-sm">
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                            <span id="error-text">Error</span>
                         </div>
                     </div>
 
-                    <div>
-                        <div id="error-msg" class="hidden bg-red-50 border border-red-200 text-red-700 p-3 rounded mb-4 text-sm">
-                            <div class="flex items-center gap-2">
-                                <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                                <span id="error-text">Error</span>
-                            </div>
+                    <form id="backofficeForm" class="w-full max-w-sm mx-auto space-y-5">
+                        
+                        <div>
+                            <label class="block text-base text-gray-700 font-semibold mb-1">Usuario:</label>
+                            <input type="email" id="backofficeEmail" required class="w-full border border-gray-400 px-4 py-2.5 text-sm bg-white outline-none focus:border-gray-600 transition-colors">
+                            <p class="text-[10px] text-gray-400 mt-1">Ej: sst@cue.edu.co, registro@cue.edu.co</p>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-base text-gray-700 font-semibold mb-1">Contraseña:</label>
+                            <input type="password" id="backofficePassword" required class="w-full border border-gray-400 px-4 py-2.5 text-sm bg-white outline-none focus:border-gray-600 transition-colors">
                         </div>
 
-                        <form id="backofficeForm" class="space-y-3">
-                            <div class="grid grid-cols-[110px_1fr] items-center gap-3">
-                                <label class="text-sm text-gray-700 font-semibold">Usuario:</label>
-                                <input type="email" id="backofficeEmail" required class="border border-gray-300 px-3 py-2 text-sm bg-white">
-                            </div>
-                            <div class="grid grid-cols-[110px_1fr] items-center gap-3">
-                                <label class="text-sm text-gray-700 font-semibold">Contraseña:</label>
-                                <input type="password" id="backofficePassword" required class="border border-gray-300 px-3 py-2 text-sm bg-white">
-                            </div>
-
-                            <div class="flex items-center justify-end gap-2 pt-2">
-                                <button type="submit" class="px-6 py-2 bg-gray-200 border border-gray-400 text-gray-700 text-sm hover:bg-gray-300">Enviar</button>
-                                <button type="button" id="btnCancel" class="px-6 py-2 bg-gray-200 border border-gray-400 text-gray-700 text-sm hover:bg-gray-300">Cancelar</button>
-                            </div>
-                            <div class="text-right">
-                                <a href="#" class="text-xs text-gray-500 hover:underline">Olvidó su usuario y clave ?</a>
-                            </div>
-                        </form>
-
-                        <div class="mt-6 pt-4 border-t border-gray-200">
-                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-2">Modo demo (Gestores)</p>
-                            <div class="grid grid-cols-2 gap-2">
-                                <button type="button" onclick="demoBackoffice('secretaria.ani@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">Secretaría ANI</button>
-                                <button type="button" onclick="demoBackoffice('direccion.ani@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">Dirección ANI</button>
-                                <button type="button" onclick="demoBackoffice('coordinacion.acad@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">Coord. Acad.</button>
-                                <button type="button" onclick="demoBackoffice('sst@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">SST</button>
-                                <button type="button" onclick="demoBackoffice('registro@cue.edu.co','admin')" class="text-[10px] py-2 border border-gray-300 hover:bg-gray-100 font-bold text-gray-700">Registro</button>
-                            </div>
-                            <p class="text-[11px] text-gray-600 mt-3">Solicitantes: ingrese por <a class="text-[#2b6ea3] font-bold hover:underline" href="index.html">Portal CUE</a>.</p>
+                        <div class="flex items-center gap-3 pt-2">
+                            <button type="submit" class="px-8 py-2 bg-[#e0e0e0] border border-gray-400 text-gray-800 text-sm font-semibold hover:bg-[#d5d5d5] transition-colors shadow-sm">
+                                Enviar
+                            </button>
+                            <button type="button" id="btnCancel" class="px-8 py-2 bg-[#e0e0e0] border border-gray-400 text-gray-800 text-sm font-semibold hover:bg-[#d5d5d5] transition-colors shadow-sm">
+                                Cancelar
+                            </button>
                         </div>
-                    </div>
+                        
+                        <div class="pt-2">
+                            <a href="#" class="text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">Olvidó su usuario y clave ?</a>
+                        </div>
+                    </form>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="px-10 pb-8">
-                <div class="text-center text-[10px] text-gray-500 leading-relaxed">
-                    <div class="font-semibold">MiCUEOnline v4.0</div>
-                    <div>Desarrollado por: Departamento de Desarrollo y Sistemas de Información</div>
-                    <div>Armenia, 2026</div>
-                </div>
-            </div>
+    <footer class="w-full text-center text-gray-200 text-xs leading-relaxed pb-6 relative z-10 px-4 mt-4">
+        <p class="font-bold text-sm mb-1">MiCUEonline v4.0</p>
+        <p>Desarrollado por: <strong>Departamento de Sistemas de Información</strong></p>
+        <p>Corporación Universitaria Empresarial "Alexander von Humboldt"</p>
+        <p>Personería Jurídica Resolución 439 de 14 de marzo de 2001 otorgada por MINEDUCACIÓN</p>
+        <p>I.E.S. sujeta a inspección y vigilancia por MINEDUCACIÓN</p>
+        <p class="mt-1">Armenia, 2026</p>
+    </footer>
+
+    <div class="fixed bottom-4 left-4 bg-white border border-gray-300 shadow-xl p-3 rounded opacity-10 hover:opacity-100 transition-opacity duration-300 z-50 max-w-[200px]">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Gestores (Demo)</p>
+        <div class="flex flex-col gap-1.5">
+            <button type="button" onclick="demoBackoffice('secretaria.ani@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">Secretaría ANI</button>
+            <button type="button" onclick="demoBackoffice('direccion.ani@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">Dirección ANI</button>
+            <button type="button" onclick="demoBackoffice('coord.acad@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">Coordinación</button>
+            <button type="button" onclick="demoBackoffice('sst@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">SST</button>
+            <button type="button" onclick="demoBackoffice('registro@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">Registro</button>
+        </div>
+        <div class="mt-3 pt-2 border-t border-gray-200 text-center">
+            <a href="index.html" class="text-[10px] text-blue-600 font-bold hover:underline">Ir a Portal CUE</a>
         </div>
     </div>
 
@@ -96,15 +102,56 @@
             errorBox.classList.add('hidden');
         }
 
+        // Lógica de Redirección Automática según correo (Se mantiene intacta)
         document.getElementById('backofficeForm').onsubmit = (e) => {
             e.preventDefault();
             clearError();
-            const res = AuthService.loginBackoffice(
-                document.getElementById('backofficeEmail').value,
-                document.getElementById('backofficePassword').value
-            );
-            if (!res.success) return showError(res.message);
-            window.location.href = 'modules/' + res.redirect;
+            
+            const email = document.getElementById('backofficeEmail').value.toLowerCase().trim();
+            const name = email.split('@')[0].toUpperCase();
+            
+            let roleCode = '';
+            let roleName = '';
+            let redirectUrl = '';
+
+            if (email.includes('secretaria.ani')) {
+                roleCode = 'ANI_SECRETARIA';
+                roleName = 'Secretaría ANI';
+                redirectUrl = 'modules/dashboard-ani.html';
+            } 
+            else if (email.includes('direccion.ani')) {
+                roleCode = 'ANI_DIRECCION';
+                roleName = 'Dirección ANI';
+                redirectUrl = 'modules/dashboard-ani.html';
+            } 
+            else if (email.includes('coord')) {
+                roleCode = 'COORD_ACAD';
+                roleName = 'Coordinación Académica';
+                redirectUrl = 'modules/dashboard-acad.html';
+            } 
+            else if (email.includes('sst') || email.includes('riesgos')) {
+                roleCode = 'SST';
+                roleName = 'SST - Riesgos';
+                redirectUrl = 'modules/dashboard-sst.html';
+            } 
+            else if (email.includes('registro') || email.includes('control')) {
+                roleCode = 'REGISTRO';
+                roleName = 'Control y Registro';
+                redirectUrl = 'modules/dashboard-registro.html';
+            } 
+            else {
+                showError('El correo no tiene privilegios administrativos.');
+                return;
+            }
+
+            const user = {
+                name: name,
+                email: email,
+                role: { code: roleCode, name: roleName }
+            };
+
+            localStorage.setItem('CUE_AUTH_USER', JSON.stringify(user));
+            window.location.href = redirectUrl;
         };
 
         document.getElementById('btnCancel').onclick = () => {
@@ -120,4 +167,3 @@
     </script>
 </body>
 </html>
-
