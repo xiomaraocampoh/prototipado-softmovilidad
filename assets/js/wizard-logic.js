@@ -43,7 +43,8 @@ const WizardLogic = {
         } else {
             this.filterTypesByModality(); 
             if(this.draftId) this.loadDraft(this.draftId);
-            this.updateUI(); 
+            this.updateUI();
+            this.calculateDuration();
         }
         
         if(typeof lucide !== 'undefined') lucide.createIcons();
@@ -232,6 +233,7 @@ const WizardLogic = {
         
         this.stepIdx += dir;
         if(this.stepIdx === 4) this.loadDocs();
+        if(this.stepIdx === 2 || this.stepIdx === 3) this.calculateDuration();
         
         this.updateUI();
         window.scrollTo(0,0);
@@ -323,7 +325,7 @@ const WizardLogic = {
                 date: new Date().toLocaleDateString(),
                 type: type,
                 dir: dir,
-                status: dir === 'ENTRANTE' ? 'EN_REVISION_TOTAL' : 'EN_REVISION_POSTULACION',
+                status: dir === 'ENTRANTE' ? 'EN_REVISION_TOTAL' : 'EN_REVISION_SECRETARIA_ANI',
                 userEmail: this.user.email
             };
             if(this.draftId) reqs = reqs.map(r => r.id === this.draftId ? {...r, ...data} : r);
@@ -334,8 +336,43 @@ const WizardLogic = {
         window.location.href='dashboard-estudiante.html';
     },
 
-    loadProfile: function() {},
-    calculateDuration: function() {},
+    loadProfile: function() {
+        const autoDoc = document.getElementById('autoDoc');
+        const autoSem = document.getElementById('autoSem');
+        const sstContactName = document.getElementById('sstContactName');
+        let profile = {};
+        try {
+            const raw = localStorage.getItem('CUE_USER_PROFILE');
+            if (raw) profile = JSON.parse(raw);
+        } catch (e) {}
+        const docNumber = profile.docNumber || profile.numDoc || (this.user && this.user.docNumber) || 'Por definir';
+        const semester = profile.semester != null ? profile.semester : (this.user && this.user.semester);
+        const promedio = profile.promedio != null ? profile.promedio : (this.user && this.user.promedio);
+        const semText = (semester != null && semester !== '') ? (promedio != null && promedio !== '' ? `Sem ${semester} / Prom ${promedio}` : `Sem ${semester}`) : (promedio != null && promedio !== '' ? `Prom ${promedio}` : '—');
+        if (autoDoc) autoDoc.value = docNumber;
+        if (autoSem) autoSem.value = semText;
+        if (sstContactName && this.user && this.user.name && !sstContactName.value) sstContactName.placeholder = this.user.name;
+    },
+    calculateDuration: function() {
+        const inicio = document.getElementById('fechaInicio')?.value;
+        const fin = document.getElementById('fechaFin')?.value;
+        const out = document.getElementById('duracionCalculada');
+        if (!out) return;
+        if (!inicio || !fin) {
+            out.value = '';
+            return;
+        }
+        const a = new Date(inicio);
+        const b = new Date(fin);
+        if (isNaN(a.getTime()) || isNaN(b.getTime()) || b < a) {
+            out.value = 'Verifique fechas';
+            return;
+        }
+        const diffMs = b - a;
+        const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
+        const weeks = Math.round(diffDays / 7 * 10) / 10;
+        out.value = diffDays <= 0 ? '0 días' : (diffDays >= 7 ? `${weeks} semanas (${diffDays} días)` : `${diffDays} días`);
+    },
     toggleFinance: function() {
         document.getElementById('montoCosto')?.classList.toggle('hidden', document.getElementById('hasCosto')?.value !== 'SI');
         document.getElementById('montoBeca')?.classList.toggle('hidden', document.getElementById('hasBeca')?.value !== 'SI');

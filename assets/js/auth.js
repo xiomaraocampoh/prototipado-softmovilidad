@@ -4,7 +4,7 @@
  */
 
 const ROLES = {
-    // Solicitantes Internos
+    // Solicitantes Internos (RF-01: en UI solo "Profesor"; code DOCENTE es interno)
     ESTUDIANTE: { code: 'ESTUDIANTE', redirect: 'dashboard-estudiante.html', name: 'Estudiante CUE' },
     DOCENTE: { code: 'DOCENTE', redirect: 'dashboard-estudiante.html', name: 'Profesor / Investigador' },
     COLABORADOR: { code: 'COLABORADOR', redirect: 'dashboard-estudiante.html', name: 'Colaborador Administrativo' },

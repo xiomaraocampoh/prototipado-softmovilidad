@@ -106,25 +106,25 @@
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white p-5 rounded-xl shadow-sm border md:col-span-1 h-fit">
                         <h4 class="font-bold text-[#03045e] border-b pb-2 mb-4">Nuevo Convenio</h4>
-                        <form onsubmit="alert('Convenio registrado.'); event.preventDefault();" class="space-y-4">
+                        <form id="formConvenio" class="space-y-4" onsubmit="return saveConvenio(event);">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1">Institución</label>
-                                <input type="text" placeholder="Ej: Universidad de Lima" required
+                                <input type="text" id="convNombre" placeholder="Ej: Universidad de Lima" required
                                     class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1">País</label>
-                                <input type="text" placeholder="Ej: Perú" required
+                                <input type="text" id="convPais" placeholder="Ej: Perú" required
                                     class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1">Ciudad</label>
-                                <input type="text" placeholder="Ej: Lima" required
+                                <input type="text" id="convCiudad" placeholder="Ej: Lima" required
                                     class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
                             </div>
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 mb-1">Fecha de Vigencia</label>
-                                <input type="date" required
+                                <input type="date" id="convVigencia" required
                                     class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
                             </div>
                             <button type="submit"
@@ -141,21 +141,8 @@
                                     <th class="p-4 text-center">Estado</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y">
-                                <tr class="hover:bg-gray-50">
-                                    <td class="p-4 font-bold text-[#03045e]">UNAM (México)</td>
-                                    <td class="p-4 text-gray-600">31/12/2027</td>
-                                    <td class="p-4 text-center"><span
-                                            class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">Activo</span>
-                                    </td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="p-4 font-bold text-[#03045e]">DHBW Ravensburg</td>
-                                    <td class="p-4 text-gray-600">31/12/2023</td>
-                                    <td class="p-4 text-center"><span
-                                            class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold">Vencido</span>
-                                    </td>
-                                </tr>
+                            <tbody id="conveniosTableBody" class="divide-y">
+                                <!-- Cargado desde CUE_CONVENIOS (localStorage) -->
                             </tbody>
                         </table>
                     </div>
@@ -310,8 +297,77 @@
             document.getElementById('aniTitle').textContent = user.role.code === 'ANI_SECRETARIA' ? 'Secretaría ANI' : 'Dirección ANI';
 
             loadTable();
+            loadConveniosTable();
             lucide.createIcons();
         });
+
+        // ==========================================
+        // CONVENIOS (RF-11): persistencia en CUE_CONVENIOS
+        // ==========================================
+        const LS_CONVENIOS = 'CUE_CONVENIOS';
+
+        function getConvenios() {
+            try {
+                const raw = localStorage.getItem(LS_CONVENIOS);
+                if (!raw) return [];
+                const data = JSON.parse(raw);
+                return Array.isArray(data) ? data : [];
+            } catch {
+                return [];
+            }
+        }
+
+        function saveConvenio(e) {
+            e.preventDefault();
+            const nombre = document.getElementById('convNombre').value.trim();
+            const pais = document.getElementById('convPais').value.trim();
+            const ciudad = document.getElementById('convCiudad').value.trim();
+            const vigencia = document.getElementById('convVigencia').value;
+            if (!nombre || !pais || !ciudad || !vigencia) {
+                alert('Complete todos los campos del convenio.');
+                return false;
+            }
+            const convenios = getConvenios();
+            convenios.push({ nombre, pais, ciudad, vigencia });
+            localStorage.setItem(LS_CONVENIOS, JSON.stringify(convenios));
+            document.getElementById('formConvenio').reset();
+            loadConveniosTable();
+            alert('Convenio registrado correctamente.');
+            return false;
+        }
+
+        function loadConveniosTable() {
+            const tbody = document.getElementById('conveniosTableBody');
+            if (!tbody) return;
+            let convenios = getConvenios();
+            if (convenios.length === 0) {
+                convenios = [
+                    { nombre: 'UNAM', pais: 'México', ciudad: 'CDMX', vigencia: '2027-12-31' },
+                    { nombre: 'DHBW Ravensburg', pais: 'Alemania', ciudad: 'Ravensburg', vigencia: '2023-12-31' }
+                ];
+                localStorage.setItem(LS_CONVENIOS, JSON.stringify(convenios));
+            }
+            const formatDate = (str) => {
+                if (!str) return 'N/A';
+                const d = new Date(str);
+                return isNaN(d.getTime()) ? str : d.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            };
+            tbody.innerHTML = convenios.map(c => {
+                const isExp = new Date(c.vigencia) < new Date();
+                const estadoClass = isExp ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
+                const estadoTxt = isExp ? 'Vencido' : 'Activo';
+                return `<tr class="hover:bg-gray-50">
+                    <td class="p-4 font-bold text-[#03045e]">${escapeHtml(c.nombre)}</td>
+                    <td class="p-4 text-gray-600">${formatDate(c.vigencia)}</td>
+                    <td class="p-4 text-center"><span class="${estadoClass} px-2 py-1 rounded text-xs font-bold">${estadoTxt}</span></td>
+                </tr>`;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
 
         // Lógica del Sidebar y Pestañas
         function switchTab(targetId) {
