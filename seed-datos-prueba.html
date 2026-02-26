@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar datos de prueba - CUE Movilidad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-['Inter'] min-h-screen flex items-center justify-center p-6">
+    <div class="bg-white rounded-2xl shadow-xl border border-gray-200 max-w-2xl w-full p-8">
+        <h1 class="text-2xl font-bold text-[#03045e] mb-2">Datos de prueba – CUE Movilidad</h1>
+        <p class="text-gray-600 text-sm mb-6">Carga en <code class="bg-gray-100 px-1 rounded">localStorage</code> solicitudes, salidas, convenios y programas para probar cada dashboard (mínimo 5 ítems por módulo).</p>
+        <button type="button" id="btnCargar" onclick="cargarDatosPrueba()" class="w-full bg-green-600 text-white py-3 rounded-xl font-bold hover:bg-green-700 transition flex items-center justify-center gap-2">
+            <span>Cargar datos de prueba</span>
+        </button>
+        <p id="mensaje" class="mt-6 text-sm text-gray-500 hidden"></p>
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <p class="text-xs font-bold text-gray-400 uppercase mb-2">Qué se carga</p>
+            <ul class="text-xs text-gray-600 space-y-1">
+                <li><strong>Portal Estudiante/Externo:</strong> 5+ solicitudes por usuario (borrador, en revisión, aprobada, movilidad activa).</li>
+                <li><strong>ANI:</strong> 5+ solicitudes en bandeja (Secretaría y Dirección), convenios, programas.</li>
+                <li><strong>Coordinación:</strong> 5+ en Paz y Salvo (con programa), 5+ salidas académicas.</li>
+                <li><strong>SST:</strong> 5+ salidas con transporte Universidad (requieren revisión).</li>
+                <li><strong>Registro:</strong> 5+ entrantes por matricular (con datos Q10), 5+ tickets de certificados.</li>
+            </ul>
+        </div>
+    </div>
+    <script>
+        function cargarDatosPrueba() {
+            const msg = document.getElementById('mensaje');
+            const btn = document.getElementById('btnCargar');
+
+            // Perfil para interno (wizard paso 3)
+            const perfilEstudiante = {
+                docNumber: '1098765432',
+                programa: 'Ingeniería de Software',
+                semester: 5,
+                promedio: 4.2,
+                eps: 'Sanitas EPS',
+                alergias: 'Ninguna',
+                contactoEmergenciaNombre: 'María Ocampo',
+                contactoEmergenciaParentesco: 'Madre',
+                contactoEmergenciaTelefono: '3001112233'
+            };
+            localStorage.setItem('CUE_USER_PROFILE', JSON.stringify(perfilEstudiante));
+
+            // Convenios (ANI + wizard)
+            const convenios = [
+                { nombre: 'UNAM', pais: 'México', ciudad: 'CDMX', vigencia: '2027-12-31' },
+                { nombre: 'Universidad de Lima', pais: 'Perú', ciudad: 'Lima', vigencia: '2026-06-30' },
+                { nombre: 'DHBW Ravensburg', pais: 'Alemania', ciudad: 'Ravensburg', vigencia: '2025-12-31' },
+                { nombre: 'Universidad de los Andes', pais: 'Colombia', ciudad: 'Bogotá', vigencia: '2028-01-15' },
+                { nombre: 'Universidad del Valle', pais: 'Colombia', ciudad: 'Cali', vigencia: '2026-12-31' }
+            ];
+            localStorage.setItem('CUE_CONVENIOS', JSON.stringify(convenios));
+
+            // Programas con coordinador (ANI + Coordinación filtro)
+            const coordEmail = 'coordinacion.acad@cue.edu.co';
+            const programas = [
+                { nombre: 'Ingeniería de Software', correoCoordinador: coordEmail },
+                { nombre: 'Ingeniería Industrial', correoCoordinador: coordEmail },
+                { nombre: 'Medicina', correoCoordinador: 'coord.medicina@cue.edu.co' },
+                { nombre: 'Enfermería', correoCoordinador: coordEmail },
+                { nombre: 'Derecho', correoCoordinador: 'coord.derecho@cue.edu.co' }
+            ];
+            localStorage.setItem('CUE_PROGRAMAS', JSON.stringify(programas));
+
+            // Datos FO-IN-012 para externos (Registro + ANI modal)
+            function externoFOIN012(primerNombre, segundoNombre, primerApellido, segundoApellido, numDoc, correo) {
+                return {
+                    primerNombre, segundoNombre: segundoNombre || '', primerApellido, segundoApellido: segundoApellido || '',
+                    sexo: 'M', direccion: 'Calle 123', departamento: 'Quindío', municipio: 'Armenia',
+                    tipoDoc: 'CC', numDoc, fecExpedicion: '2020-01-15', fecNacimiento: '1998-05-20',
+                    nacionalidad: 'Colombiana', celular: '3009998877', correo,
+                    contactoNombre: 'Padre', contactoParentesco: 'Padre', contactoTelefono: '3001112233', contactoCorreo: 'padre@mail.com',
+                    necesidadesMedicas: '', actividadesMaterias: 'Cursar asignaturas de Ingeniería de Software según convenio.'
+                };
+            }
+
+            // ExpedienteData genérico para salientes (ANI modal + Coord programa)
+            function expedienteSaliente(programa, tipo) {
+                return {
+                    tipo: tipo || 'Intercambio Académico (Semestre - Asignaturas)',
+                    modalidad: 'PRESENCIAL', alcance: 'INTERNACIONAL', direccion: 'SALIENTE',
+                    institucionDestino: 'UNAM', otraEntidad: '', pais: 'México', ciudad: 'CDMX',
+                    fechaInicio: '2026-08-01', fechaFin: '2026-12-15', duracion: '4.5 meses (137 días)',
+                    hasCosto: 'NO', montoCosto: '', hasBeca: 'SI', montoBeca: '500',
+                    actividadesDesc: 'Asignaturas de ingeniería', documento: '1098765432',
+                    programa: programa || 'Ingeniería de Software', semestrePromedio: 'Sem 5 / Prom 4.2',
+                    eps: 'Sanitas', alergiasMeds: 'Ninguna',
+                    contactoNombre: 'María Ocampo', contactoParentesco: 'Madre', contactoTel: '3001112233'
+                };
+            }
+
+            const hoy = new Date().toISOString().slice(0, 10);
+            const haceDias = (d) => new Date(Date.now() - d * 864e5).toISOString().slice(0, 10);
+
+            const requests = [
+                // --- Estudiante CUE (5+) ---
+                { id: 'REQ-E1', date: haceDias(2), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'SALIENTE', status: 'BORRADOR', userEmail: 'estudiante@cue.edu.co', userName: 'Xiomara Ocampo' },
+                { id: 'REQ-E2', date: haceDias(5), type: 'Curso Corto', dir: 'SALIENTE', status: 'EN_REVISION_SECRETARIA_ANI', userEmail: 'estudiante@cue.edu.co', userName: 'Xiomara Ocampo', expedienteData: expedienteSaliente('Ingeniería de Software', 'Curso Corto') },
+                { id: 'REQ-E3', date: haceDias(10), type: 'Práctica Empresarial - Pasantía', dir: 'SALIENTE', status: 'APROBADA_POSTULACION', userEmail: 'estudiante@cue.edu.co', userName: 'Xiomara Ocampo', expedienteData: expedienteSaliente('Ingeniería de Software') },
+                { id: 'REQ-E4', date: haceDias(20), type: 'Estancia Investigación', dir: 'SALIENTE', status: 'MOVILIDAD_ACTIVA', userEmail: 'estudiante@cue.edu.co', userName: 'Xiomara Ocampo', expedienteData: expedienteSaliente('Ingeniería de Software', 'Estancia Investigación') },
+                { id: 'REQ-E5', date: haceDias(1), type: 'Diplomado Opción de Grado', dir: 'SALIENTE', status: 'EN_REVISION_DIRECCION_ANI', userEmail: 'estudiante@cue.edu.co', userName: 'Xiomara Ocampo', expedienteData: expedienteSaliente('Ingeniería de Software') },
+                { id: 'REQ-E6', date: haceDias(60), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'SALIENTE', status: 'MOVILIDAD_ACTIVA', userEmail: 'estudiante@cue.edu.co', userName: 'Xiomara Ocampo', expedienteData: expedienteSaliente('Ingeniería de Software'), certRequested: true, certType: 'Certificado de Notas', certStatus: 'PAGADO', certObs: 'Para trámite de beca.' },
+
+                // --- Externo (5+ entrantes, varios PENDIENTE_MATRICULA con externoFOIN012) ---
+                { id: 'REQ-X1', date: haceDias(3), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'ENTRANTE', status: 'PENDIENTE_MATRICULA', userEmail: 'externo@unam.mx', userName: 'Carlos Méndez', externoFOIN012: externoFOIN012('Carlos', 'Alberto', 'Méndez', 'López', '80123456', 'externo@unam.mx') },
+                { id: 'REQ-X2', date: haceDias(7), type: 'Curso Corto', dir: 'ENTRANTE', status: 'PENDIENTE_MATRICULA', userEmail: 'maria.ext@ula.ve', externoFOIN012: externoFOIN012('María', 'Fernanda', 'García', 'Sánchez', 'V12345678', 'maria.ext@ula.ve') },
+                { id: 'REQ-X3', date: haceDias(14), type: 'Estancia Investigación', dir: 'ENTRANTE', status: 'PENDIENTE_MATRICULA', userEmail: 'juan.ext@uni.edu.pe', externoFOIN012: externoFOIN012('Juan', '', 'Pérez', 'Ruiz', '45678901', 'juan.ext@uni.edu.pe') },
+                { id: 'REQ-X4', date: haceDias(21), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'ENTRANTE', status: 'PENDIENTE_MATRICULA', userEmail: 'laura.ext@tec.mx', externoFOIN012: externoFOIN012('Laura', 'Isabel', 'Rodríguez', 'Hernández', '90123456', 'laura.ext@tec.mx') },
+                { id: 'REQ-X5', date: haceDias(28), type: 'Curso Idiomas', dir: 'ENTRANTE', status: 'PENDIENTE_MATRICULA', userEmail: 'pedro.ext@uchile.cl', externoFOIN012: externoFOIN012('Pedro', 'Luis', 'Silva', 'Muñoz', '11223344', 'pedro.ext@uchile.cl') },
+                { id: 'REQ-X6', date: haceDias(40), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'ENTRANTE', status: 'MOVILIDAD_ACTIVA', userEmail: 'externo@unam.mx', externoFOIN012: externoFOIN012('Carlos', 'Alberto', 'Méndez', 'López', '80123456', 'externo@unam.mx') },
+
+                // --- Para ANI bandeja (Secretaría: EN_REVISION_SECRETARIA_ANI; Dirección: EN_REVISION_TOTAL / EN_REVISION_DIRECCION_ANI) ---
+                { id: 'REQ-A1', date: haceDias(1), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'SALIENTE', status: 'EN_REVISION_SECRETARIA_ANI', userEmail: 'estudiante1@cue.edu.co', userName: 'Estudiante Uno', expedienteData: expedienteSaliente('Ingeniería de Software') },
+                { id: 'REQ-A2', date: haceDias(2), type: 'Práctica Empresarial - Pasantía', dir: 'SALIENTE', status: 'EN_REVISION_SECRETARIA_ANI', userEmail: 'estudiante2@cue.edu.co', userName: 'Estudiante Dos', expedienteData: expedienteSaliente('Ingeniería Industrial') },
+                { id: 'REQ-A3', date: haceDias(1), type: 'Curso Corto', dir: 'ENTRANTE', status: 'EN_REVISION_TOTAL', userEmail: 'externo2@tec.mx', externoFOIN012: externoFOIN012('Ana', 'María', 'López', 'Gómez', '55667788', 'externo2@tec.mx') },
+                { id: 'REQ-A4', date: haceDias(3), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'SALIENTE', status: 'EN_REVISION_DIRECCION_ANI', userEmail: 'estudiante3@cue.edu.co', userName: 'Estudiante Tres', expedienteData: expedienteSaliente('Ingeniería de Software') },
+                { id: 'REQ-A5', date: haceDias(2), type: 'Estancia Investigación', dir: 'ENTRANTE', status: 'EN_REVISION_TOTAL', userEmail: 'externo3@uniandes.edu.co', externoFOIN012: externoFOIN012('Andrés', '', 'Martínez', 'Castro', '99887766', 'externo3@uniandes.edu.co') },
+
+                // --- Para Coordinación Paz y Salvo (SALIENTE, APROBADA_POSTULACION o EN_REVISION_DIRECCION_ANI, con expedienteData.programa) ---
+                { id: 'REQ-C1', date: haceDias(4), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'SALIENTE', status: 'APROBADA_POSTULACION', userEmail: 'estudiante1@cue.edu.co', userName: 'Estudiante Uno', expedienteData: expedienteSaliente('Ingeniería de Software') },
+                { id: 'REQ-C2', date: haceDias(5), type: 'Curso Corto', dir: 'SALIENTE', status: 'APROBADA_POSTULACION', userEmail: 'estudiante2@cue.edu.co', userName: 'Estudiante Dos', expedienteData: expedienteSaliente('Ingeniería de Software') },
+                { id: 'REQ-C3', date: haceDias(6), type: 'Práctica Empresarial - Pasantía', dir: 'SALIENTE', status: 'EN_REVISION_DIRECCION_ANI', userEmail: 'estudiante3@cue.edu.co', userName: 'Estudiante Tres', expedienteData: expedienteSaliente('Ingeniería Industrial') },
+                { id: 'REQ-C4', date: haceDias(7), type: 'Estancia Investigación', dir: 'SALIENTE', status: 'APROBADA_POSTULACION', userEmail: 'ana.gomez@cue.edu.co', userName: 'Ana Gómez', expedienteData: expedienteSaliente('Ingeniería de Software') },
+                { id: 'REQ-C5', date: haceDias(8), type: 'Diplomado Opción de Grado', dir: 'SALIENTE', status: 'APROBADA_POSTULACION', userEmail: 'juan.perez@cue.edu.co', userName: 'Juan Pérez', expedienteData: expedienteSaliente('Ingeniería de Software') },
+
+                // --- Certificados (movilidad activa, certRequested) para Registro ---
+                { id: 'REQ-CERT1', date: haceDias(30), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'SALIENTE', status: 'MOVILIDAD_ACTIVA', userEmail: 'estudiante@cue.edu.co', certRequested: true, certType: 'Certificado de Notas', certStatus: 'PAGADO', certObs: 'Incluir promedio.' },
+                { id: 'REQ-CERT2', date: haceDias(25), type: 'Curso Corto', dir: 'SALIENTE', status: 'MOVILIDAD_ACTIVA', userEmail: 'estudiante1@cue.edu.co', certRequested: true, certType: 'Certificado de Estudio', certStatus: 'PAGADO', certObs: '' },
+                { id: 'REQ-CERT3', date: haceDias(20), type: 'Práctica Empresarial - Pasantía', dir: 'SALIENTE', status: 'MOVILIDAD_ACTIVA', userEmail: 'estudiante2@cue.edu.co', certRequested: true, certType: 'Certificado de Notas', certStatus: 'PAGADO', certObs: 'Para empleador.' },
+                { id: 'REQ-CERT4', date: haceDias(15), type: 'Estancia Investigación', dir: 'SALIENTE', status: 'MOVILIDAD_ACTIVA', userEmail: 'ana.gomez@cue.edu.co', certRequested: true, certType: 'Certificado de Estudio', certStatus: 'PAGADO', certObs: '' },
+                { id: 'REQ-CERT5', date: haceDias(10), type: 'Intercambio Académico (Semestre - Asignaturas)', dir: 'SALIENTE', status: 'MOVILIDAD_ACTIVA', userEmail: 'juan.perez@cue.edu.co', certRequested: true, certType: 'Certificado de Buena Conducta', certStatus: 'PAGADO', certObs: 'Trámite visa.' },
+                { id: 'REQ-CERT6', date: haceDias(5), type: 'Curso Corto', dir: 'SALIENTE', status: 'MOVILIDAD_ACTIVA', userEmail: 'estudiante3@cue.edu.co', certRequested: true, certType: 'Certificado de Notas', certStatus: 'ENTREGADO', certObs: '' }
+            ];
+
+            localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
+
+            // Salidas académicas (Coordinación + SST): 5+ con transporte Universidad, 2 con propio
+            const salidas = [];
+            const tiposSalida = ['VISITA_EMPRESARIAL', 'SALIDA_CAMPO', 'CONGRESO_EVENTO', 'OTRA'];
+            const participantesBase = [
+                { nombre: 'Xiomara Ocampo', email: 'estudiante@cue.edu.co', rol: 'ESTUDIANTE' },
+                { nombre: 'Estudiante Uno', email: 'estudiante1@cue.edu.co', rol: 'ESTUDIANTE' },
+                { nombre: 'Estudiante Dos', email: 'estudiante2@cue.edu.co', rol: 'ESTUDIANTE' },
+                { nombre: 'Ana Gómez', email: 'ana.gomez@cue.edu.co', rol: 'ESTUDIANTE' },
+                { nombre: 'Juan Pérez', email: 'juan.perez@cue.edu.co', rol: 'ESTUDIANTE' }
+            ];
+            for (let i = 1; i <= 7; i++) {
+                const transporteUniversidad = i <= 5;
+                const inicio = new Date(Date.now() + (i * 7) * 864e5).toISOString().slice(0, 10);
+                const fin = new Date(Date.now() + (i * 7 + 3) * 864e5).toISOString().slice(0, 10);
+                salidas.push({
+                    id: 'SA-' + (2000 + i),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    nombre: 'Salida prueba ' + i + (transporteUniversidad ? ' (transporte Univ.)' : ''),
+                    tipo: tiposSalida[(i - 1) % tiposSalida.length],
+                    destino: ['Bogotá', 'Medellín', 'Cali', 'Pereira', 'Cartagena', 'Reserva Natural', 'Planta Industrial'][i - 1],
+                    direccion: 'Carrera 10 # 20-30',
+                    actividad: 'Visita académica / Práctica de campo',
+                    fechaInicio: inicio,
+                    fechaFin: fin,
+                    transporte: transporteUniversidad ? 'UNIVERSIDAD' : 'PROPIO',
+                    requiereSST: transporteUniversidad,
+                    estadoAcad: transporteUniversidad ? (i <= 3 ? 'EN_REVISION_SST' : (i === 4 ? 'APROBADA' : 'EN_REVISION_SST')) : 'APROBADA',
+                    coordinatorEmail: coordEmail,
+                    profesorResponsable: { email: 'profesor' + i + '@cue.edu.co', nombre: 'Profesor Responsable ' + i },
+                    participantes: participantesBase.slice(0, 2 + (i % 3)),
+                    sstReview: transporteUniversidad ? (i === 4 ? { estado: 'APROBADO' } : { estado: 'PENDIENTE' }) : null
+                });
+            }
+            localStorage.setItem('CUE_SALIDAS_ACADEMICAS', JSON.stringify(salidas));
+
+            msg.classList.remove('hidden');
+            msg.className = 'mt-6 text-sm text-green-700 font-medium';
+            msg.innerHTML = 'Datos de prueba cargados correctamente.<br><br>' +
+                '<a href="index.html" class="text-[#0077b6] font-bold underline hover:no-underline">Portal CUE</a> (estudiante / externo) · ' +
+                '<a href="index-sistema.html" class="text-[#0077b6] font-bold underline hover:no-underline">Sistema (gestores)</a>';
+            btn.disabled = true;
+            btn.classList.add('opacity-70', 'cursor-not-allowed');
+        }
+    </script>
+</body>
+</html>
