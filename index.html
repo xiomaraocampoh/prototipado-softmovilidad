@@ -159,19 +159,6 @@
                     
                     <form id="portalStep1" class="w-full flex flex-col items-center md:items-start">
                         
-                        <div class="mb-4 w-full">
-                            <label class="label-classic" style="font-size: 16px; font-weight: bold;">Perfil de Ingreso:</label>
-                            <select id="roleSelect" required class="input-classic cursor-pointer">
-                                <option value="" disabled selected>Seleccione su rol...</option>
-                                <option value="ESTUDIANTE">Estudiante CUE</option>
-                                <option value="PROFESOR">Profesor no docente / Investigador</option>
-                                <option value="ADMINISTRATIVO">Colaborador / Administrativo</option>
-                                <option value="EGRESADO">Egresado</option>
-                                <option value="EXTERNO">Usuario Externo (Entrante)</option>
-                                <option value="RECTOR">Rectoría</option>
-                            </select>
-                        </div>
-
                         <div class="mb-2 w-full">
                             <label class="label-classic" style="font-size: 16px; font-weight: bold;">Correo Institucional:</label>
                             <input type="email" id="portalEmail" required class="input-classic">
@@ -273,13 +260,10 @@
         step1.onsubmit = (e) => {
             e.preventDefault();
             clearError();
-            
-            const role = document.getElementById('roleSelect').value;
-            if(!role) return showError("Debe seleccionar un Perfil de Ingreso.");
 
             const email = portalEmail.value;
             const res = AuthService.requestPortalCode(email, { reuseLast: reuseLastCode.checked });
-            
+
             if (!res.success) return showError(res.message);
             showStep2(email);
             alert(`Código ${res.reused ? 'reutilizado' : 'enviado'} (simulación): ${res.code}`);
@@ -288,33 +272,16 @@
         step2.onsubmit = (e) => {
             e.preventDefault();
             clearError();
-            
-            const role = document.getElementById('roleSelect').value;
+
             const email = portalEmail.value;
-            const name = email.split('@')[0].toUpperCase();
 
-            const roleNames = {
-                'ESTUDIANTE': 'Estudiante',
-                'PROFESOR': 'Profesor / Investigador',
-                'ADMINISTRATIVO': 'Administrativo',
-                'EGRESADO': 'Egresado',
-                'EXTERNO': 'Solicitante Externo',
-                'RECTOR': 'Rector'
-            };
-
-            // Validación de código simulada de auth.js
+            // Validación de código y asignación automática de rol según correo
             const res = AuthService.loginPortal(email, portalCode.value);
             if (!res.success) return showError(res.message);
 
-            // Almacenar usuario
-            const user = {
-                name: name,
-                email: email,
-                role: { code: role, name: roleNames[role] }
-            };
-
-            localStorage.setItem('CUE_AUTH_USER', JSON.stringify(user));
-            window.location.href = 'modules/dashboard-estudiante.html';
+            const redirect = res.redirect || 'dashboard-estudiante.html';
+            const url = redirect.startsWith('modules/') ? redirect : `modules/${redirect}`;
+            window.location.href = url;
         };
 
         document.getElementById('backToStep1').onclick = () => {

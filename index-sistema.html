@@ -102,56 +102,24 @@
             errorBox.classList.add('hidden');
         }
 
-        // Lógica de Redirección Automática según correo (Se mantiene intacta)
+        // Lógica de autenticación Backoffice usando AuthService (rol automático por correo)
         document.getElementById('backofficeForm').onsubmit = (e) => {
             e.preventDefault();
             clearError();
-            
-            const email = document.getElementById('backofficeEmail').value.toLowerCase().trim();
-            const name = email.split('@')[0].toUpperCase();
-            
-            let roleCode = '';
-            let roleName = '';
-            let redirectUrl = '';
 
-            if (email.includes('secretaria.ani')) {
-                roleCode = 'ANI_SECRETARIA';
-                roleName = 'Secretaría ANI';
-                redirectUrl = 'modules/dashboard-ani.html';
-            } 
-            else if (email.includes('direccion.ani')) {
-                roleCode = 'ANI_DIRECCION';
-                roleName = 'Dirección ANI';
-                redirectUrl = 'modules/dashboard-ani.html';
-            } 
-            else if (email.includes('coord')) {
-                roleCode = 'COORD_ACAD';
-                roleName = 'Coordinación Académica';
-                redirectUrl = 'modules/dashboard-acad.html';
-            } 
-            else if (email.includes('sst') || email.includes('riesgos')) {
-                roleCode = 'SST';
-                roleName = 'SST - Riesgos';
-                redirectUrl = 'modules/dashboard-sst.html';
-            } 
-            else if (email.includes('registro') || email.includes('control')) {
-                roleCode = 'REGISTRO';
-                roleName = 'Control y Registro';
-                redirectUrl = 'modules/dashboard-registro.html';
-            } 
-            else {
-                showError('El correo no tiene privilegios administrativos.');
+            const email = document.getElementById('backofficeEmail').value;
+            const password = document.getElementById('backofficePassword').value;
+
+            const result = AuthService.loginBackoffice(email, password);
+
+            if (!result.success) {
+                showError(result.message || 'Credenciales incorrectas.');
                 return;
             }
 
-            const user = {
-                name: name,
-                email: email,
-                role: { code: roleCode, name: roleName }
-            };
-
-            localStorage.setItem('CUE_AUTH_USER', JSON.stringify(user));
-            window.location.href = redirectUrl;
+            const redirect = result.redirect || '';
+            const url = redirect.startsWith('modules/') ? redirect : `modules/${redirect}`;
+            window.location.href = url;
         };
 
         document.getElementById('btnCancel').onclick = () => {
