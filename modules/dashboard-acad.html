@@ -5,1024 +5,425 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coordinación Académica - CUE Movilidad</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Control explícito de pestañas: solo el panel con data-active="true" es visible */
-        .acad-tab-panel[data-active="false"] { display: none !important; }
-        .acad-tab-panel[data-active="true"] { display: block !important; }
+        body { font-family: 'Montserrat', sans-serif; background-color: #f3f4f6; }
+        .bg-cue { background-color: #00529C; }
+        .text-cue { color: #00529C; }
     </style>
 </head>
+<body class="flex h-screen overflow-hidden">
 
-<body class="bg-[#f0f4f8] font-['Inter']">
-    <nav class="bg-white border-b-4 border-indigo-700 shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-10">
-                <h1 class="font-bold text-indigo-800 border-l pl-4 ml-2">Coordinación Académica</h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="text-right hidden md:block">
-                    <p id="userNameDisplay" class="text-sm font-bold text-[#03045e] leading-tight">Usuario</p>
-                    <p id="userRoleDisplay" class="text-[10px] text-gray-500 uppercase font-bold">Rol</p>
-                </div>
-                <button onclick="AuthService.logout()" class="text-gray-400 hover:text-red-500 p-2 bg-gray-50 rounded-full hover:bg-red-50 transition" title="Cerrar Sesión">
-                    <i data-lucide="log-out" class="w-5 h-5"></i>
-                </button>
-            </div>
+    <aside class="w-64 bg-cue text-white flex flex-col shadow-xl z-20">
+        <div class="p-6 text-center border-b border-blue-800">
+            <img src="../assets/img/logo_avh.png" alt="Logo CUE" class="h-12 bg-white p-1 rounded mx-auto mb-3">
+            <h2 class="text-sm font-bold tracking-widest uppercase">Coordinación</h2>
+            <p id="coordNameDisplay" class="text-xs text-blue-200 mt-1">Cargando...</p>
         </div>
-    </nav>
-
-    <main class="max-w-7xl mx-auto mt-8 px-6 pb-12">
-        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 border-b pb-4">
-            <div>
-                <h2 class="text-2xl font-bold text-[#03045e]">Bandeja Académica y Salidas Académicas</h2>
-                <p class="text-gray-500 text-sm">Aprobación de movilidad (viabilidad académica) y creación de salidas  Academicas</p>
-            </div>
-
-            <div class="flex items-center gap-2 bg-white border rounded-lg p-1 shadow-sm w-full md:w-auto">
-                <button id="tabBtnPazSalvo" onclick="switchAcadTab('pazSalvo')" class="px-4 py-2 rounded-md text-sm font-bold bg-indigo-700 text-white flex-1 md:flex-none">Movilidad viable académicamente</button>
-                <button id="tabBtnSalidas" onclick="switchAcadTab('salidas')" class="px-4 py-2 rounded-md text-sm font-bold text-indigo-800 hover:bg-indigo-50 flex-1 md:flex-none">Salidas Académicas</button>
-            </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <button onclick="switchTab('solicitudes')" id="tab-solicitudes" class="w-full flex items-center gap-3 px-4 py-3 bg-blue-800/50 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="file-check" class="w-5 h-5"></i> Solicitudes
+            </button>
+            <button onclick="switchTab('salidas')" id="tab-salidas" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-800/50 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="bus" class="w-5 h-5"></i> Crear Salida Académica
+            </button>
+        </nav>
+        <div class="p-4 border-t border-blue-800">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="log-out" class="w-4 h-4"></i> Cerrar Sesión
+            </button>
         </div>
+    </aside>
 
-        <!-- TAB: APROBACIÓN ACADÉMICA (Paz y Salvo / Homologación) -->
-        <section id="tabPazSalvo" class="acad-tab-panel" data-active="true">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-3 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="bg-gray-50 p-4 border-b flex flex-col gap-3">
-                        <h3 class="font-bold text-[#03045e] flex items-center gap-2">
-                            <i data-lucide="clipboard-check" class="w-5 h-5 text-indigo-700"></i> Paz y Salvo (REQ-11, REQ-12)
-                        </h3>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <input id="pazSearch" type="text" placeholder="Buscar por nombre, ID o correo…" class="border rounded-lg px-3 py-2 text-sm w-full md:w-56 focus:outline-none focus:border-indigo-400">
-                            <select id="pazFilterEstado" class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400" onchange="loadPazYSalvoTable()">
-                                <option value="TODAS">Todas</option>
-                                <option value="PENDIENTES">Pendientes</option>
-                                <option value="APROBADAS">Aprobadas</option>
-                            </select>
-                            <button onclick="loadPazYSalvoTable()" class="px-3 py-2 text-sm font-bold border rounded-lg hover:bg-indigo-50 text-indigo-700">Buscar</button>
-                        </div>
+    <main class="flex-1 flex flex-col overflow-hidden">
+        
+        <header class="bg-white shadow-sm h-16 flex items-center px-8 border-b border-gray-200 z-10">
+            <h1 id="headerTitle" class="text-xl font-bold text-gray-800">Cargando...</h1>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-8">
+            
+            <div id="alertBox" class="hidden mb-6 p-4 rounded-lg flex items-center gap-3 text-sm font-bold shadow-sm">
+                <i id="alertIcon" data-lucide="check-circle" class="w-5 h-5"></i>
+                <span id="alertMessage">Operación exitosa</span>
+            </div>
+
+            <div id="view-solicitudes" class="space-y-6">
+                
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                    <div class="relative w-full md:w-96">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"></i>
+                        <input type="text" id="searchInput" placeholder="Buscar estudiante o correo..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#00529C] outline-none" onkeyup="filterTable()">
                     </div>
+                    <div class="w-full md:w-auto">
+                        <select id="statusFilter" class="w-full md:w-auto border border-gray-300 rounded-lg text-sm px-4 py-2 outline-none focus:ring-2 focus:ring-[#00529C] text-gray-700 font-medium cursor-pointer" onchange="filterTable()">
+                            <option value="ALL">Todas las solicitudes</option>
+                            <option value="PENDIENTE">Pendientes de Aval</option>
+                            <option value="APROBADA">Aprobadas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
-                                <tr>
-                                    <th class="p-4 w-28">ID</th>
-                                    <th class="p-4">Solicitante</th>
-                                    <th class="p-4">Tipo</th>
-                                    <th class="p-4">Estado ANI</th>
-                                    <th class="p-4">Aprobación académica</th>
-                                    <th class="p-4 text-center">Acción</th>
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
+                                    <th class="p-4 font-semibold">Solicitante</th>
+                                    <th class="p-4 font-semibold">Destino / Movilidad</th>
+                                    <th class="p-4 font-semibold">Fechas</th>
+                                    <th class="p-4 font-semibold">Estado</th>
+                                    <th class="p-4 font-semibold text-center">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody id="pazTableBody" class="divide-y divide-gray-100 text-sm"></tbody>
+                            <tbody id="solicitudesTableBody" class="divide-y divide-gray-100 text-sm">
+                                </tbody>
                         </table>
+                    </div>
+                    <div id="emptyStateBandeja" class="hidden p-10 text-center flex flex-col items-center justify-center">
+                        <i data-lucide="inbox" class="w-12 h-12 text-gray-300 mb-3"></i>
+                        <p class="text-gray-500 font-medium">No se encontraron solicitudes con estos filtros.</p>
                     </div>
                 </div>
             </div>
-        </section>
 
-        <!-- TAB: SALIDAS ACADÉMICAS (solo Coordinación crea; transporte Universidad → SST) -->
-        <section id="tabSalidas" class="acad-tab-panel" data-active="false">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="bg-gray-50 p-4 border-b">
-                        <h3 class="font-bold text-[#03045e] flex items-center gap-2">
-                            <i data-lucide="map-pin" class="w-5 h-5 text-indigo-700"></i> Crear Salida Académica
-                        </h3>
-                        <p class="text-xs text-gray-500 mt-1">Si el transporte es suministrado por la universidad, se activa SST automáticamente.</p>
-                    </div>
-                    <form id="salidaForm" class="p-4 space-y-4" onsubmit="return createSalida(event)">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">Nombre de la salida</label>
-                            <input id="salidaNombre" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Ej: Visita empresarial - Planta Nestlé">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">Tipo (opcional)</label>
-                            <select id="salidaTipo" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400">
-                                <option value="VISITA_EMPRESARIAL">Visita empresarial</option>
-                                <option value="SALIDA_CAMPO">Salida de campo</option>
-                                <option value="CONGRESO_EVENTO">Congreso / evento</option>
-                                <option value="OTRA">Otra</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div id="view-salidas" class="hidden max-w-4xl mx-auto">
+                <div class="bg-white rounded-lg shadow-md border border-gray-200 p-8">
+                    <h2 class="text-lg font-bold text-gray-800 border-b pb-3 mb-6">Formulario de Salida Académica</h2>
+                    
+                    <form id="salidaForm" class="space-y-6">
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Destino (Ciudad/Lugar) <span class="text-red-600">*</span></label>
-                                <input id="salidaDestino" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Ciudad o lugar">
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Destino (Ciudad/Lugar) *</label>
+                                <input type="text" id="s_destino" required class="w-full p-2 border border-gray-300 rounded focus:border-[#00529C] outline-none text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Dirección <span class="text-red-600">*</span></label>
-                                <input id="salidaDireccion" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Dirección del destino">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Fecha de inicio <span class="text-red-600">*</span></label>
-                                <input id="salidaFechaInicio" required type="date" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400">
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Dirección Exacta *</label>
+                                <input type="text" id="s_direccion" required class="w-full p-2 border border-gray-300 rounded focus:border-[#00529C] outline-none text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Fecha de fin <span class="text-red-600">*</span></label>
-                                <input id="salidaFechaFin" required type="date" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400">
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Profesor responsable (correo) <span class="text-red-600">*</span></label>
-                                <input id="salidaProfesorEmail" required type="email" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="profesor@cue.edu.co">
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Fecha de Salida *</label>
+                                <input type="date" id="s_fechaInicio" required class="w-full p-2 border border-gray-300 rounded focus:border-[#00529C] outline-none text-sm">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Profesor responsable (nombre) <span class="text-red-600">*</span></label>
-                                <input id="salidaProfesorNombre" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Nombre completo">
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Fecha de Regreso *</label>
+                                <input type="date" id="s_fechaFin" required class="w-full p-2 border border-gray-300 rounded focus:border-[#00529C] outline-none text-sm">
                             </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 mb-1">Actividad a realizar <span class="text-red-600">*</span></label>
-                            <input id="salidaActividad" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Descripción de la actividad">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Profesor Responsable *</label>
+                                <input type="text" id="s_profesor" placeholder="Nombre completo" required class="w-full p-2 border border-gray-300 rounded focus:border-[#00529C] outline-none text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Actividad a Realizar *</label>
+                                <input type="text" id="s_actividad" placeholder="Ej: Visita técnica a planta" required class="w-full p-2 border border-gray-300 rounded focus:border-[#00529C] outline-none text-sm">
+                            </div>
                         </div>
 
-                        <div class="border rounded-lg p-3 bg-gray-50">
-                            <p class="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-2">
-                                <i data-lucide="bus" class="w-4 h-4 text-indigo-700"></i> ¿La salida requiere transporte suministrado/contratado por la Universidad? <span class="text-red-600">*</span>
-                            </p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <label class="flex items-center gap-3 p-3 border rounded bg-white cursor-pointer hover:bg-gray-50">
-                                    <input type="radio" name="salidaTransporte" value="UNIVERSIDAD" class="w-4 h-4 accent-indigo-700" required>
-                                    <div>
-                                        <p class="text-sm font-bold text-gray-800">SÍ</p>
-                                        <p class="text-[10px] text-gray-500">Activa revisión SST (SOAT, pólizas, etc.).</p>
-                                    </div>
+                        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+                            <label class="block text-sm font-bold text-[#00529C] mb-2">
+                                ¿La salida requiere transporte suministrado/contratado por la Universidad? *
+                            </label>
+                            <div class="flex gap-6">
+                                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input type="radio" name="s_transporte" value="SI" required class="w-4 h-4 accent-[#00529C]">
+                                    SÍ (Pasará a revisión de SST)
                                 </label>
-                                <label class="flex items-center gap-3 p-3 border rounded bg-white cursor-pointer hover:bg-gray-50">
-                                    <input type="radio" name="salidaTransporte" value="PROPIO" class="w-4 h-4 accent-indigo-700" required>
-                                    <div>
-                                        <p class="text-sm font-bold text-gray-800">NO</p>
-                                        <p class="text-[10px] text-gray-500">Medios propios. No interviene SST.</p>
-                                    </div>
+                                <label class="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input type="radio" name="s_transporte" value="NO" class="w-4 h-4 accent-[#00529C]">
+                                    NO (Aprobación directa a ANI)
                                 </label>
                             </div>
                         </div>
 
-                        <div class="border rounded-lg p-3">
-                            <p class="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-2">
-                                <i data-lucide="users" class="w-4 h-4 text-indigo-700"></i> Gestión de estudiantes
-                            </p>
-                            <div class="mb-3">
-                                <label class="block text-[11px] font-bold text-gray-500 mb-1">Buscar por Nombre o Documento de Identidad</label>
-                                <div class="flex gap-2">
-                                    <input id="participantSearchInput" type="text" class="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:border-indigo-400" placeholder="Nombre o documento">
-                                    <button type="button" onclick="searchParticipants()" class="px-3 py-2 text-xs font-bold border rounded bg-white text-indigo-700 hover:bg-indigo-50">Agregar</button>
-                                </div>
+                        <div class="border border-gray-200 rounded-lg p-5">
+                            <h3 class="text-sm font-bold text-gray-800 mb-4">Lista de Estudiantes Participantes</h3>
+                            
+                            <div class="flex gap-2 mb-4">
+                                <input type="text" id="add_identificacion" placeholder="Número de Identificación..." class="w-1/3 p-2 border border-gray-300 rounded outline-none text-sm">
+                                <input type="text" id="add_nombre" placeholder="Nombre completo del estudiante..." class="flex-1 p-2 border border-gray-300 rounded outline-none text-sm">
+                                <button type="button" onclick="agregarEstudiante()" class="bg-gray-800 text-white px-4 py-2 rounded text-sm font-bold hover:bg-black transition flex items-center gap-2">
+                                    <i data-lucide="plus" class="w-4 h-4"></i> Agregar
+                                </button>
                             </div>
-                            <div id="participantSearchResults" class="space-y-1 mb-3 text-xs"></div>
-                            <div>
-                                <p class="text-[11px] font-bold text-gray-500 uppercase mb-1">Estudiantes agregados</p>
-                                <div id="participantsSelected" class="space-y-1 text-sm"></div>
-                            </div>
+
+                            <table class="w-full text-left text-sm border-collapse mt-2">
+                                <thead>
+                                    <tr class="bg-gray-100 text-gray-600 border-y border-gray-200">
+                                        <th class="p-2 font-semibold">Identificación</th>
+                                        <th class="p-2 font-semibold">Nombre Completo</th>
+                                        <th class="p-2 font-semibold text-center w-24">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaEstudiantes" class="divide-y divide-gray-200">
+                                    </tbody>
+                            </table>
+                            <p id="msgSinEstudiantes" class="text-xs text-gray-400 mt-3 text-center italic">Aún no has agregado estudiantes a la lista.</p>
                         </div>
 
-                        <button type="submit" class="w-full bg-indigo-700 text-white py-2 rounded text-sm font-bold hover:bg-indigo-800 transition flex items-center justify-center gap-2">
-                            <i data-lucide="save" class="w-4 h-4"></i> Guardar Salida
-                        </button>
+                        <div class="flex justify-end pt-4 border-t border-gray-100">
+                            <button type="submit" class="bg-[#00529C] text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-blue-800 transition shadow-md flex items-center gap-2">
+                                <i data-lucide="save" class="w-4 h-4"></i> Guardar Salida Académica
+                            </button>
+                        </div>
                     </form>
                 </div>
-
-                <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="bg-gray-50 p-4 border-b flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                        <h3 class="font-bold text-[#03045e] flex items-center gap-2">
-                            <i data-lucide="list" class="w-5 h-5 text-indigo-700"></i> Salidas registradas
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <select id="salidasFilter" class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400" onchange="loadSalidasTable()">
-                                <option value="ALL">Todas</option>
-                                <option value="EN_REVISION_SST">En revisión SST</option>
-                                <option value="APROBADA">Aprobadas</option>
-                                <option value="CANCELADA">Canceladas</option>
-                            </select>
-                            <button onclick="loadSalidasTable()" class="px-3 py-2 text-sm font-bold border rounded-lg hover:bg-gray-50">Actualizar</button>
-                        </div>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
-                                <tr>
-                                    <th class="p-4 w-28">ID</th>
-                                    <th class="p-4">Salida</th>
-                                    <th class="p-4">Fechas</th>
-                                    <th class="p-4">Transporte</th>
-                                    <th class="p-4">Estado</th>
-                                    <th class="p-4">SST</th>
-                                    <th class="p-4 text-center">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="salidasTableBody" class="divide-y divide-gray-100 text-sm"></tbody>
-                        </table>
-                    </div>
-                </div>
             </div>
-        </section>
+
+        </div>
     </main>
 
-    <!-- MODAL: APROBACIÓN ACADÉMICA -->
-    <div id="pazModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[95vh]">
-            <div class="bg-indigo-700 p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold flex items-center gap-2"><i data-lucide="clipboard-check" class="w-5 h-5"></i> Aprobación de movilidad (Homologación)</h3>
-                <button onclick="closePazModal()" class="text-indigo-200 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto flex-grow">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded border mb-6 items-center">
-                    <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Solicitud</span>
-                        <span class="font-mono font-bold text-[#03045e] text-lg" id="pazModalId"></span>
-                    </div>
-                    <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Solicitante</span>
-                        <span class="font-bold text-gray-800" id="pazModalUser"></span>
-                    </div>
-                    <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Tipo</span>
-                        <span class="font-bold text-gray-800" id="pazModalType"></span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Estado de aprobación académica</label>
-                        <select id="pazEstado" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400">
-                            <option value="PENDIENTE">Pendiente</option>
-                            <option value="APROBADO">Aprobado</option>
-                            <option value="RECHAZADO">Rechazado</option>
-                        </select>
-                        <p class="text-[10px] text-gray-500 mt-1">Se guarda en <span class="font-mono font-bold">academicReview.estado</span>.</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-500 mb-1">Plan de homologación (resumen)</label>
-                        <textarea id="pazPlan" rows="4" class="w-full border rounded p-2 text-sm focus:outline-none focus:border-indigo-400" placeholder="Ej: Se homologan 2 asignaturas, 1 se cursa en destino…"></textarea>
-                    </div>
-                </div>
-                <div class="mt-4">
-                    <label class="block text-xs font-bold text-gray-500 mb-1">Observaciones</label>
-                    <textarea id="pazObs" rows="4" class="w-full border rounded p-2 text-sm focus:outline-none focus:border-indigo-400" placeholder="Observaciones para trazabilidad…"></textarea>
-                </div>
-            </div>
-            <div class="bg-gray-50 p-4 border-t flex justify-end gap-3">
-                <button onclick="closePazModal()" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold hover:bg-gray-100">Cerrar</button>
-                <button onclick="saveAcademicReview()" class="px-6 py-2 bg-indigo-700 text-white rounded text-sm font-bold hover:bg-indigo-800 transition">Guardar revisión</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: DETALLE SALIDA -->
-    <div id="salidaModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[95vh]">
-            <div class="bg-indigo-700 p-4 flex justify-between items-center text-white">
-                <h3 class="font-bold flex items-center gap-2"><i data-lucide="map-pin" class="w-5 h-5"></i> Detalle de Salida Académica</h3>
-                <button onclick="closeSalidaModal()" class="text-indigo-200 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="p-6 overflow-y-auto flex-grow">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded border mb-6 items-center">
-                    <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Salida</span>
-                        <span class="font-mono font-bold text-[#03045e] text-lg" id="salidaModalId"></span>
-                    </div>
-                    <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Profesor responsable</span>
-                        <span class="font-bold text-gray-800" id="salidaModalProfesor"></span>
-                    </div>
-                    <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Estado</span>
-                        <span class="font-bold text-gray-800" id="salidaModalEstado"></span>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <div class="border rounded-lg p-4">
-                        <p class="text-xs font-bold text-gray-500 uppercase mb-2">Datos</p>
-                        <div class="space-y-2 text-sm text-gray-700">
-                            <div><span class="font-bold">Nombre:</span> <span id="salidaModalNombre"></span></div>
-                            <div><span class="font-bold">Tipo:</span> <span id="salidaModalTipo"></span></div>
-                            <div><span class="font-bold">Destino:</span> <span id="salidaModalDestino"></span></div>
-                            <div><span class="font-bold">Dirección:</span> <span id="salidaModalDireccion"></span></div>
-                            <div><span class="font-bold">Fechas:</span> <span id="salidaModalFechas"></span></div>
-                            <div><span class="font-bold">Actividad:</span> <span id="salidaModalActividad"></span></div>
-                            <div><span class="font-bold">Transporte:</span> <span id="salidaModalTransporte"></span></div>
-                        </div>
-                    </div>
-                    <div class="border rounded-lg p-4">
-                        <p class="text-xs font-bold text-gray-500 uppercase mb-2">Participantes</p>
-                        <div id="salidaModalParticipantes" class="space-y-2 text-sm text-gray-700"></div>
-                    </div>
-                </div>
-
-                <div class="mt-6 border rounded-lg p-4 bg-gray-50">
-                    <p class="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-2">
-                        <i data-lucide="shield" class="w-4 h-4 text-indigo-700"></i> SST (solo si transporte universidad)
-                    </p>
-                    <div id="salidaModalSst" class="text-sm text-gray-700"></div>
-                </div>
-            </div>
-            <div class="bg-gray-50 p-4 border-t flex justify-end gap-3">
-                <button onclick="closeSalidaModal()" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold hover:bg-gray-100">Cerrar</button>
-                <button onclick="cancelSalida()" class="px-4 py-2 border border-red-300 text-red-700 bg-white rounded text-sm font-bold hover:bg-red-50">Cancelar salida</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="../assets/js/state.js"></script>
-    <script src="../assets/js/auth.js"></script>
     <script>
-        const LS_KEYS = {
-            requests: 'CUE_MY_REQUESTS',
-            salidas: 'CUE_SALIDAS_ACADEMICAS'
-        };
+        // Inicializar iconos
+        lucide.createIcons();
 
-        let currentPazRequestId = null;
-        let currentSalidaId = null;
-        let participantCatalogCache = null;
-        let selectedParticipants = [];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            let user;
-            try {
-                user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
-            } catch (e) {
-                console.error('Auth check failed', e);
-                window.location.href = '../index-sistema.html';
-                return;
-            }
-            if (!user || !user.role || user.role.code !== 'COORD_ACAD') {
-                alert("Acceso denegado. Se requiere perfil de Coordinación Académica.");
-                window.location.href = '../index-sistema.html';
-                return;
-            }
-            const nameEl = document.getElementById('userNameDisplay');
-            const roleEl = document.getElementById('userRoleDisplay');
-            if (nameEl) nameEl.textContent = user.name || '';
-            if (roleEl) roleEl.textContent = user.role.name || '';
-
-            try {
-                seedDemoData();
-                ensureCoordinatorProgram(user);
-                loadPazYSalvoTable();
-                loadSalidasTable();
-            } catch (e) {
-                console.error('Dashboard init failed', e);
-                if (document.getElementById('pazTableBody')) {
-                    document.getElementById('pazTableBody').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-600">Error al cargar. Revise la consola (F12).</td></tr>';
-                }
-            }
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        });
-
-        function safeParseArray(key) {
-            try {
-                const raw = localStorage.getItem(key);
-                if (!raw) return [];
-                const data = JSON.parse(raw);
-                return Array.isArray(data) ? data : [];
-            } catch {
-                return [];
-            }
+        // 1. SESIÓN Y FILTRO DE PROGRAMA
+        const currentUser = JSON.parse(localStorage.getItem('CUE_AUTH_USER'));
+        if (!currentUser || currentUser.role.code !== 'COORD_ACAD') {
+            window.location.href = '../index-sistema.html';
         }
 
-        function saveArray(key, arr) {
-            localStorage.setItem(key, JSON.stringify(arr));
-        }
+        // Mapeo automático de programa según correo para el prototipo
+        let programaCoordinador = "INGENIERÍA DE SOFTWARE"; 
+        if(currentUser.email.includes('medicina')) programaCoordinador = "MEDICINA";
+        if(currentUser.email.includes('derecho')) programaCoordinador = "DERECHO";
 
-        // Crear datos de prueba mínimos para la demo
-        function seedDemoData() {
-            let reqs = safeParseArray(LS_KEYS.requests);
-            let salidas = safeParseArray(LS_KEYS.salidas);
-            let changedReqs = false;
-            let changedSalidas = false;
+        document.getElementById('coordNameDisplay').textContent = `${currentUser.name} (${programaCoordinador})`;
+        document.getElementById('headerTitle').textContent = `Solicitudes de ${programaCoordinador}`;
 
-            if (reqs.length === 0) {
-                reqs = [
-                    {
-                        id: 'REQ-2001',
-                        date: '01/03/2026',
-                        type: 'Intercambio Académico',
-                        dir: 'SALIENTE',
-                        status: 'APROBADA_POSTULACION',
-                        userEmail: 'estudiante1@cue.edu.co',
-                        userName: 'Estudiante Uno',
-                        expedienteData: { programa: 'Ingeniería de Software' }
-                    },
-                    {
-                        id: 'REQ-2002',
-                        date: '05/03/2026',
-                        type: 'Curso Corto',
-                        dir: 'SALIENTE',
-                        status: 'APROBADA_POSTULACION',
-                        userEmail: 'estudiante2@cue.edu.co',
-                        userName: 'Estudiante Dos',
-                        academicReview: { estado: 'PENDIENTE' },
-                        expedienteData: { programa: 'Ingeniería de Software' }
-                    },
-                    {
-                        id: 'REQ-3001',
-                        date: '10/03/2026',
-                        type: 'Intercambio Académico',
-                        dir: 'ENTRANTE',
-                        status: 'EN_REVISION_TOTAL',
-                        userEmail: 'externo@unam.mx',
-                        userName: 'Estudiante Externo'
-                    }
+        // 2. INYECTAR DATOS DE PRUEBA (SEED DATA)
+        function injectSeedData() {
+            let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS'));
+            if (!requests || requests.length === 0) {
+                const mockData = [
+                    { id: 101, applicantName: 'Carlos López', email: 'clopez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Intercambio Académico (Semestre - Asignaturas)', destinyInst: 'Universidad de Monterrey', dateStart: '2026-08-01', dateEnd: '2026-12-15', status: 'PENDIENTE_PAZ_SALVO' },
+                    { id: 102, applicantName: 'Ana Rodríguez', email: 'arodriguez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Práctica Empresarial - Pasantía', destinyInst: 'Microsoft Colombia', dateStart: '2026-07-01', dateEnd: '2026-12-30', status: 'REVISION_ANI' },
+                    { id: 103, applicantName: 'Luis Fernández', email: 'lfernandez@cue.edu.co', program: 'DERECHO', type: 'Diplomado Opción de Grado', destinyInst: 'Cámara de Comercio', dateStart: '2026-05-10', dateEnd: '2026-07-20', status: 'PENDIENTE_PAZ_SALVO' },
+                    { id: 104, applicantName: 'Sofía Martínez', email: 'smartinez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Curso Corto', destinyInst: 'Platzi', dateStart: '2026-09-01', dateEnd: '2026-09-30', status: 'PENDIENTE_PAZ_SALVO' }
                 ];
-                changedReqs = true;
+                localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(mockData));
             }
+        }
+        injectSeedData();
 
-            if (salidas.length === 0) {
-                const now = new Date();
-                const today = now.toISOString().slice(0, 10);
-                const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+        // 3. GESTIÓN DE PESTAÑAS (TABS)
+        function switchTab(tabId) {
+            document.getElementById('view-solicitudes').classList.add('hidden');
+            document.getElementById('view-salidas').classList.add('hidden');
+            document.getElementById('tab-solicitudes').classList.remove('bg-blue-800/50');
+            document.getElementById('tab-salidas').classList.remove('bg-blue-800/50');
 
-                salidas = [
-                    {
-                        id: 'SA-1001',
-                        createdAt: now.toISOString(),
-                        updatedAt: now.toISOString(),
-                        nombre: 'Visita empresarial - Planta Nestlé',
-                        tipo: 'VISITA_EMPRESARIAL',
-                        destino: 'Bogotá D.C.',
-                        fechaInicio: today,
-                        fechaFin: nextWeek,
-                        transporte: 'UNIVERSIDAD',
-                        requiereSST: true,
-                        estadoAcad: 'EN_REVISION_SST',
-                        coordinatorEmail: 'coord.acad@cue.edu.co',
-                        profesorResponsable: { email: 'profesor1@cue.edu.co', nombre: 'Profesor Responsable 1' },
-                        participantes: [
-                            { nombre: 'Estudiante Uno', email: 'estudiante1@cue.edu.co', rol: 'ESTUDIANTE' },
-                            { nombre: 'Estudiante Dos', email: 'estudiante2@cue.edu.co', rol: 'ESTUDIANTE' }
-                        ],
-                        sstReview: { estado: 'PENDIENTE' }
-                    },
-                    {
-                        id: 'SA-1002',
-                        createdAt: now.toISOString(),
-                        updatedAt: now.toISOString(),
-                        nombre: 'Salida de campo - Biología',
-                        tipo: 'SALIDA_CAMPO',
-                        destino: 'Reserva Natural',
-                        fechaInicio: today,
-                        fechaFin: nextWeek,
-                        transporte: 'PROPIO',
-                        requiereSST: false,
-                        estadoAcad: 'APROBADA',
-                        coordinatorEmail: 'coord.acad@cue.edu.co',
-                        profesorResponsable: { email: 'profesor2@cue.edu.co', nombre: 'Profesor Responsable 2' },
-                        participantes: [
-                            { nombre: 'Ana Gómez', email: 'ana.gomez@cue.edu.co', rol: 'ESTUDIANTE' }
-                        ],
-                        sstReview: null
-                    }
-                ];
-                changedSalidas = true;
-            }
-
-            if (changedReqs) saveArray(LS_KEYS.requests, reqs);
-            if (changedSalidas) saveArray(LS_KEYS.salidas, salidas);
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabId}`).classList.add('bg-blue-800/50');
+            
+            document.getElementById('headerTitle').textContent = tabId === 'solicitudes' ? `Solicitudes de ${programaCoordinador}` : 'Creación de Salidas Académicas';
         }
 
-        function genId(prefix) {
-            return `${prefix}-${Math.floor(Math.random() * 9000 + 1000)}`;
+        // 4. LÓGICA DE FILTRADO Y RENDERIZADO DE TABLA
+        let allRequests = [];
+
+        function loadSolicitudes() {
+            let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')) || [];
+            
+            // Filtro maestro: Solo los de este programa
+            allRequests = requests.filter(req => {
+                const prog = req.program ? req.program.toUpperCase() : '';
+                return prog === programaCoordinador;
+            });
+            
+            filterTable();
         }
 
-        function formatDateRange(d1, d2) {
-            if (!d1 && !d2) return 'N/A';
-            if (d1 && !d2) return d1;
-            if (!d1 && d2) return d2;
-            return `${d1} → ${d2}`;
-        }
-
-        function switchAcadTab(tab) {
-            const tabPaz = document.getElementById('tabPazSalvo');
-            const tabSal = document.getElementById('tabSalidas');
-            const btnPaz = document.getElementById('tabBtnPazSalvo');
-            const btnSal = document.getElementById('tabBtnSalidas');
-
-            const isPaz = tab === 'pazSalvo';
-            if (tabPaz) tabPaz.setAttribute('data-active', isPaz ? 'true' : 'false');
-            if (tabSal) tabSal.setAttribute('data-active', isPaz ? 'false' : 'true');
-
-            if (btnPaz) {
-                btnPaz.classList.toggle('bg-indigo-700', isPaz);
-                btnPaz.classList.toggle('text-white', isPaz);
-                btnPaz.classList.toggle('text-indigo-800', !isPaz);
-                btnPaz.classList.toggle('hover:bg-indigo-50', !isPaz);
-            }
-            if (btnSal) {
-                btnSal.classList.toggle('bg-indigo-700', !isPaz);
-                btnSal.classList.toggle('text-white', !isPaz);
-                btnSal.classList.toggle('text-indigo-800', isPaz);
-                btnSal.classList.toggle('hover:bg-indigo-50', isPaz);
-            }
-            if (!isPaz && typeof loadSalidasTable === 'function') loadSalidasTable();
-        }
-
-        // =========================
-        // 1) PAZ Y SALVO
-        // =========================
-        function getAcademicReviewState(req) {
-            if (!req || typeof req !== 'object') return 'PENDIENTE';
-            const st = req.academicReview && typeof req.academicReview === 'object' ? req.academicReview.estado : null;
-            return (st && typeof st === 'string') ? st : 'PENDIENTE';
-        }
-
-        function ensureCoordinatorProgram(user) {
-            const email = (user?.email || '').toLowerCase();
-            if (!email) return;
-            try {
-                let programas = JSON.parse(localStorage.getItem('CUE_PROGRAMAS') || '[]');
-                if (!Array.isArray(programas)) programas = [];
-                const asObj = p => typeof p === 'string' ? { nombre: p, correoCoordinador: '' } : p;
-                const hasMyProgram = programas.some(p => (asObj(p).correoCoordinador || '').toLowerCase() === email);
-                if (!hasMyProgram && programas.length < 20) {
-                    programas.push({ nombre: 'Ingeniería de Software', correoCoordinador: email });
-                    localStorage.setItem('CUE_PROGRAMAS', JSON.stringify(programas));
-                }
-            } catch (_) {}
-        }
-
-        function getCoordinatorProgramNames() {
-            let user;
-            try { user = AuthService.checkAuth(); } catch (_) { return []; }
-            const email = (user && user.email ? user.email : '').toString().toLowerCase();
-            if (!email) return [];
-            try {
-                const raw = localStorage.getItem('CUE_PROGRAMAS');
-                if (!raw) return [];
-                const data = JSON.parse(raw);
-                const arr = Array.isArray(data) ? data : [];
-                return arr
-                    .filter(p => p != null)
-                    .map(p => typeof p === 'string' ? { nombre: p, correoCoordinador: '' } : (p || {}))
-                    .filter(p => (p.correoCoordinador || '').toString().toLowerCase() === email)
-                    .map(p => (p.nombre != null ? p.nombre : '').toString().trim())
-                    .filter(Boolean);
-            } catch (_) { return []; }
-        }
-
-        function getRequestDisplayName(r) {
-            if (!r || typeof r !== 'object') return '';
-            if (r.userName) return String(r.userName);
-            if (r.userFullName) return String(r.userFullName);
-            const ext = r.externoFOIN012;
-            if (ext && typeof ext === 'object' && (ext.primerNombre || ext.primerApellido)) {
-                return [ext.primerNombre, ext.segundoNombre, ext.primerApellido, ext.segundoApellido].filter(Boolean).join(' ').trim() || '';
-            }
-            return (r.userEmail != null ? r.userEmail : '').toString();
-        }
-
-        function loadPazYSalvoTable() {
-            const tbody = document.getElementById('pazTableBody');
-            if (!tbody) return;
+        function filterTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const tbody = document.getElementById('solicitudesTableBody');
+            const emptyState = document.getElementById('emptyStateBandeja');
+            
             tbody.innerHTML = '';
 
-            const q = (document.getElementById('pazSearch')?.value || '').toString().trim().toLowerCase();
-            const filterEstado = (document.getElementById('pazFilterEstado')?.value || 'TODAS').toString();
-            let reqs = [];
-            try { reqs = safeParseArray(LS_KEYS.requests); } catch (_) {}
-            const coordinatorPrograms = getCoordinatorProgramNames();
+            const filtered = allRequests.filter(req => {
+                const matchesSearch = (req.applicantName && req.applicantName.toLowerCase().includes(searchTerm)) || 
+                                      (req.email && req.email.toLowerCase().includes(searchTerm));
+                
+                let isPendiente = req.status === 'PENDIENTE_PAZ_SALVO';
+                let matchesStatus = true;
+                
+                if (statusFilter === 'PENDIENTE') matchesStatus = isPendiente;
+                if (statusFilter === 'APROBADA') matchesStatus = !isPendiente; // Si no es PENDIENTE_PAZ_SALVO, el coordinador ya la aprobó
 
-            let visible = reqs.filter(r => {
-                if (!r || typeof r !== 'object') return false;
-                const dir = (r.dir != null ? r.dir : '').toString().toUpperCase();
-                const status = (r.status != null ? r.status : '').toString().toUpperCase();
-                if (dir !== 'SALIENTE') return false;
-                const statusOk = status === 'APROBADA_POSTULACION' || status === 'EN_REVISION_DIRECCION_ANI';
-                if (!statusOk) return false;
-                if (status === 'APROBADA_POSTULACION' && getAcademicReviewState(r) === 'APROBADO') return false;
-                if (coordinatorPrograms.length > 0) {
-                    const reqPrograma = (r.expedienteData && r.expedienteData.programa != null ? r.expedienteData.programa : '').toString().trim();
-                    if (!reqPrograma || !coordinatorPrograms.some(p => p === reqPrograma)) return false;
-                }
-                if (q) {
-                    const name = getRequestDisplayName(r).toLowerCase();
-                    const id = (r.id != null ? r.id : '').toString().toLowerCase();
-                    const email = (r.userEmail != null ? r.userEmail : '').toString().toLowerCase();
-                    const doc = (r.expedienteData?.documento ?? r.externoFOIN012?.numDoc ?? '').toString().toLowerCase();
-                    if (!id.includes(q) && !email.includes(q) && !name.includes(q) && !doc.includes(q)) return false;
-                }
-                if (filterEstado === 'PENDIENTES' && getAcademicReviewState(r) === 'APROBADO') return false;
-                if (filterEstado === 'APROBADAS' && getAcademicReviewState(r) !== 'APROBADO') return false;
-                return true;
+                return matchesSearch && matchesStatus;
             });
 
-            if (visible.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-500">
-                    <div class="flex flex-col items-center gap-2">
-                        <span class="text-4xl opacity-50">📋</span>
-                        <p class="font-medium">No hay solicitudes pendientes de Paz y Salvo</p>
-                        <p class="text-xs">Las solicitudes salientes aprobadas por ANI aparecerán aquí para su revisión académica.</p>
-                    </div>
-                </td></tr>`;
-                return;
-            }
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filtered.forEach(req => {
+                    const isPendiente = req.status === 'PENDIENTE_PAZ_SALVO';
+                    
+                    // Badge de Estado
+                    const statusBadge = isPendiente 
+                        ? `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Pendiente Aval</span>`
+                        : `<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Aprobada</span>`;
+                    
+                    // Botón de Acción
+                    const actionButton = isPendiente
+                        ? `<button onclick="aprobarPazYSalvo(${req.id})" class="bg-[#00529C] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-800 transition shadow-sm">Dar Aval (Aprobar)</button>`
+                        : `<span class="text-xs text-gray-400 italic">En proceso ANI</span>`;
 
-            visible.forEach(req => {
-                const acadState = getAcademicReviewState(req);
-                const isPendingAni = (req.status || '').toUpperCase() === 'EN_REVISION_DIRECCION_ANI';
-                let badge = acadState === 'APROBADO'
-                    ? `<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold border border-green-200">Aprobado</span>`
-                    : acadState === 'RECHAZADO'
-                        ? `<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold border border-red-200">Rechazado</span>`
-                        : isPendingAni
-                            ? `<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold border border-blue-200">Pend. ANI</span>`
-                            : `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-bold border border-orange-200">Pendiente</span>`;
-
-                const actionBtn = isPendingAni
-                    ? `<span class="text-xs text-gray-400 italic">Esperando aprobación ANI</span>`
-                    : `<button onclick="openPazModal('${req.id}')" class="border border-indigo-300 text-indigo-800 px-4 py-1.5 rounded text-xs font-bold hover:bg-indigo-50 transition">Revisar</button>`;
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 transition border-b">
-                        <td class="p-4 font-mono font-bold text-[#03045e]">${req.id || '-'}</td>
-                        <td class="p-4 text-gray-700">${req.userEmail || '-'}</td>
-                        <td class="p-4 text-gray-700">${req.type || '-'}</td>
-                        <td class="p-4 text-gray-700"><span class="text-[10px] font-bold px-2 py-1 rounded bg-blue-50 text-blue-700 border border-blue-100">${req.status || '-'}</span></td>
-                        <td class="p-4">${badge}</td>
-                        <td class="p-4 text-center">${actionBtn}</td>
-                    </tr>
-                `;
-            });
-            lucide.createIcons();
-        }
-
-        function openPazModal(requestId) {
-            let reqs = [];
-            try { reqs = safeParseArray(LS_KEYS.requests); } catch (_) {}
-            const req = reqs.find(r => r && r.id === requestId);
-            if (!req) { alert("No se encontró la solicitud."); return; }
-
-            const modal = document.getElementById('pazModal');
-            if (!modal) return;
-            currentPazRequestId = requestId;
-            const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text || '-'; };
-            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val != null ? val : ''; };
-            setText('pazModalId', req.id);
-            setText('pazModalUser', req.userEmail);
-            setText('pazModalType', req.type);
-            const current = (req.academicReview && typeof req.academicReview === 'object') ? req.academicReview : {};
-            setVal('pazEstado', current.estado || 'PENDIENTE');
-            setVal('pazPlan', current.planHomologacion || '');
-            setVal('pazObs', current.observaciones || '');
-            modal.classList.remove('hidden');
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-        }
-
-        function closePazModal() {
-            const modal = document.getElementById('pazModal');
-            if (modal) modal.classList.add('hidden');
-            currentPazRequestId = null;
-        }
-
-        function showToast(message, type) {
-            type = type || 'success';
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-4 right-4 z-[9999] px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-white animate-fade-in ' +
-                (type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-indigo-600');
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3000);
-        }
-
-        function saveAcademicReview() {
-            if (!currentPazRequestId) return;
-            const user = AuthService.checkAuth();
-            const estado = document.getElementById('pazEstado').value;
-            const plan = document.getElementById('pazPlan').value.trim();
-            const obs = document.getElementById('pazObs').value.trim();
-
-            const reqs = safeParseArray(LS_KEYS.requests);
-            const idx = reqs.findIndex(r => r.id === currentPazRequestId);
-            if (idx === -1) return alert("No se encontró la solicitud.");
-
-            reqs[idx].academicReview = {
-                estado,
-                planHomologacion: plan,
-                observaciones: obs,
-                reviewedAt: new Date().toISOString(),
-                coordinatorEmail: user?.email || ''
-            };
-
-            saveArray(LS_KEYS.requests, reqs);
-            closePazModal();
-            loadPazYSalvoTable();
-            showToast("Revisión académica registrada correctamente.", "success");
-        }
-
-        // =========================
-        // 2) SALIDAS ACADEMICAS – BÚSQUEDA DE PARTICIPANTES
-        // =========================
-        function getParticipantCatalog() {
-            if (participantCatalogCache) return participantCatalogCache;
-
-            const reqs = safeParseArray(LS_KEYS.requests);
-            const map = new Map();
-
-            reqs.forEach(r => {
-                if (!r.userEmail) return;
-                const email = String(r.userEmail).toLowerCase();
-                if (!map.has(email)) {
-                    const doc = r.expedienteData?.documento || r.externoFOIN012?.numDoc || '';
-                    map.set(email, {
-                        nombre: getRequestDisplayName(r),
-                        email,
-                        documento: String(doc).trim(),
-                        rol: 'ESTUDIANTE'
-                    });
-                }
-            });
-
-            if (map.size === 0) {
-                ['ana.gomez@cue.edu.co', 'juan.perez@cue.edu.co', 'laura.rodriguez@cue.edu.co'].forEach((email, idx) => {
-                    map.set(email, {
-                        nombre: ['Ana Gómez', 'Juan Pérez', 'Laura Rodríguez'][idx],
-                        email,
-                        documento: ['1098000001', '1098000002', '1098000003'][idx],
-                        rol: 'ESTUDIANTE'
-                    });
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-4">
+                            <p class="font-bold text-gray-800">${req.applicantName}</p>
+                            <p class="text-xs text-gray-500">${req.email}</p>
+                        </td>
+                        <td class="p-4">
+                            <p class="font-medium text-gray-700">${req.destinyInst || 'Institución'}</p>
+                            <p class="text-xs text-gray-500">${req.type || 'Movilidad'}</p>
+                        </td>
+                        <td class="p-4 text-xs text-gray-600">${req.dateStart} a <br> ${req.dateEnd}</td>
+                        <td class="p-4">${statusBadge}</td>
+                        <td class="p-4 text-center">${actionButton}</td>
+                    `;
+                    tbody.appendChild(tr);
                 });
             }
-
-            participantCatalogCache = Array.from(map.values());
-            return participantCatalogCache;
         }
 
-        function searchParticipants() {
-            const q = (document.getElementById('participantSearchInput')?.value || '').trim().toLowerCase();
-            const resultsDiv = document.getElementById('participantSearchResults');
-            resultsDiv.innerHTML = '';
+        function aprobarPazYSalvo(id) {
+            let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')) || [];
+            const index = requests.findIndex(r => r.id === id);
+            if(index !== -1) {
+                requests[index].status = 'REVISION_ANI'; // Pasa a la bandeja de secretaría ANI
+                localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
+                mostrarAlerta('Solicitud aprobada académicamente. Enviada a revisión documental (ANI).', 'success');
+                loadSolicitudes(); // Recargar datos locales
+            }
+        }
 
-            if (!q) {
-                resultsDiv.innerHTML = `<p class="text-[11px] text-gray-400 italic">Escriba un nombre o correo para buscar participantes.</p>`;
+        // 5. LÓGICA DE SALIDAS ACADÉMICAS Y LISTA DINÁMICA
+        let listaEstudiantesSalida = [];
+
+        function agregarEstudiante() {
+            const idInput = document.getElementById('add_identificacion');
+            const nombreInput = document.getElementById('add_nombre');
+            
+            if(!idInput.value || !nombreInput.value) {
+                mostrarAlerta('Debes digitar Identificación y Nombre.', 'error');
                 return;
             }
 
-            const catalog = getParticipantCatalog();
-            const results = catalog.filter(p =>
-                (p.nombre || '').toLowerCase().includes(q) ||
-                (p.email || '').toLowerCase().includes(q) ||
-                (p.documento || '').toLowerCase().includes(q)
-            ).slice(0, 10);
-
-            if (results.length === 0) {
-                resultsDiv.innerHTML = `<p class="text-[11px] text-gray-400 italic">No se encontraron participantes con ese criterio.</p>`;
-                return;
-            }
-
-            results.forEach(p => {
-                const safeEmail = (p.email || '').replace(/'/g, "\\'");
-                const already = selectedParticipants.some(sp => sp.email === p.email);
-                resultsDiv.innerHTML += `
-                    <div class="flex items-center justify-between border rounded px-2 py-1 bg-gray-50">
-                        <div>
-                            <div class="text-[12px] font-semibold text-gray-800">${escapeHtml(p.nombre)}</div>
-                            <div class="text-[10px] text-gray-500">${escapeHtml(p.email)}${p.documento ? ' · Doc: ' + escapeHtml(p.documento) : ''}</div>
-                        </div>
-                        <button type="button" onclick="addParticipantFromCatalog('${safeEmail}')" class="text-[11px] font-bold px-2 py-1 rounded ${already ? 'border border-gray-300 text-gray-400 cursor-not-allowed' : 'border border-indigo-300 text-indigo-700 hover:bg-indigo-50'}" ${already ? 'disabled' : ''}>
-                            ${already ? 'Agregado' : 'Agregar'}
-                        </button>
-                    </div>
-                `;
+            listaEstudiantesSalida.push({
+                identificacion: idInput.value,
+                nombre: nombreInput.value
             });
+
+            idInput.value = '';
+            nombreInput.value = '';
+            renderTablaEstudiantes();
         }
 
-        function addParticipantFromCatalog(email) {
-            const catalog = getParticipantCatalog();
-            const found = catalog.find(p => p.email === email);
-            if (!found) return;
-            if (selectedParticipants.some(sp => sp.email === found.email)) return;
-            selectedParticipants.push({ ...found });
-            renderSelectedParticipants();
-            searchParticipants();
+        function eliminarEstudiante(index) {
+            listaEstudiantesSalida.splice(index, 1);
+            renderTablaEstudiantes();
         }
 
-        function removeSelectedParticipant(email) {
-            selectedParticipants = selectedParticipants.filter(p => p.email !== email);
-            renderSelectedParticipants();
-            searchParticipants();
-        }
-
-        function renderSelectedParticipants() {
-            const c = document.getElementById('participantsSelected');
-            c.innerHTML = '';
-            if (selectedParticipants.length === 0) {
-                c.innerHTML = `<p class="text-[11px] text-gray-400 italic">Aún no hay participantes agregados.</p>`;
-                return;
-            }
-            selectedParticipants.forEach(p => {
-                const safeEmail = (p.email || '').replace(/'/g, "\\'");
-                c.innerHTML += `
-                    <div class="flex items-center justify-between border rounded px-3 py-1 bg-white">
-                        <div>
-                            <div class="text-[12px] font-semibold text-gray-800">${escapeHtml(p.nombre)}</div>
-                            <div class="text-[10px] text-gray-500">${escapeHtml(p.email)}</div>
-                        </div>
-                        <button type="button" onclick="removeSelectedParticipant('${safeEmail}')" class="text-[11px] font-bold px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50">Eliminar</button>
-                    </div>
-                `;
-            });
-        }
-
-        function escapeHtml(str) {
-            return String(str)
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#039;');
-        }
-
-        function createSalida(e) {
-            if (e && e.preventDefault) e.preventDefault();
-            const user = AuthService.checkAuth();
-
-            const nombre = document.getElementById('salidaNombre').value.trim();
-            const tipo = document.getElementById('salidaTipo')?.value || 'OTRA';
-            const destino = document.getElementById('salidaDestino').value.trim();
-            const direccion = document.getElementById('salidaDireccion').value.trim();
-            const fechaInicio = document.getElementById('salidaFechaInicio').value;
-            const fechaFin = document.getElementById('salidaFechaFin').value;
-            const profesorEmail = document.getElementById('salidaProfesorEmail').value.trim().toLowerCase();
-            const profesorNombre = document.getElementById('salidaProfesorNombre').value.trim();
-            const actividad = document.getElementById('salidaActividad').value.trim();
-            const transporte = document.querySelector('input[name="salidaTransporte"]:checked')?.value;
-
-            if (!transporte) return alert("Indique si la salida requiere transporte suministrado por la Universidad (SÍ/NO).");
-            if (fechaFin && fechaInicio && fechaFin < fechaInicio) return alert("La fecha fin no puede ser anterior a la fecha inicio.");
-
-            const requiereSST = transporte === 'UNIVERSIDAD';
-            const salida = {
-                id: genId('SA'),
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                nombre,
-                tipo,
-                destino,
-                direccion,
-                actividad,
-                fechaInicio,
-                fechaFin,
-                transporte,
-                requiereSST,
-                estadoAcad: requiereSST ? 'EN_REVISION_SST' : 'APROBADA',
-                coordinatorEmail: user?.email || '',
-                profesorResponsable: { email: profesorEmail, nombre: profesorNombre },
-                participantes: selectedParticipants.slice(),
-                sstReview: requiereSST ? { estado: 'PENDIENTE' } : null
-            };
-
-            const salidas = safeParseArray(LS_KEYS.salidas);
-            salidas.unshift(salida);
-            saveArray(LS_KEYS.salidas, salidas);
-
-            document.getElementById('salidaForm').reset();
-            selectedParticipants = [];
-            renderSelectedParticipants();
-            document.getElementById('participantSearchResults').innerHTML = '';
-
-            loadSalidasTable();
-            showToast(requiereSST
-                ? "Salida creada. Se envió a SST para verificación de transporte."
-                : "Salida creada. Al ser por medios propios, no requiere revisión SST.", "success");
-            return false;
-        }
-
-        function loadSalidasTable() {
-            const tbody = document.getElementById('salidasTableBody');
-            if (!tbody) return;
+        function renderTablaEstudiantes() {
+            const tbody = document.getElementById('tablaEstudiantes');
+            const msg = document.getElementById('msgSinEstudiantes');
             tbody.innerHTML = '';
 
-            const filter = document.getElementById('salidasFilter').value;
-            const salidas = safeParseArray(LS_KEYS.salidas);
-
-            const visible = salidas.filter(s => filter === 'ALL' ? true : (String(s.estadoAcad || '').toUpperCase() === filter));
-            if (visible.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400 italic">No hay salidas académicas registradas.</td></tr>`;
-                return;
-            }
-
-            visible.forEach(s => {
-                const transporteTxt = s.transporte === 'UNIVERSIDAD' ? 'Universidad' : 'Propio';
-                const estado = (s.estadoAcad || 'EN_DISENO').toUpperCase();
-                const sstEstado = s.requiereSST ? ((s.sstReview?.estado || 'PENDIENTE').toUpperCase()) : 'NO_APLICA';
-
-                const estadoBadge = estado === 'APROBADA'
-                    ? `<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold border border-green-200">Aprobada</span>`
-                    : estado === 'CANCELADA'
-                        ? `<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold border border-red-200">Cancelada</span>`
-                        : `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-bold border border-orange-200">En revisión</span>`;
-
-                const sstBadge = sstEstado === 'NO_APLICA'
-                    ? `<span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-bold border">No aplica</span>`
-                    : sstEstado === 'APROBADO'
-                        ? `<span class="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold border border-green-200">Aprobado</span>`
-                        : sstEstado === 'RECHAZADO'
-                            ? `<span class="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold border border-red-200">Rechazado</span>`
-                            : `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-bold border border-orange-200">Pendiente</span>`;
-
-                tbody.innerHTML += `
-                    <tr class="hover:bg-gray-50 transition border-b">
-                        <td class="p-4 font-mono font-bold text-[#03045e]">${s.id}</td>
-                        <td class="p-4">
-                            <div class="font-bold text-gray-800">${escapeHtml(s.nombre)}</div>
-                            <div class="text-[10px] text-gray-500">${escapeHtml(s.destino || '')}</div>
-                        </td>
-                        <td class="p-4 text-xs text-gray-600">${formatDateRange(s.fechaInicio, s.fechaFin)}</td>
-                        <td class="p-4 text-sm text-gray-700">${transporteTxt}</td>
-                        <td class="p-4">${estadoBadge}</td>
-                        <td class="p-4">${sstBadge}</td>
-                        <td class="p-4 text-center">
-                            <button onclick="openSalidaModal('${s.id}')" class="border border-indigo-300 text-indigo-800 px-4 py-1.5 rounded text-xs font-bold hover:bg-indigo-50 transition">Ver</button>
-                        </td>
-                    </tr>
-                `;
-            });
-            lucide.createIcons();
-        }
-
-        function openSalidaModal(id) {
-            const salidas = safeParseArray(LS_KEYS.salidas);
-            const s = salidas.find(x => x.id === id);
-            if (!s) return alert("No se encontró la salida.");
-
-            currentSalidaId = id;
-            document.getElementById('salidaModalId').textContent = s.id;
-            document.getElementById('salidaModalNombre').textContent = s.nombre || '-';
-            document.getElementById('salidaModalTipo').textContent = s.tipo || '-';
-            document.getElementById('salidaModalDestino').textContent = s.destino || '-';
-            document.getElementById('salidaModalDireccion').textContent = s.direccion || '—';
-            document.getElementById('salidaModalFechas').textContent = formatDateRange(s.fechaInicio, s.fechaFin);
-            document.getElementById('salidaModalActividad').textContent = s.actividad || '—';
-            document.getElementById('salidaModalTransporte').textContent = s.transporte === 'UNIVERSIDAD' ? 'SÍ (Universidad)' : 'NO (Medios propios)';
-            document.getElementById('salidaModalEstado').textContent = (s.estadoAcad || '-').toUpperCase();
-            document.getElementById('salidaModalProfesor').textContent = `${s.profesorResponsable?.nombre || '-'} (${s.profesorResponsable?.email || '-'})`;
-
-            const partsDiv = document.getElementById('salidaModalParticipantes');
-            partsDiv.innerHTML = '';
-            const parts = Array.isArray(s.participantes) ? s.participantes : [];
-            if (parts.length === 0) {
-                partsDiv.innerHTML = `<p class="text-gray-500 italic">Sin participantes registrados.</p>`;
+            if(listaEstudiantesSalida.length === 0) {
+                msg.classList.remove('hidden');
             } else {
-                parts.forEach(p => {
-                    partsDiv.innerHTML += `
-                        <div class="flex items-center justify-between border rounded p-2 bg-white">
-                            <div>
-                                <div class="font-bold text-gray-800 text-sm">${escapeHtml(p.nombre || '-')}</div>
-                                <div class="text-[10px] text-gray-500">${escapeHtml(p.email || '')}</div>
-                            </div>
-                            <span class="text-[10px] font-bold px-2 py-1 rounded bg-gray-50 border text-gray-700">${p.rol === 'PROFESOR' ? 'Profesor' : 'Estudiante'}</span>
-                        </div>
+                msg.classList.add('hidden');
+                listaEstudiantesSalida.forEach((est, index) => {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td class="p-2 text-gray-700">${est.identificacion}</td>
+                            <td class="p-2 text-gray-700">${est.nombre}</td>
+                            <td class="p-2 text-center">
+                                <button type="button" onclick="eliminarEstudiante(${index})" class="text-red-500 hover:text-red-700">
+                                    <i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i>
+                                </button>
+                            </td>
+                        </tr>
                     `;
                 });
             }
-
-            const sstDiv = document.getElementById('salidaModalSst');
-            if (!s.requiereSST) {
-                sstDiv.innerHTML = `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs font-bold border">No aplica</span> Transporte por medios propios.`;
-            } else {
-                const st = (s.sstReview?.estado || 'PENDIENTE').toUpperCase();
-                const obs = s.sstReview?.observaciones ? `<div class="mt-2 text-xs text-gray-600"><span class="font-bold">Observaciones:</span> ${escapeHtml(s.sstReview.observaciones)}</div>` : '';
-                sstDiv.innerHTML = `
-                    <div class="flex items-center gap-2">
-                        <span class="text-xs font-bold">Estado SST:</span>
-                        <span class="text-[10px] font-bold px-2 py-1 rounded border ${st === 'APROBADO' ? 'bg-green-100 text-green-800 border-green-200' : st === 'RECHAZADO' ? 'bg-red-100 text-red-800 border-red-200' : 'bg-orange-100 text-orange-800 border-orange-200'}">${st}</span>
-                    </div>
-                    ${obs}
-                    <div class="mt-2 text-[10px] text-gray-500">La revisión SST se gestiona desde el panel SST.</div>
-                `;
-            }
-
-            document.getElementById('salidaModal').classList.remove('hidden');
             lucide.createIcons();
         }
 
-        function closeSalidaModal() {
-            document.getElementById('salidaModal').classList.add('hidden');
-            currentSalidaId = null;
+        // 6. GUARDAR SALIDA (El Bypass de SST)
+        document.getElementById('salidaForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if(listaEstudiantesSalida.length === 0) {
+                mostrarAlerta('Debes agregar al menos un estudiante a la lista.', 'error');
+                return;
+            }
+
+            const requiereSST = document.querySelector('input[name="s_transporte"]:checked').value;
+            const estadoInicial = requiereSST === 'SI' ? 'EN_REVISION_SST' : 'APROBADA_POR_COORD';
+
+            const nuevaSalida = {
+                id: Date.now(),
+                creador: currentUser.name,
+                programa: programaCoordinador,
+                destino: document.getElementById('s_destino').value,
+                direccion: document.getElementById('s_direccion').value,
+                fechaInicio: document.getElementById('s_fechaInicio').value,
+                fechaFin: document.getElementById('s_fechaFin').value,
+                profesor: document.getElementById('s_profesor').value,
+                actividad: document.getElementById('s_actividad').value,
+                transporteUniversidad: requiereSST,
+                estudiantes: listaEstudiantesSalida,
+                status: estadoInicial
+            };
+
+            let salidasDB = JSON.parse(localStorage.getItem('CUE_SALIDAS_ACADEMICAS')) || [];
+            salidasDB.push(nuevaSalida);
+            localStorage.setItem('CUE_SALIDAS_ACADEMICAS', JSON.stringify(salidasDB));
+
+            mostrarAlerta(requiereSST === 'SI' ? 'Salida Guardada. Enviada a SST para revisión de vehículo.' : 'Salida Guardada y Aprobada Exitosamente (Bypass SST).', 'success');
+            
+            // Limpiar form
+            e.target.reset();
+            listaEstudiantesSalida = [];
+            renderTablaEstudiantes();
+        });
+
+        // UTILIDADES
+        function mostrarAlerta(mensaje, tipo) {
+            const box = document.getElementById('alertBox');
+            const icon = document.getElementById('alertIcon');
+            document.getElementById('alertMessage').textContent = mensaje;
+            
+            box.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
+            
+            if(tipo === 'success') {
+                box.classList.add('bg-green-100', 'text-green-800');
+                icon.setAttribute('data-lucide', 'check-circle');
+            } else {
+                box.classList.add('bg-red-100', 'text-red-800');
+                icon.setAttribute('data-lucide', 'alert-triangle');
+            }
+            lucide.createIcons();
+            
+            setTimeout(() => box.classList.add('hidden'), 5000);
         }
 
-        function cancelSalida() {
-            if (!currentSalidaId) return;
-            if (!confirm("¿Cancelar esta salida académica? Esta acción deja trazabilidad en el estado.")) return;
-
-            const salidas = safeParseArray(LS_KEYS.salidas);
-            const idx = salidas.findIndex(s => s.id === currentSalidaId);
-            if (idx === -1) return;
-            salidas[idx].estadoAcad = 'CANCELADA';
-            salidas[idx].updatedAt = new Date().toISOString();
-            saveArray(LS_KEYS.salidas, salidas);
-
-            closeSalidaModal();
-            loadSalidasTable();
-            alert("Salida cancelada.");
+        function logout() {
+            localStorage.removeItem('CUE_AUTH_USER');
+            window.location.href = '../index-sistema.html';
         }
+
+        // INIT
+        loadSolicitudes();
+        renderTablaEstudiantes();
+
     </script>
 </body>
 </html>
