@@ -83,18 +83,20 @@
                     </div>
                 </div>
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
-                            <tr>
-                                <th class="p-4 w-24">ID</th>
-                                <th class="p-4">Solicitante</th>
-                                <th class="p-4">Tipo Movilidad</th>
-                                <th class="p-4 text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody id="aniTableBody" class="divide-y divide-gray-100 text-sm">
-                        </tbody>
-                    </table>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
+                                <tr>
+                                    <th class="p-4 w-24">ID</th>
+                                    <th class="p-4">Solicitante</th>
+                                    <th class="p-4">Tipo Movilidad</th>
+                                    <th class="p-4 text-center">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="aniTableBody" class="divide-y divide-gray-100 text-sm">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -426,7 +428,13 @@
             });
 
             if (visibleReqs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-400 italic">No hay expedientes pendientes de revisión.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-500">
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-4xl opacity-50">📂</span>
+                        <p class="font-medium">No hay expedientes pendientes de revisión</p>
+                        <p class="text-xs">Las solicitudes radicadas aparecerán aquí según su rol (Secretaría o Dirección).</p>
+                    </div>
+                </td></tr>`;
                 return;
             }
 

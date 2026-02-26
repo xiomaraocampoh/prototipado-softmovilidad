@@ -331,6 +331,7 @@
         </div>
     </div>
 
+    <script src="../assets/js/state.js"></script>
     <script src="../assets/js/auth.js"></script>
     <script>
         const LS_KEYS = {
@@ -344,21 +345,36 @@
         let selectedParticipants = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
-            if (!user || user.role.code !== 'COORD_ACAD') {
+            let user;
+            try {
+                user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
+            } catch (e) {
+                console.error('Auth check failed', e);
+                window.location.href = '../index-sistema.html';
+                return;
+            }
+            if (!user || !user.role || user.role.code !== 'COORD_ACAD') {
                 alert("Acceso denegado. Se requiere perfil de Coordinación Académica.");
                 window.location.href = '../index-sistema.html';
                 return;
             }
-            document.getElementById('userNameDisplay').textContent = user.name;
-            document.getElementById('userRoleDisplay').textContent = user.role.name;
+            const nameEl = document.getElementById('userNameDisplay');
+            const roleEl = document.getElementById('userRoleDisplay');
+            if (nameEl) nameEl.textContent = user.name || '';
+            if (roleEl) roleEl.textContent = user.role.name || '';
 
-            seedDemoData();
-            ensureCoordinatorProgram(user);
-
-            loadPazYSalvoTable();
-            loadSalidasTable();
-            lucide.createIcons();
+            try {
+                seedDemoData();
+                ensureCoordinatorProgram(user);
+                loadPazYSalvoTable();
+                loadSalidasTable();
+            } catch (e) {
+                console.error('Dashboard init failed', e);
+                if (document.getElementById('pazTableBody')) {
+                    document.getElementById('pazTableBody').innerHTML = '<tr><td colspan="6" class="p-8 text-center text-red-600">Error al cargar. Revise la consola (F12).</td></tr>';
+                }
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         });
 
         function safeParseArray(key) {
@@ -512,8 +528,9 @@
         // 1) PAZ Y SALVO
         // =========================
         function getAcademicReviewState(req) {
-            const st = req?.academicReview?.estado;
-            return st || 'PENDIENTE';
+            if (!req || typeof req !== 'object') return 'PENDIENTE';
+            const st = req.academicReview && typeof req.academicReview === 'object' ? req.academicReview.estado : null;
+            return (st && typeof st === 'string') ? st : 'PENDIENTE';
         }
 
         function ensureCoordinatorProgram(user) {
@@ -532,8 +549,9 @@
         }
 
         function getCoordinatorProgramNames() {
-            const user = AuthService.checkAuth();
-            const email = (user?.email || '').toLowerCase();
+            let user;
+            try { user = AuthService.checkAuth(); } catch (_) { return []; }
+            const email = (user && user.email ? user.email : '').toString().toLowerCase();
             if (!email) return [];
             try {
                 const raw = localStorage.getItem('CUE_PROGRAMAS');
@@ -541,46 +559,53 @@
                 const data = JSON.parse(raw);
                 const arr = Array.isArray(data) ? data : [];
                 return arr
-                    .map(p => typeof p === 'string' ? { nombre: p, correoCoordinador: '' } : p)
-                    .filter(p => (p.correoCoordinador || '').toLowerCase() === email)
-                    .map(p => (p.nombre || '').trim())
+                    .filter(p => p != null)
+                    .map(p => typeof p === 'string' ? { nombre: p, correoCoordinador: '' } : (p || {}))
+                    .filter(p => (p.correoCoordinador || '').toString().toLowerCase() === email)
+                    .map(p => (p.nombre != null ? p.nombre : '').toString().trim())
                     .filter(Boolean);
-            } catch { return []; }
+            } catch (_) { return []; }
         }
 
         function getRequestDisplayName(r) {
-            if (r.userName) return r.userName;
-            if (r.userFullName) return r.userFullName;
+            if (!r || typeof r !== 'object') return '';
+            if (r.userName) return String(r.userName);
+            if (r.userFullName) return String(r.userFullName);
             const ext = r.externoFOIN012;
-            if (ext && (ext.primerNombre || ext.primerApellido)) return [ext.primerNombre, ext.segundoNombre, ext.primerApellido, ext.segundoApellido].filter(Boolean).join(' ');
-            return r.userEmail || '';
+            if (ext && typeof ext === 'object' && (ext.primerNombre || ext.primerApellido)) {
+                return [ext.primerNombre, ext.segundoNombre, ext.primerApellido, ext.segundoApellido].filter(Boolean).join(' ').trim() || '';
+            }
+            return (r.userEmail != null ? r.userEmail : '').toString();
         }
 
         function loadPazYSalvoTable() {
             const tbody = document.getElementById('pazTableBody');
+            if (!tbody) return;
             tbody.innerHTML = '';
 
-            const q = (document.getElementById('pazSearch')?.value || '').trim().toLowerCase();
-            const filterEstado = document.getElementById('pazFilterEstado')?.value || 'TODAS';
-            const reqs = safeParseArray(LS_KEYS.requests);
+            const q = (document.getElementById('pazSearch')?.value || '').toString().trim().toLowerCase();
+            const filterEstado = (document.getElementById('pazFilterEstado')?.value || 'TODAS').toString();
+            let reqs = [];
+            try { reqs = safeParseArray(LS_KEYS.requests); } catch (_) {}
             const coordinatorPrograms = getCoordinatorProgramNames();
 
             let visible = reqs.filter(r => {
-                const dir = (r.dir || '').toUpperCase();
-                const status = (r.status || '').toUpperCase();
+                if (!r || typeof r !== 'object') return false;
+                const dir = (r.dir != null ? r.dir : '').toString().toUpperCase();
+                const status = (r.status != null ? r.status : '').toString().toUpperCase();
                 if (dir !== 'SALIENTE') return false;
                 const statusOk = status === 'APROBADA_POSTULACION' || status === 'EN_REVISION_DIRECCION_ANI';
                 if (!statusOk) return false;
                 if (status === 'APROBADA_POSTULACION' && getAcademicReviewState(r) === 'APROBADO') return false;
                 if (coordinatorPrograms.length > 0) {
-                    const reqPrograma = (r.expedienteData?.programa || '').trim();
+                    const reqPrograma = (r.expedienteData && r.expedienteData.programa != null ? r.expedienteData.programa : '').toString().trim();
                     if (!reqPrograma || !coordinatorPrograms.some(p => p === reqPrograma)) return false;
                 }
                 if (q) {
                     const name = getRequestDisplayName(r).toLowerCase();
-                    const id = String(r.id || '').toLowerCase();
-                    const email = String(r.userEmail || '').toLowerCase();
-                    const doc = String((r.expedienteData?.documento || r.externoFOIN012?.numDoc) || '').toLowerCase();
+                    const id = (r.id != null ? r.id : '').toString().toLowerCase();
+                    const email = (r.userEmail != null ? r.userEmail : '').toString().toLowerCase();
+                    const doc = (r.expedienteData?.documento ?? r.externoFOIN012?.numDoc ?? '').toString().toLowerCase();
                     if (!id.includes(q) && !email.includes(q) && !name.includes(q) && !doc.includes(q)) return false;
                 }
                 if (filterEstado === 'PENDIENTES' && getAcademicReviewState(r) === 'APROBADO') return false;
@@ -589,7 +614,13 @@
             });
 
             if (visible.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400 italic">No hay solicitudes pendientes de Paz y Salvo.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-500">
+                    <div class="flex flex-col items-center gap-2">
+                        <span class="text-4xl opacity-50">📋</span>
+                        <p class="font-medium">No hay solicitudes pendientes de Paz y Salvo</p>
+                        <p class="text-xs">Las solicitudes salientes aprobadas por ANI aparecerán aquí para su revisión académica.</p>
+                    </div>
+                </td></tr>`;
                 return;
             }
 
@@ -623,27 +654,41 @@
         }
 
         function openPazModal(requestId) {
-            const reqs = safeParseArray(LS_KEYS.requests);
-            const req = reqs.find(r => r.id === requestId);
-            if (!req) return alert("No se encontró la solicitud.");
+            let reqs = [];
+            try { reqs = safeParseArray(LS_KEYS.requests); } catch (_) {}
+            const req = reqs.find(r => r && r.id === requestId);
+            if (!req) { alert("No se encontró la solicitud."); return; }
 
+            const modal = document.getElementById('pazModal');
+            if (!modal) return;
             currentPazRequestId = requestId;
-            document.getElementById('pazModalId').textContent = req.id || '-';
-            document.getElementById('pazModalUser').textContent = req.userEmail || '-';
-            document.getElementById('pazModalType').textContent = req.type || '-';
-
-            const current = req.academicReview || {};
-            document.getElementById('pazEstado').value = current.estado || 'PENDIENTE';
-            document.getElementById('pazPlan').value = current.planHomologacion || '';
-            document.getElementById('pazObs').value = current.observaciones || '';
-
-            document.getElementById('pazModal').classList.remove('hidden');
-            lucide.createIcons();
+            const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text || '-'; };
+            const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val != null ? val : ''; };
+            setText('pazModalId', req.id);
+            setText('pazModalUser', req.userEmail);
+            setText('pazModalType', req.type);
+            const current = (req.academicReview && typeof req.academicReview === 'object') ? req.academicReview : {};
+            setVal('pazEstado', current.estado || 'PENDIENTE');
+            setVal('pazPlan', current.planHomologacion || '');
+            setVal('pazObs', current.observaciones || '');
+            modal.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function closePazModal() {
-            document.getElementById('pazModal').classList.add('hidden');
+            const modal = document.getElementById('pazModal');
+            if (modal) modal.classList.add('hidden');
             currentPazRequestId = null;
+        }
+
+        function showToast(message, type) {
+            type = type || 'success';
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 z-[9999] px-4 py-3 rounded-lg shadow-lg text-sm font-medium text-white animate-fade-in ' +
+                (type === 'success' ? 'bg-green-600' : type === 'error' ? 'bg-red-600' : 'bg-indigo-600');
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 3000);
         }
 
         function saveAcademicReview() {
@@ -668,7 +713,7 @@
             saveArray(LS_KEYS.requests, reqs);
             closePazModal();
             loadPazYSalvoTable();
-            alert("Revisión académica registrada.");
+            showToast("Revisión académica registrada correctamente.", "success");
         }
 
         // =========================
@@ -843,9 +888,9 @@
             document.getElementById('participantSearchResults').innerHTML = '';
 
             loadSalidasTable();
-            alert(requiereSST
+            showToast(requiereSST
                 ? "Salida creada. Se envió a SST para verificación de transporte."
-                : "Salida creada. Al ser por medios propios, no requiere revisión SST.");
+                : "Salida creada. Al ser por medios propios, no requiere revisión SST.", "success");
             return false;
         }
 

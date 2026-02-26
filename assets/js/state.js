@@ -1,72 +1,38 @@
 /**
- * Máquina de Estados de Movilidad CUE
- * Patrón: Chain of Responsibility (Secuencial)
+ * Estados estandarizados del flujo de movilidad (CUE).
+ * Referencia única para wizard, ANI, Coordinación, SST y Registro.
+ * Evita desfases entre "lo que guarda el wizard" y "lo que filtra cada bandeja".
  */
-
-const STATES = {
-    DRAFT: 'BORRADOR',
-    SUBMITTED: 'ENVIADO',
-    REVIEW_ANI: 'EN_REVISION_ANI',       // Paso 1: Secretaría
-    REVIEW_ACAD: 'EN_REVISION_ACADEMICA', // Paso 2: Coordinador
-    REVIEW_SST: 'EN_REVISION_SST',       // Paso 3: Opcional (Solo si hay transporte/riesgo)
-    REVIEW_FIN: 'EN_REVISION_FINANCIERA', // Paso 4: Final (Viáticos)
-    APPROVED: 'APROBADO',
-    REJECTED: 'NO_APROBADO',
-    ACTIVE: 'EN_EJECUCION',
-    CLOSED: 'CERRADA'
+const STATUS = {
+    // Radicado: lo ve Coordinación (Paz y Salvo)
+    PENDIENTE_PAZ_SALVO: 'PENDIENTE_PAZ_SALVO',
+    // Sinónimos usados en código actual (mapeo para compatibilidad)
+    APROBADA_POSTULACION: 'APROBADA_POSTULACION',   // ANI aprobó → Coord revisa académicamente
+    EN_REVISION_DIRECCION_ANI: 'EN_REVISION_DIRECCION_ANI',
+    // Revisión ANI
+    EN_REVISION_SECRETARIA_ANI: 'EN_REVISION_SECRETARIA_ANI',
+    EN_REVISION_TOTAL: 'EN_REVISION_TOTAL',
+    // Post-aprobación
+    PENDIENTE_MATRICULA: 'PENDIENTE_MATRICULA',     // Entrante → Registro matricula
+    APROBADA_POSTULACION_FASE2: 'APROBADA_POSTULACION', // Saliente → Fase 2 documentos
+    MOVILIDAD_ACTIVA: 'MOVILIDAD_ACTIVA',
+    EN_REVISION_LEGALIZACION: 'EN_REVISION_LEGALIZACION',
+    BORRADOR: 'BORRADOR',
+    RECHAZADO: 'RECHAZADO'
 };
 
-class MobilityRequest {
-    constructor(data) {
-        this.data = data;
-        this.status = STATES.SUBMITTED; // Estado inicial al enviar
-        this.logs = []; // Para auditoría (RNF-07)
-    }
+/** Estados que muestra Coordinación en Paz y Salvo (solicitudes salientes ya aprobadas por ANI) */
+const STATUS_COORD_PAZ_SALVO = [STATUS.APROBADA_POSTULACION, STATUS.EN_REVISION_DIRECCION_ANI];
 
-    // El motor que mueve la solicitud
-    approve(reviewerRole) {
-        this.addLog(`Aprobado por ${reviewerRole}`, 'APROBAR');
+/** Estados que muestra Secretaría ANI */
+const STATUS_ANI_SECRETARIA = [STATUS.EN_REVISION_SECRETARIA_ANI];
 
-        switch (this.status) {
-            case STATES.SUBMITTED:
-                // Paso 1: ANI aprueba -> Pasa a Académico
-                this.status = STATES.REVIEW_ACAD; 
-                break;
+/** Estados que muestra Dirección ANI */
+const STATUS_ANI_DIRECCION = [STATUS.EN_REVISION_DIRECCION_ANI, STATUS.EN_REVISION_TOTAL];
 
-            case STATES.REVIEW_ACAD:
-                // Paso 2: Académico aprueba -> ¿Requiere SST o Pasa a Financiera?
-                if (this.requiresSST()) {
-                    this.status = STATES.REVIEW_SST;
-                } else {
-                    this.status = STATES.REVIEW_FIN;
-                }
-                break;
-
-            case STATES.REVIEW_SST:
-                // Paso 3: SST aprueba -> Pasa a Financiera
-                this.status = STATES.REVIEW_FIN;
-                break;
-
-            case STATES.REVIEW_FIN:
-                // Paso 4: Financiera aprueba -> FIN
-                this.status = STATES.APPROVED;
-                break;
-        }
-        
-        return this.status;
-    }
-
-    // Lógica para determinar si entra al bucket de SST
-    requiresSST() {
-        // Regla: Si es Salida Académica CON Transporte Contratado
-        return (this.data.type === 'SALIDA_ACADEMICA' && this.data.hasHiredTransport);
-    }
-
-    addLog(action, type) {
-        this.logs.push({
-            date: new Date(),
-            action: action,
-            type: type
-        });
-    }
+if (typeof window !== 'undefined') {
+    window.STATUS = STATUS;
+    window.STATUS_COORD_PAZ_SALVO = STATUS_COORD_PAZ_SALVO;
+    window.STATUS_ANI_SECRETARIA = STATUS_ANI_SECRETARIA;
+    window.STATUS_ANI_DIRECCION = STATUS_ANI_DIRECCION;
 }
