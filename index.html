@@ -5,82 +5,221 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal CUE - Movilidad</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
-        body { font-family: 'Montserrat', sans-serif; background-color: #e5e7eb; }
-        .bg-cue { background-color: #00529C; }
-        .text-cue { color: #00529C; }
+        /* CSS Clásico Oficial de la Institución */
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #ffffff;
+            color: #777;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .navbar-classic {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #00529c;
+            border: 0;
+            letter-spacing: 4px;
+            height: 60px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .container-classic {
+            padding: 100px 15px 40px 15px;
+            flex-grow: 1;
+        }
+        .title-classic {
+            font-size: 45px;
+            color: #111;
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: bold;
+        }
+        @media (min-width: 768px) {
+            .title-classic { font-size: 55px; }
+        }
+        .label-classic {
+            font-size: 20px;
+            color: #111;
+            font-weight: 400;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .input-classic {
+            width: 100%;
+            max-width: 300px;
+            height: 34px;
+            padding: 6px 12px;
+            font-size: 14px;
+            line-height: 1.42857143;
+            color: #555;
+            background-color: #fff;
+            background-image: none;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
+            transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
+            outline: none;
+        }
+        .input-classic:focus {
+            border-color: #66afe9;
+            box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+        }
+        .btn-primary-classic {
+            color: #fff;
+            background-color: #337ab7;
+            border: 1px solid #2e6da4;
+            padding: 10px 16px;
+            font-size: 18px;
+            line-height: 1.3333333;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 300px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .btn-primary-classic:hover {
+            background-color: #286090;
+            border-color: #204d74;
+        }
+        .btn-default-classic {
+            color: #333;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px 16px;
+            font-size: 18px;
+            line-height: 1.3333333;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 300px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-default-classic:hover {
+            background-color: #e6e6e6;
+            border-color: #adadad;
+        }
+        .footer-classic {
+            background-color: #00529c;
+            color: #f5f5f5;
+            padding: 32px;
+            text-align: center;
+        }
+        .footer-classic a {
+            color: #f5f5f5;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .footer-classic a:hover {
+            color: #777;
+        }
+        .footer-classic h5 {
+            font-size: 14px;
+            line-height: 1.8;
+            margin: 0;
+            font-weight: normal;
+        }
     </style>
 </head>
+<body>
 
-<body class="min-h-screen flex flex-col">
+    <nav class="navbar-classic">
+        <img src="assets/img/logo_avh.png" alt="Logo CUE" style="height: 40px; background: white; padding: 2px; border-radius: 4px;">
+    </nav>
 
-    <header class="fixed top-0 left-0 w-full h-[50px] bg-cue z-50 flex items-center px-4 md:px-8 shadow-md">
-        <span class="text-white text-[13px] md:text-[15px] tracking-[4px] font-semibold uppercase">
-            CORPORACIÓN UNIVERSITARIA EMPRESARIAL
-        </span>
-    </header>
-
-    <main class="flex-grow pt-[50px] pb-[50px] flex items-center justify-center p-4">
+    <div class="container-classic mx-auto max-w-6xl">
         
-        <div class="bg-white rounded-lg shadow-2xl flex flex-col md:flex-row w-full max-w-4xl border border-gray-200 overflow-hidden">
+        <div id="error-msg" class="hidden bg-[#f2dede] border border-[#ebccd1] text-[#a94442] p-3 rounded mb-4 text-center max-w-md mx-auto">
+            <span id="error-text">Error</span>
+        </div>
+
+        <div class="w-full">
             
-            <div class="md:w-5/12 bg-gray-50 flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-gray-200">
-                <img src="assets/img/logo_camara.png" alt="Cámara de Comercio" class="max-w-full h-auto max-h-40" onerror="this.style.display='none'">
+            <div class="title-classic" id="portalTitle">
+                Portal CUE
             </div>
 
-            <div class="md:w-7/12 p-8 md:p-12 flex flex-col justify-center">
-                <h1 id="portalTitle" class="text-3xl font-light text-center text-gray-500 mb-8">Portal CUE</h1>
-
-                <div id="error-msg" class="hidden bg-red-50 border border-red-200 text-red-700 p-2 rounded mb-4 text-xs">
-                    <div class="flex items-center gap-2">
-                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
-                        <span id="error-text">Error</span>
-                    </div>
+            <div class="flex flex-col md:flex-row items-center justify-center w-full gap-8 md:gap-0 mt-8">
+                
+                <div class="w-full md:w-1/2 flex justify-center items-center">
+                    <img src="assets/img/logo_camara.png" alt="Logo Institucional" class="max-w-full w-[350px] h-auto" onerror="this.style.display='none'">
                 </div>
 
-                <form id="portalStep1" class="w-full">
-                    <div class="flex items-center gap-3 mb-2">
-                        <label class="w-16 text-right text-sm font-semibold text-gray-700">Correo:</label>
-                        <input type="email" id="portalEmail" required class="flex-1 border border-gray-300 px-3 py-1.5 text-sm bg-white outline-none focus:border-[#00529C] transition-colors">
-                        <button type="submit" class="px-5 py-1.5 bg-cue text-white font-semibold text-sm hover:bg-blue-800 transition-colors shadow-sm cursor-pointer">
-                            Ingresar
-                        </button>
-                    </div>
-                    <div class="flex justify-start pl-[76px] mt-2">
-                        <label class="flex items-center gap-2 text-xs text-gray-500 cursor-pointer hover:text-gray-800">
-                            <input id="reuseLastCode" type="checkbox" class="w-3.5 h-3.5 accent-[#00529C]">
-                            Usar el último código generado
-                        </label>
-                    </div>
-                </form>
-
-                <form id="portalStep2" class="w-full hidden text-center">
-                    <p class="text-sm text-gray-600 mb-1">El código de seguridad se envió al correo</p>
-                    <p id="portalEmailEcho" class="text-sm font-bold text-cue mb-6"></p>
+                <div class="w-full md:w-1/2 flex justify-center md:justify-start md:pl-[10%]">
                     
-                    <div class="flex items-center justify-center gap-3 mb-5">
-                        <label class="text-sm font-semibold text-gray-700">Código:</label>
-                        <input inputmode="numeric" maxlength="4" id="portalCode" class="w-24 text-center tracking-[4px] border border-gray-400 px-3 py-1.5 text-base font-bold outline-none focus:border-[#00529C]">
-                    </div>
-                    <div class="flex items-center justify-center gap-2">
-                        <button type="button" id="backToStep1" class="px-6 py-1.5 bg-gray-200 border border-gray-400 text-gray-700 text-sm hover:bg-gray-300 font-semibold cursor-pointer">Volver</button>
-                        <button type="submit" class="px-6 py-1.5 bg-cue text-white text-sm hover:bg-blue-800 font-semibold shadow-sm cursor-pointer">Validar</button>
-                    </div>
-                </form>
+                    <form id="portalStep1" class="w-full flex flex-col items-center md:items-start">
+                        
+                        <div class="mb-4 w-full">
+                            <label class="label-classic" style="font-size: 16px; font-weight: bold;">Perfil de Ingreso:</label>
+                            <select id="roleSelect" required class="input-classic cursor-pointer">
+                                <option value="" disabled selected>Seleccione su rol...</option>
+                                <option value="ESTUDIANTE">Estudiante CUE</option>
+                                <option value="PROFESOR">Profesor no docente / Investigador</option>
+                                <option value="ADMINISTRATIVO">Colaborador / Administrativo</option>
+                                <option value="EGRESADO">Egresado</option>
+                                <option value="EXTERNO">Usuario Externo (Entrante)</option>
+                                <option value="RECTOR">Rectoría</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-2 w-full">
+                            <label class="label-classic" style="font-size: 16px; font-weight: bold;">Correo Institucional:</label>
+                            <input type="email" id="portalEmail" required class="input-classic">
+                        </div>
+
+                        <div class="w-full max-w-[300px] mb-4">
+                            <label class="flex items-center gap-2 text-sm text-[#777] cursor-pointer">
+                                <input id="reuseLastCode" type="checkbox" class="w-4 h-4">
+                                Usar último código generado
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-primary-classic">Ingresar</button>
+                    </form>
+
+                    <form id="portalStep2" class="w-full hidden flex flex-col items-center md:items-start">
+                        
+                        <label class="label-classic text-center md:text-left">
+                            El código de seguridad se envió al correo <br> 
+                            <strong id="portalEmailEcho" style="color: #337ab7;"></strong>
+                        </label>
+                        <br>
+                        
+                        <input name="CodigoToken" id="portalCode" type="password" size="25" maxlength="4" class="input-classic text-center tracking-[8px] text-lg" required/>
+                        <br>
+                        
+                        <button type="submit" class="btn-primary-classic">Ingresar</button>
+                        <button type="button" id="backToStep1" class="btn-default-classic">Volver</button>
+                        
+                    </form>
+
+                </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <footer class="fixed bottom-0 left-0 w-full h-[50px] bg-cue z-50 flex flex-col items-center justify-center text-white/80 text-[10px] leading-tight">
-        <div class="font-semibold">MiCUEOnline v4.0</div>
-        <div>Desarrollado por: Departamento de Desarrollo y Sistemas de Información</div>
-        <div>Armenia, 2026</div>
+    <footer class="footer-classic">
+        <h5>
+            MiCUEonline v4.0<br>
+            Desarrollado por: <a href="mailto:direccion-desarrolloysistemasdeinformacion@cue.edu.co">Departamento de Desarrollo y Sistemas de Información</a><br>
+            Corporación Universitaria Empresarial "Alexander von Humboldt"<br>
+            Personería Jurídica Resolución 439 de 14 de marzo de 2001 otorgada por MINEDUCACIÓN<br>
+            I.E.S. sujeta a inspección y vigilancia por MINEDUCACIÓN<br>
+            Armenia, 2026<br>
+        </h5>
     </footer>
 
-    <div class="fixed bottom-[60px] left-4 bg-white/95 border border-gray-300 shadow-lg p-3 rounded opacity-20 hover:opacity-100 transition-opacity duration-300 z-40">
+    <div class="fixed bottom-[100px] left-4 bg-white border border-gray-300 shadow-xl p-3 rounded opacity-10 hover:opacity-100 transition-opacity duration-300 z-50 max-w-[220px]">
         <p class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2 text-center">Modo Demo</p>
         <div class="grid grid-cols-2 gap-1.5">
             <button type="button" onclick="demoPortal('estudiante@cue.edu.co')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded">Estudiante</button>
@@ -90,15 +229,14 @@
             <button type="button" onclick="demoPortal('externo@unam.mx')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded">Externo</button>
             <button type="button" onclick="demoPortal('rector@cue.edu.co')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-50 text-gray-600 rounded">Rector</button>
         </div>
-        <div class="mt-3 pt-2 border-t border-gray-100 text-center">
-            <a href="index-sistema.html" class="text-[10px] text-cue font-bold hover:underline">Ir a Acceso al Sistema</a>
+        <div class="mt-3 pt-2 border-t border-gray-200 text-center">
+            <a href="index-sistema.html" class="text-[10px] text-[#337ab7] font-bold hover:underline">Ir a Acceso al Sistema</a>
         </div>
     </div>
 
     <script src="assets/js/auth.js"></script>
     <script>
-        lucide.createIcons();
-
+        // Ocultar íconos de Lucide ya que no se usan en este diseño
         const errorBox = document.getElementById('error-msg');
         const errorText = document.getElementById('error-text');
         const portalTitle = document.getElementById('portalTitle');
@@ -117,15 +255,17 @@
         function clearError() {
             errorBox.classList.add('hidden');
         }
+        
         function showStep2(email) {
-            portalTitle.textContent = 'Validación CUE';
+            portalTitle.innerHTML = '<b>Portal CUE: Validación</b>';
             portalEmailEcho.textContent = email;
             step1.classList.add('hidden');
             step2.classList.remove('hidden');
             portalCode.focus();
         }
+        
         function showStep1() {
-            portalTitle.textContent = 'Portal CUE';
+            portalTitle.innerHTML = '<b>Portal CUE</b>';
             step2.classList.add('hidden');
             step1.classList.remove('hidden');
         }
@@ -133,8 +273,13 @@
         step1.onsubmit = (e) => {
             e.preventDefault();
             clearError();
+            
+            const role = document.getElementById('roleSelect').value;
+            if(!role) return showError("Debe seleccionar un Perfil de Ingreso.");
+
             const email = portalEmail.value;
             const res = AuthService.requestPortalCode(email, { reuseLast: reuseLastCode.checked });
+            
             if (!res.success) return showError(res.message);
             showStep2(email);
             alert(`Código ${res.reused ? 'reutilizado' : 'enviado'} (simulación): ${res.code}`);
@@ -143,9 +288,33 @@
         step2.onsubmit = (e) => {
             e.preventDefault();
             clearError();
-            const res = AuthService.loginPortal(portalEmail.value, portalCode.value);
+            
+            const role = document.getElementById('roleSelect').value;
+            const email = portalEmail.value;
+            const name = email.split('@')[0].toUpperCase();
+
+            const roleNames = {
+                'ESTUDIANTE': 'Estudiante',
+                'PROFESOR': 'Profesor / Investigador',
+                'ADMINISTRATIVO': 'Administrativo',
+                'EGRESADO': 'Egresado',
+                'EXTERNO': 'Solicitante Externo',
+                'RECTOR': 'Rector'
+            };
+
+            // Validación de código simulada de auth.js
+            const res = AuthService.loginPortal(email, portalCode.value);
             if (!res.success) return showError(res.message);
-            window.location.href = 'modules/' + res.redirect;
+
+            // Almacenar usuario
+            const user = {
+                name: name,
+                email: email,
+                role: { code: role, name: roleNames[role] }
+            };
+
+            localStorage.setItem('CUE_AUTH_USER', JSON.stringify(user));
+            window.location.href = 'modules/dashboard-estudiante.html';
         };
 
         document.getElementById('backToStep1').onclick = () => {
@@ -156,7 +325,6 @@
         window.demoPortal = (email) => {
             portalEmail.value = email;
             reuseLastCode.checked = false;
-            step1.requestSubmit();
         };
     </script>
 </body>
