@@ -279,9 +279,8 @@
             const res = AuthService.loginPortal(email, portalCode.value);
             if (!res.success) return showError(res.message);
 
-            const redirect = res.redirect || 'dashboard-estudiante.html';
-            const url = redirect.startsWith('modules/') ? redirect : `modules/${redirect}`;
-            window.location.href = url;
+            // Redirigir al portal CUE (sidebar); desde ahí "Movilidad" lleva al dashboard del solicitante
+            window.location.href = 'portal-cue.html';
         };
 
         document.getElementById('backToStep1').onclick = () => {

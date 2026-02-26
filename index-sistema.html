@@ -79,7 +79,7 @@
         <div class="flex flex-col gap-1.5">
             <button type="button" onclick="demoBackoffice('secretaria.ani@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">Secretaría ANI</button>
             <button type="button" onclick="demoBackoffice('direccion.ani@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">Dirección ANI</button>
-            <button type="button" onclick="demoBackoffice('coord.acad@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">Coordinación</button>
+            <button type="button" onclick="demoBackoffice('coordinacion.acad@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">Coordinación</button>
             <button type="button" onclick="demoBackoffice('sst@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">SST</button>
             <button type="button" onclick="demoBackoffice('registro@cue.edu.co','admin')" class="text-[10px] py-1 px-2 border border-gray-200 hover:bg-gray-100 text-gray-600 rounded text-left">Registro</button>
         </div>
@@ -117,9 +117,8 @@
                 return;
             }
 
-            const redirect = result.redirect || '';
-            const url = redirect.startsWith('modules/') ? redirect : `modules/${redirect}`;
-            window.location.href = url;
+            // Redirigir al menú del sistema (fondo y lista); desde ahí "Movilidad" lleva al dashboard del rol
+            window.location.href = 'menu-sistema.html';
         };
 
         document.getElementById('btnCancel').onclick = () => {

@@ -152,7 +152,9 @@ const AuthService = {
         } catch {}
 
         localStorage.removeItem(LS_KEYS.authUser);
-        window.location.href = isBackoffice ? '../index-sistema.html' : '../index.html';
+        const isInModules = window.location.pathname.indexOf('modules/') !== -1;
+        const prefix = isInModules ? '../' : '';
+        window.location.href = prefix + (isBackoffice ? 'index-sistema.html' : 'index.html');
     },
 
     checkAuth: function(opts = {}) {
