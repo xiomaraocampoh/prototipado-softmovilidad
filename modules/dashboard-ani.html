@@ -152,29 +152,41 @@
             <div id="tab-credenciales" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-[#03045e]">Generación de Credenciales (Externos)</h2>
-                    <p class="text-gray-500 text-sm">Cree cuentas temporales para solicitantes de movilidad entrante.
-                    </p>
+                    <p class="text-gray-500 text-sm">Cree cuentas temporales para solicitantes de movilidad entrante (REQ-08).</p>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-sm border max-w-xl">
-                    <form
-                        onsubmit="alert('Credenciales generadas y enviadas al correo del usuario.'); event.preventDefault();"
-                        class="space-y-4">
+                    <form id="formCredencialesExterno" onsubmit="return generarAccesoExterno(event);" class="space-y-4">
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Nombre Completo del
-                                Externo</label>
-                            <input type="text" required
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Nombre completo <span class="text-red-600">*</span></label>
+                            <input type="text" id="extName" required placeholder="Ej: Carlos Méndez López"
                                 class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Correo Electrónico (Para envío de
-                                clave)</label>
-                            <input type="email" required
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Correo electrónico <span class="text-red-600">*</span></label>
+                            <input type="email" id="extEmail" required placeholder="Para envío de clave"
                                 class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Institución de Origen</label>
-                            <input type="text" required
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Institución de origen <span class="text-red-600">*</span></label>
+                            <input type="text" id="extInst" required placeholder="Ej: UNAM"
                                 class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600 mb-1">Documento de identidad <span class="text-red-600">*</span></label>
+                            <input type="text" id="extDoc" required placeholder="Número de documento o pasaporte"
+                                class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Fecha de inicio del acceso <span class="text-red-600">*</span></label>
+                                <input type="date" id="extFecInicio" required
+                                    class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Fecha de fin del acceso <span class="text-red-600">*</span></label>
+                                <input type="date" id="extFecFin" required
+                                    class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
+                            </div>
                         </div>
                         <button type="submit"
                             class="w-full bg-[#03045e] text-white py-3 rounded text-sm font-bold flex justify-center items-center gap-2 hover:bg-black transition">
@@ -186,33 +198,39 @@
 
             <div id="tab-programas" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-[#03045e]">Programas Académicos</h2>
-                    <p class="text-gray-500 text-sm">Gestión de facultades y programas institucionales.</p>
+                    <h2 class="text-2xl font-bold text-[#03045e]">Programas Académicos (REQ-09)</h2>
+                    <p class="text-gray-500 text-sm">Gestión de programas y correo del coordinador para la bandeja de Paz y Salvo.</p>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm border overflow-hidden max-w-4xl">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
-                            <tr>
-                                <th class="p-4">Programa</th>
-                                <th class="p-4">Facultad</th>
-                                <th class="p-4 text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-bold text-[#03045e]">Ingeniería de Software</td>
-                                <td class="p-4 text-gray-600">Ingenierías</td>
-                                <td class="p-4 text-center"><button
-                                        class="text-blue-600 font-bold text-xs hover:underline">Editar</button></td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-bold text-[#03045e]">Medicina</td>
-                                <td class="p-4 text-gray-600">Ciencias de la Salud</td>
-                                <td class="p-4 text-center"><button
-                                        class="text-blue-600 font-bold text-xs hover:underline">Editar</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border md:col-span-1 h-fit">
+                        <h4 class="font-bold text-[#03045e] border-b pb-2 mb-4">Agregar Programa</h4>
+                        <form id="formPrograma" class="space-y-4" onsubmit="return agregarProgramaANI(event);">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Nombre del Programa <span class="text-red-600">*</span></label>
+                                <input type="text" id="progNombre" placeholder="Ej: Ingeniería de Software" required
+                                    class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Correo del Coordinador Académico <span class="text-red-600">*</span></label>
+                                <input type="email" id="progCorreoCoord" placeholder="Ej: coord.software@cue.edu.co" required
+                                    class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                            </div>
+                            <button type="submit" class="w-full bg-[#0077b6] text-white py-2 rounded text-sm font-bold hover:bg-[#03045e] transition">Guardar Programa</button>
+                        </form>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border overflow-hidden md:col-span-2">
+                        <table class="w-full text-left text-sm">
+                            <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
+                                <tr>
+                                    <th class="p-4">Programa</th>
+                                    <th class="p-4">Correo Coordinador</th>
+                                    <th class="p-4 text-center w-24">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="programasTableBody" class="divide-y divide-gray-100">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -259,24 +277,23 @@
     </div>
 
     <div id="reviewModal"
-        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col">
-            <div class="bg-[#03045e] p-4 flex justify-between items-center text-white">
+        class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="bg-[#03045e] p-4 flex justify-between items-center text-white shrink-0">
                 <h3 class="font-bold flex items-center gap-2"><i data-lucide="clipboard-check" class="w-5 h-5"></i>
-                    Revisión de Expediente</h3>
+                    Evaluar Expediente (FO-IN-012)</h3>
                 <button onclick="document.getElementById('reviewModal').classList.add('hidden')"
                     class="text-gray-300 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
-            <div class="p-6">
+            <div class="p-6 overflow-y-auto flex-1">
                 <div class="grid grid-cols-2 gap-4 mb-4 text-sm">
-                    <div class="bg-gray-50 p-3 rounded border"><span
-                            class="block text-[10px] font-bold text-gray-400 uppercase">ID de Solicitud</span><span
-                            class="font-mono font-bold text-[#03045e]" id="modalId"></span></div>
-                    <div class="bg-gray-50 p-3 rounded border"><span
-                            class="block text-[10px] font-bold text-gray-400 uppercase">Usuario Solicitante</span><span
-                            class="font-bold text-gray-800" id="modalUser"></span></div>
+                    <div class="bg-gray-50 p-3 rounded border"><span class="block text-[10px] font-bold text-gray-400 uppercase">ID Solicitud</span><span class="font-mono font-bold text-[#03045e]" id="modalId"></span></div>
+                    <div class="bg-gray-50 p-3 rounded border"><span class="block text-[10px] font-bold text-gray-400 uppercase">Solicitante</span><span class="font-bold text-gray-800" id="modalUser"></span></div>
                 </div>
-                <div id="modalActions" class="flex justify-end gap-3 pt-4 border-t mt-6"></div>
+                <div id="modalExpedienteContent" class="text-sm space-y-4 mb-6">
+                    <!-- Contenido dinámico: datos FO-IN-012 completos (REQ-10) -->
+                </div>
+                <div id="modalActions" class="flex justify-end gap-3 pt-4 border-t"></div>
             </div>
         </div>
     </div>
@@ -414,38 +431,99 @@
             }
 
             visibleReqs.forEach(req => {
+                const safeId = String(req.id || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 tbody.innerHTML += `
                     <tr class="hover:bg-blue-50 transition border-b">
-                        <td class="p-4 font-mono font-bold text-[#03045e]">${req.id}</td>
-                        <td class="p-4">${req.userEmail}</td>
-                        <td class="p-4">${req.type}</td>
+                        <td class="p-4 font-mono font-bold text-[#03045e]">${escapeHtml(req.id)}</td>
+                        <td class="p-4">${escapeHtml(req.userEmail)}</td>
+                        <td class="p-4">${escapeHtml(req.type)}</td>
                         <td class="p-4 text-center">
-                            <button onclick="openReview('${req.id}', '${req.userEmail}', '${req.dir}')" class="border border-[#0077b6] text-[#0077b6] px-4 py-1.5 rounded text-xs font-bold hover:bg-blue-50 transition">Evaluar Expediente</button>
+                            <button onclick="openReviewById('${safeId}')" class="border border-[#0077b6] text-[#0077b6] px-4 py-1.5 rounded text-xs font-bold hover:bg-blue-50 transition">Evaluar Expediente</button>
                         </td>
                     </tr>
                 `;
             });
         }
 
-        function openReview(id, userEmail, dir) {
-            currentRequestId = id;
-            document.getElementById('modalId').textContent = id;
-            document.getElementById('modalUser').textContent = userEmail;
+        function openReviewById(id) {
+            const allReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            const req = allReqs.find(r => r.id === id);
+            openReview(req || { id: id, userEmail: id, type: '', dir: 'SALIENTE' });
+        }
+
+        function buildExpedienteHtml(req) {
+            const ed = req.expedienteData || {};
+            const ext = req.externoFOIN012 || {};
+            const isExterno = !!req.externoFOIN012;
+            const v = (val) => (val === undefined || val === null || val === '') ? '—' : String(val);
+
+            let html = '';
+
+            html += '<div class="border rounded-lg p-4 bg-gray-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Movilidad y destino</h4><div class="grid grid-cols-2 gap-2 text-sm">';
+            html += '<div><span class="text-gray-500">Tipo</span><br>' + v(ed.tipo) + '</div>';
+            html += '<div><span class="text-gray-500">Dirección</span><br>' + v(ed.direccion) + '</div>';
+            html += '<div><span class="text-gray-500">Institución destino</span><br>' + v(ed.institucionDestino) + (ed.otraEntidad ? ' / ' + v(ed.otraEntidad) : '') + '</div>';
+            html += '<div><span class="text-gray-500">País / Ciudad</span><br>' + v(ed.pais) + ' / ' + v(ed.ciudad) + '</div>';
+            html += '<div><span class="text-gray-500">Fechas</span><br>' + v(ed.fechaInicio) + ' – ' + v(ed.fechaFin) + '</div>';
+            html += '<div><span class="text-gray-500">Duración</span><br>' + v(ed.duracion) + '</div>';
+            html += '<div class="col-span-2"><span class="text-gray-500">Actividades / materias</span><br>' + v(ed.actividadesDesc) + '</div></div></div>';
+
+            html += '<div class="border rounded-lg p-4 bg-gray-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Datos personales y documento</h4><div class="grid grid-cols-2 gap-2 text-sm">';
+            if (isExterno) {
+                html += '<div><span class="text-gray-500">Primer nombre</span><br>' + v(ext.primerNombre) + '</div><div><span class="text-gray-500">Segundo nombre</span><br>' + v(ext.segundoNombre) + '</div>';
+                html += '<div><span class="text-gray-500">Primer apellido</span><br>' + v(ext.primerApellido) + '</div><div><span class="text-gray-500">Segundo apellido</span><br>' + v(ext.segundoApellido) + '</div>';
+                html += '<div><span class="text-gray-500">Sexo</span><br>' + v(ext.sexo) + '</div><div><span class="text-gray-500">Dirección</span><br>' + v(ext.direccion) + '</div>';
+                html += '<div><span class="text-gray-500">Departamento</span><br>' + v(ext.departamento) + '</div><div><span class="text-gray-500">Municipio</span><br>' + v(ext.municipio) + '</div>';
+                html += '<div><span class="text-gray-500">Tipo doc</span><br>' + v(ext.tipoDoc) + '</div><div><span class="text-gray-500">Número doc</span><br>' + v(ext.numDoc) + '</div>';
+                html += '<div><span class="text-gray-500">Celular</span><br>' + v(ext.celular) + '</div><div><span class="text-gray-500">Correo</span><br>' + v(ext.correo) + '</div>';
+            } else {
+                html += '<div><span class="text-gray-500">Documento</span><br>' + v(ed.documento) + '</div><div><span class="text-gray-500">Programa</span><br>' + v(ed.programa) + '</div>';
+                html += '<div><span class="text-gray-500">Semestre / Promedio</span><br>' + v(ed.semestrePromedio) + '</div>';
+            }
+            html += '</div></div>';
+
+            html += '<div class="border rounded-lg p-4 bg-gray-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Costos, apoyos y becas</h4><div class="grid grid-cols-2 gap-2 text-sm">';
+            html += '<div><span class="text-gray-500">Costo matrícula</span><br>' + v(ed.hasCosto) + (ed.montoCosto ? ' – ' + ed.montoCosto : '') + '</div>';
+            html += '<div><span class="text-gray-500">Beca / apoyo</span><br>' + v(ed.hasBeca) + (ed.montoBeca ? ' – ' + ed.montoBeca : '') + '</div></div></div>';
+
+            html += '<div class="border rounded-lg p-4 bg-gray-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Riesgos médicos y contacto de emergencia</h4><div class="grid grid-cols-2 gap-2 text-sm">';
+            if (isExterno) {
+                html += '<div class="col-span-2"><span class="text-gray-500">Necesidades médicas</span><br>' + v(ext.necesidadesMedicas) + '</div>';
+                html += '<div><span class="text-gray-500">Contacto emergencia</span><br>' + v(ext.contactoNombre) + ' ' + v(ext.contactoParentesco) + '</div>';
+                html += '<div><span class="text-gray-500">Tel / Correo</span><br>' + v(ext.contactoTelefono) + ' / ' + v(ext.contactoCorreo) + '</div>';
+            } else {
+                html += '<div><span class="text-gray-500">EPS</span><br>' + v(ed.eps) + '</div><div><span class="text-gray-500">Alergias/Meds</span><br>' + v(ed.alergiasMeds) + '</div>';
+                html += '<div><span class="text-gray-500">Contacto emergencia</span><br>' + v(ed.contactoNombre) + ' ' + v(ed.contactoParentesco) + ' ' + v(ed.contactoTel) + '</div>';
+            }
+            html += '</div></div>';
+
+            if (isExterno) {
+                html += '<div class="border rounded-lg p-4 bg-blue-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Actividades a realizar / materias a cursar</h4><p class="text-sm">' + v(ext.actividadesMaterias) + '</p></div>';
+            }
+            return html;
+        }
+
+        function openReview(req) {
+            if (!req || !req.id) return;
+            currentRequestId = req.id;
+            document.getElementById('modalId').textContent = req.id;
+            document.getElementById('modalUser').textContent = req.userEmail || '—';
+
+            const content = document.getElementById('modalExpedienteContent');
+            content.innerHTML = req.expedienteData || req.externoFOIN012 ? buildExpedienteHtml(req) : '<p class="text-gray-500 italic">No hay datos de expediente registrados para esta solicitud.</p>';
 
             const actionsDiv = document.getElementById('modalActions');
+            const dir = req.dir || 'SALIENTE';
             if (currentRole === 'ANI_SECRETARIA') {
                 actionsDiv.innerHTML = `<button onclick="processRequest('EN_REVISION_DIRECCION_ANI')" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition">Pre-Aprobar (Enviar a Dirección)</button>`;
             } else {
                 let btnAprobar = dir === 'ENTRANTE'
                     ? `<button onclick="processRequest('PENDIENTE_MATRICULA')" class="px-6 py-2 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700 transition">Aprobar y Enviar a Registro (Matrícula)</button>`
                     : `<button onclick="processRequest('APROBADA_POSTULACION')" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition">Aprobar Postulación (Pasa a Fase 2)</button>`;
-
-                actionsDiv.innerHTML = `
-                    <button onclick="document.getElementById('reviewModal').classList.add('hidden')" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold">Cancelar</button>
-                    ${btnAprobar}
-                `;
+                actionsDiv.innerHTML = `<button onclick="document.getElementById('reviewModal').classList.add('hidden')" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold">Cancelar</button> ${btnAprobar}`;
             }
             document.getElementById('reviewModal').classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function processRequest(newStatus) {
@@ -459,88 +537,97 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Inicializar iconos de Lucide si los estás usando
-            if (typeof lucide !== 'undefined') { lucide.createIcons(); }
-
-            // Cargar listas al iniciar la página
-            cargarProgramas();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            loadProgramasTable();
             cargarTiposMovilidad();
         });
 
         // ==========================================
-        // 1. LÓGICA DE ACCESOS PARA EXTERNOS
+        // REQ-08: Generación de accesos a externos (6 campos)
         // ==========================================
         function generarAccesoExterno(e) {
-            e.preventDefault(); // Evita que la página se recargue
-
-            // Capturamos los datos de tus inputs actuales
-            const nombre = document.getElementById('extName') ? document.getElementById('extName').value : '';
-            const correo = document.getElementById('extEmail') ? document.getElementById('extEmail').value : '';
-            const institucion = document.getElementById('extInst') ? document.getElementById('extInst').value : '';
-
-            if (!nombre || !correo || !institucion) {
-                return alert("Por favor, complete todos los campos para generar el acceso.");
-            }
-
-            // Generar una contraseña aleatoria de 8 caracteres (letras y números)
-            const randomPassword = Math.random().toString(36).substring(2, 10);
-
-            // Simulación del envío de correo con la alerta
-            const mensajeCorreo = `¡Simulación de Envío de Correo Exitosa!\n\n` +
-                `Para: ${correo}\n` +
-                `Asunto: Credenciales de Acceso - Movilidad CUE\n\n` +
-                `Hola ${nombre},\n` +
-                `La Corporación Universitaria Empresarial Alexander von Humboldt le ha generado un acceso para gestionar su movilidad entrante desde ${institucion}.\n\n` +
-                `Usuario: ${correo}\n` +
-                `Contraseña temporal: ${randomPassword}\n\n` +
-                `Por favor ingrese al portal para continuar su proceso.`;
-
-            alert(mensajeCorreo);
-
-            // Limpiamos el formulario para uno nuevo
-            e.target.reset();
-        }
-
-        // ==========================================
-        // 2. LÓGICA DE PROGRAMAS ACADÉMICOS
-        // ==========================================
-        function cargarProgramas() {
-            const lista = document.getElementById('listaProgramas'); // Asegúrate de que el ul/tbody tenga este ID
-            if (!lista) return;
-
-            // Cargar de LocalStorage o poner valores por defecto
-            let programas = JSON.parse(localStorage.getItem('CUE_PROGRAMAS') || '["Ingeniería de Software", "Ingeniería Industrial", "Enfermería", "Medicina", "Derecho"]');
-            localStorage.setItem('CUE_PROGRAMAS', JSON.stringify(programas));
-
-            lista.innerHTML = programas.map((p, index) => `
-        <li class="flex justify-between items-center p-3 border-b text-sm text-gray-700 bg-white">
-            <span class="font-bold">${p}</span>
-            <button onclick="eliminarPrograma(${index})" class="text-red-500 hover:text-red-700" title="Eliminar Programa">Eliminar</button>
-        </li>
-    `).join('');
-        }
-
-        function agregarPrograma(e) {
             e.preventDefault();
-            const input = document.getElementById('nuevoPrograma'); // Asegúrate de que el input tenga este ID
-            if (!input || input.value.trim() === '') return;
+            const nombre = (document.getElementById('extName')?.value || '').trim();
+            const correo = (document.getElementById('extEmail')?.value || '').trim();
+            const institucion = (document.getElementById('extInst')?.value || '').trim();
+            const documento = (document.getElementById('extDoc')?.value || '').trim();
+            const fecInicio = document.getElementById('extFecInicio')?.value || '';
+            const fecFin = document.getElementById('extFecFin')?.value || '';
 
-            let programas = JSON.parse(localStorage.getItem('CUE_PROGRAMAS') || '[]');
-            programas.push(input.value.trim());
-            localStorage.setItem('CUE_PROGRAMAS', JSON.stringify(programas));
+            if (!nombre || !correo || !institucion || !documento || !fecInicio || !fecFin) {
+                alert("Complete todos los campos: nombre, correo, institución, documento, fecha inicio y fecha fin del acceso.");
+                return false;
+            }
+            if (new Date(fecFin) < new Date(fecInicio)) {
+                alert("La fecha de fin del acceso debe ser posterior a la fecha de inicio.");
+                return false;
+            }
 
-            input.value = '';
-            cargarProgramas();
-            alert("Programa académico agregado exitosamente.");
+            const randomPassword = Math.random().toString(36).substring(2, 10);
+            const msg = `Credenciales generadas y enviadas.\n\nPara: ${correo}\nNombre: ${nombre}\nInstitución: ${institucion}\nDocumento: ${documento}\nAcceso desde: ${fecInicio} hasta ${fecFin}\nUsuario: ${correo}\nContraseña temporal: ${randomPassword}`;
+            alert(msg);
+            document.getElementById('formCredencialesExterno').reset();
+            return false;
         }
 
-        function eliminarPrograma(index) {
-            if (confirm("¿Está seguro de eliminar este programa?")) {
-                let programas = JSON.parse(localStorage.getItem('CUE_PROGRAMAS') || '[]');
-                programas.splice(index, 1);
-                localStorage.setItem('CUE_PROGRAMAS', JSON.stringify(programas));
-                cargarProgramas();
+        // ==========================================
+        // REQ-09: Programas con Nombre y Correo del Coordinador (Paz y Salvo)
+        // ==========================================
+        const LS_PROGRAMAS = 'CUE_PROGRAMAS';
+
+        function getProgramas() {
+            try {
+                const raw = localStorage.getItem(LS_PROGRAMAS);
+                if (!raw) return [];
+                const data = JSON.parse(raw);
+                if (!Array.isArray(data)) return [];
+                return data.map(p => typeof p === 'string' ? { nombre: p, correoCoordinador: '' } : p);
+            } catch { return []; }
+        }
+
+        function loadProgramasTable() {
+            const tbody = document.getElementById('programasTableBody');
+            if (!tbody) return;
+            let programas = getProgramas();
+            if (programas.length === 0) {
+                programas = [
+                    { nombre: 'Ingeniería de Software', correoCoordinador: 'coordinacion.acad@cue.edu.co' },
+                    { nombre: 'Medicina', correoCoordinador: 'coord.medicina@cue.edu.co' }
+                ];
+                localStorage.setItem(LS_PROGRAMAS, JSON.stringify(programas));
             }
+            tbody.innerHTML = programas.map((p, i) => `
+                <tr class="hover:bg-gray-50">
+                    <td class="p-4 font-bold text-[#03045e]">${escapeHtml(p.nombre)}</td>
+                    <td class="p-4 text-gray-600">${escapeHtml(p.correoCoordinador || '—')}</td>
+                    <td class="p-4 text-center"><button onclick="eliminarProgramaANI(${i})" class="text-red-600 text-xs font-bold hover:underline">Eliminar</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function agregarProgramaANI(e) {
+            e.preventDefault();
+            const nombre = (document.getElementById('progNombre')?.value || '').trim();
+            const correo = (document.getElementById('progCorreoCoord')?.value || '').trim();
+            if (!nombre || !correo) {
+                alert('Ingrese el nombre del programa y el correo del coordinador académico.');
+                return false;
+            }
+            let programas = getProgramas();
+            programas.push({ nombre, correoCoordinador: correo });
+            localStorage.setItem(LS_PROGRAMAS, JSON.stringify(programas));
+            document.getElementById('formPrograma').reset();
+            loadProgramasTable();
+            alert('Programa agregado. El coordinador recibirá la bandeja de Paz y Salvo.');
+            return false;
+        }
+
+        function eliminarProgramaANI(index) {
+            if (!confirm('¿Eliminar este programa?')) return;
+            let programas = getProgramas();
+            programas.splice(index, 1);
+            localStorage.setItem(LS_PROGRAMAS, JSON.stringify(programas));
+            loadProgramasTable();
         }
 
         // ==========================================

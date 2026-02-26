@@ -30,11 +30,14 @@
     </nav>
 
     <main class="max-w-7xl mx-auto mt-8 px-6 pb-12">
-        <div class="flex justify-between items-end mb-6 border-b pb-4">
+        <div class="flex flex-wrap justify-between items-end gap-4 mb-6 border-b pb-4">
             <div>
-                <h2 class="text-2xl font-bold text-[#03045e]">Gestión Académica de Movilidad</h2>
-                <p class="text-gray-500 text-sm">Creación de matrículas para externos y despacho de certificados.</p>
+                <h2 class="text-2xl font-bold text-[#03045e]">Gestión Académica de Movilidad (REQ-16 a REQ-18)</h2>
+                <p class="text-gray-500 text-sm">Entrantes por matricular (Plantilla Q10), exportación y certificados.</p>
             </div>
+            <button type="button" id="btnExportQ10" onclick="exportarPlantillaQ10()" class="bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-green-800 transition flex items-center gap-2 shadow-sm">
+                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Exportar Plantilla Q10
+            </button>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -42,7 +45,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
                 <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
                     <h3 class="font-bold text-[#03045e] flex items-center gap-2">
-                        <i data-lucide="user-plus" class="w-5 h-5 text-green-700"></i> Entrantes por Matricular
+                        <i data-lucide="user-plus" class="w-5 h-5 text-green-700"></i> Entrantes por Matricular (Plantilla Q10)
                     </h3>
                 </div>
                 <div class="p-4 flex-grow overflow-y-auto max-h-[600px]">
@@ -54,11 +57,11 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
                 <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
                     <h3 class="font-bold text-[#03045e] flex items-center gap-2">
-                        <i data-lucide="award" class="w-5 h-5 text-blue-700"></i> Tickets de Certificados
+                        <i data-lucide="award" class="w-5 h-5 text-blue-700"></i> Bandeja de Certificados ($0 COP)
                     </h3>
                 </div>
                 <div class="p-4 flex-grow overflow-y-auto max-h-[600px]">
-                    <p class="text-xs text-gray-500 mb-4">Solicitudes pre-aprobadas (Valor $0) generadas desde el módulo de movilidad.</p>
+                    <p class="text-xs text-gray-500 mb-4">Recepción y despacho de certificados solicitados por estudiantes con movilidad activa.</p>
                     <div id="certificadosContainer" class="space-y-4">
                         </div>
                 </div>
@@ -67,8 +70,18 @@
         </div>
     </main>
 
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
     <script src="../assets/js/auth.js"></script>
     <script>
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
         document.addEventListener('DOMContentLoaded', () => {
             const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
             if (!user || user.role.code !== 'REGISTRO') {
@@ -120,28 +133,53 @@
                 }
             });
 
-            // 1. Renderizar Matrículas (Solo ENTRANTES aprobados por matricular)
+            // REQ-16: Visor entrantes con campos separados (Plantilla Q10)
             const matriculas = allReqs.filter(req => req.status === 'PENDIENTE_MATRICULA' && req.dir === 'ENTRANTE');
             if(matriculas.length === 0) {
                 matriculasContainer.innerHTML = `<p class="text-center text-sm text-gray-400 italic py-8">Bandeja al día. No hay entrantes pendientes.</p>`;
             } else {
                 matriculas.forEach(req => {
+                    const ext = req.externoFOIN012 || {};
+                    const v = (x) => (x === undefined || x === null || x === '') ? '—' : String(x);
+                    const safeId = (req.id || '').replace(/'/g, "\\'");
+                    const cardContent = ext.primerNombre != null || ext.primerApellido != null
+                        ? `
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-gray-700 mb-3">
+                                <span><strong class="text-gray-500">Primer nombre:</strong> ${v(ext.primerNombre)}</span>
+                                <span><strong class="text-gray-500">Segundo nombre:</strong> ${v(ext.segundoNombre)}</span>
+                                <span><strong class="text-gray-500">Primer apellido:</strong> ${v(ext.primerApellido)}</span>
+                                <span><strong class="text-gray-500">Segundo apellido:</strong> ${v(ext.segundoApellido)}</span>
+                                <span><strong class="text-gray-500">Sexo:</strong> ${v(ext.sexo)}</span>
+                                <span><strong class="text-gray-500">Documento:</strong> ${v(ext.tipoDoc)} ${v(ext.numDoc)}</span>
+                                <span class="col-span-2"><strong class="text-gray-500">Dirección:</strong> ${v(ext.direccion)}</span>
+                                <span><strong class="text-gray-500">Departamento:</strong> ${v(ext.departamento)}</span>
+                                <span><strong class="text-gray-500">Municipio:</strong> ${v(ext.municipio)}</span>
+                                <span class="col-span-2"><strong class="text-gray-500">Correo:</strong> ${v(ext.correo) || v(req.userEmail)}</span>
+                            </div>
+                            <div class="text-sm text-gray-700 mb-4">
+                                <span class="block font-bold text-xs text-gray-400 uppercase mb-1">Actividades a realizar / materias a cursar</span>
+                                <div class="bg-gray-50 p-2 rounded border text-xs whitespace-pre-line">${v(ext.actividadesMaterias) || req.materias || '—'}</div>
+                            </div>
+                        `
+                        : `
+                            <div class="text-sm text-gray-700 mb-4">
+                                <p class="text-xs text-gray-500"><strong>Correo:</strong> ${escapeHtml(req.userEmail)}</p>
+                                <span class="block font-bold text-xs text-gray-400 uppercase mb-1 mt-2">Actividades / materias a cursar</span>
+                                <div class="bg-gray-50 p-2 rounded border text-xs whitespace-pre-line">${escapeHtml(req.materias || '—')}</div>
+                            </div>
+                        `;
                     matriculasContainer.innerHTML += `
                         <div class="border rounded-lg p-4 bg-white shadow-sm border-l-4 border-green-500">
                             <div class="flex justify-between items-start border-b pb-2 mb-3">
                                 <div>
-                                    <span class="font-mono text-xs font-bold text-[#03045e]">${req.id}</span>
-                                    <h4 class="font-bold text-gray-800 text-sm mt-1">${req.userEmail}</h4>
-                                    <p class="text-xs text-gray-500">${req.type}</p>
+                                    <span class="font-mono text-xs font-bold text-[#03045e]">${escapeHtml(req.id)}</span>
+                                    <p class="text-xs text-gray-500 mt-0.5">${escapeHtml(req.type)}</p>
                                 </div>
-                                <span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-1 rounded font-bold uppercase tracking-wider">Por Matricular</span>
+                                <span class="bg-yellow-100 text-yellow-800 text-[10px] px-2 py-1 rounded font-bold uppercase">Por Matricular</span>
                             </div>
-                            <div class="text-sm text-gray-700 mb-4">
-                                <span class="block font-bold text-xs text-gray-400 uppercase mb-1">Materias a Cursar (Revisión Q10)</span>
-                                <div class="bg-gray-50 p-2 rounded border text-xs whitespace-pre-line">${req.materias || '- Asignaturas por definir según plan de estudios.'}</div>
-                            </div>
-                            <button onclick="confirmMatricula('${req.id}')" class="w-full bg-green-600 text-white py-2 rounded text-xs font-bold hover:bg-green-700 transition flex items-center justify-center gap-2">
-                                <i data-lucide="check-circle" class="w-4 h-4"></i> Confirmar Matrícula Exitosa en Q10
+                            ${cardContent}
+                            <button onclick="confirmMatricula('${safeId}')" class="w-full bg-green-600 text-white py-2 rounded text-xs font-bold hover:bg-green-700 transition flex items-center justify-center gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4"></i> Confirmar Matrícula
                             </button>
                         </div>
                     `;
@@ -223,6 +261,54 @@
             
             alert("Estudiante Entrante matriculado.\nEl estado ha cambiado a MOVILIDAD ACTIVA y se ha registrado la información de Q10. Se ha notificado a Dirección ANI y al estudiante.");
             loadRegistroDashboards();
+        }
+
+        // REQ-17: Exportar Plantilla Q10 (.xlsx). Datos desde fila 8; columnas en orden estricto.
+        function exportarPlantillaQ10() {
+            const allReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            const entrantes = allReqs.filter(r => r.dir === 'ENTRANTE' && (r.status === 'PENDIENTE_MATRICULA' || r.status === 'MOVILIDAD_ACTIVA') && r.externoFOIN012);
+            if (entrantes.length === 0) {
+                alert('No hay entrantes con datos Q10 para exportar. Deben existir solicitudes entrantes con datos personales completos.');
+                return;
+            }
+            const headers = [
+                'Primer nombre', 'Segundo nombre', 'Primer apellido', 'Segundo apellido',
+                'Tipo documento', 'Número identificación', 'Sexo', 'Fecha nacimiento',
+                'Teléfono', 'Celular', 'Email', 'Dirección',
+                'País dirección', 'Departamento dirección', 'Municipio dirección'
+            ];
+            const rows = entrantes.map(r => {
+                const e = r.externoFOIN012 || {};
+                return [
+                    e.primerNombre || '',
+                    e.segundoNombre || '',
+                    e.primerApellido || '',
+                    e.segundoApellido || '',
+                    e.tipoDoc || '',
+                    e.numDoc || '',
+                    e.sexo || '',
+                    e.fecNacimiento || '',
+                    e.contactoTelefono || e.celular || '',
+                    e.celular || '',
+                    e.correo || r.userEmail || '',
+                    e.direccion || '',
+                    e.pais || '',
+                    e.departamento || '',
+                    e.municipio || ''
+                ];
+            });
+            const data = [];
+            for (let i = 0; i < 7; i++) data.push([]);
+            data[0][0] = 'Plantilla Q10 - CUE Movilidad Académica';
+            data.push(headers);
+            rows.forEach(row => data.push(row));
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, 'Q10');
+            const filename = 'Plantilla_Q10_' + new Date().toISOString().slice(0, 10) + '.xlsx';
+            XLSX.writeFile(wb, filename);
+            alert('Archivo "' + filename + '" generado. Los datos dinámicos comienzan en la fila 8.');
         }
 
         function dispatchCertificado(id) {

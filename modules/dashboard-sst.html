@@ -32,8 +32,8 @@
     <main class="max-w-7xl mx-auto mt-8 px-6 pb-12">
         <div class="flex justify-between items-end mb-6 border-b pb-4">
             <div>
-                <h2 class="text-2xl font-bold text-[#03045e]">Control de Riesgos en Salidas Académicas</h2>
-                <p class="text-gray-500 text-sm">Validación de requisitos legales de transporte, pólizas y consentimientos.</p>
+                <h2 class="text-2xl font-bold text-[#03045e]">Control de Riesgos en Salidas Académicas (REQ-14)</h2>
+                <p class="text-gray-500 text-sm">Solo se muestran salidas donde el coordinador marcó &quot;SÍ&quot; en transporte suministrado por la Universidad.</p>
             </div>
             <div class="bg-white px-4 py-2 rounded shadow-sm border text-sm font-bold text-red-700 flex items-center gap-2">
                 <i data-lucide="shield-alert" class="w-4 h-4"></i> Revisiones Pendientes: <span id="pendingSSTCount">0</span>
@@ -65,42 +65,52 @@
             </div>
             <div class="p-6 overflow-y-auto flex-grow">
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 p-4 rounded border mb-6 items-center">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-4 rounded border mb-6">
                     <div>
                         <span class="block text-[10px] font-bold text-gray-400 uppercase">Referencia</span>
-                        <span class="font-mono font-bold text-[#03045e] text-lg" id="modalSstId"></span>
+                        <span class="font-mono font-bold text-[#03045e]" id="modalSstId"></span>
                     </div>
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Responsable (Profesor)</span>
-                        <span class="font-bold text-gray-800" id="modalSstUser"></span>
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Destino / Dirección</span>
+                        <span class="font-bold text-gray-800 text-sm" id="modalSstDestino"></span>
+                        <span class="text-xs text-gray-600 block mt-0.5" id="modalSstDireccion"></span>
                     </div>
                     <div>
-                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Fechas de Movilidad</span>
-                        <span class="font-bold text-gray-800" id="modalSstDates"></span>
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Profesor responsable</span>
+                        <span class="font-bold text-gray-800 text-sm" id="modalSstUser"></span>
+                    </div>
+                    <div>
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Fechas / Actividad</span>
+                        <span class="font-bold text-gray-800 text-sm" id="modalSstDates"></span>
+                        <span class="text-xs text-gray-600 block mt-0.5" id="modalSstActividad"></span>
                     </div>
                 </div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <div>
-                        <h4 class="font-bold text-gray-700 text-sm mb-3 border-b pb-1 flex items-center gap-2"><i data-lucide="bus" class="w-4 h-4 text-[#0077b6]"></i> 1. Lista de Chequeo Transporte</h4>
-                        <p class="text-xs text-gray-500 mb-4">Marque los documentos validados con la empresa de transporte contratada.</p>
+                        <h4 class="font-bold text-gray-700 text-sm mb-3 border-b pb-1 flex items-center gap-2"><i data-lucide="bus" class="w-4 h-4 text-[#0077b6]"></i> Checklist validación del vehículo (REQ-15)</h4>
+                        <p class="text-xs text-gray-500 mb-4">Marque cada ítem verificado.</p>
                         
                         <form id="sstChecklistForm" class="space-y-3">
                             <label class="flex items-center gap-3 p-3 border rounded hover:bg-gray-50 cursor-pointer transition">
-                                <input type="checkbox" class="sst-check w-4 h-4 accent-red-600">
+                                <input type="checkbox" class="sst-check w-4 h-4 accent-red-600" data-idx="0">
+                                <span class="text-sm font-bold text-gray-700">Placas</span>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border rounded hover:bg-gray-50 cursor-pointer transition">
+                                <input type="checkbox" class="sst-check w-4 h-4 accent-red-600" data-idx="1">
                                 <span class="text-sm font-bold text-gray-700">SOAT Vigente</span>
                             </label>
                             <label class="flex items-center gap-3 p-3 border rounded hover:bg-gray-50 cursor-pointer transition">
-                                <input type="checkbox" class="sst-check w-4 h-4 accent-red-600">
-                                <span class="text-sm font-bold text-gray-700">Revisión Tecnomecánica Vigente</span>
+                                <input type="checkbox" class="sst-check w-4 h-4 accent-red-600" data-idx="2">
+                                <span class="text-sm font-bold text-gray-700">Revisión Tecnomecánica</span>
                             </label>
                             <label class="flex items-center gap-3 p-3 border rounded hover:bg-gray-50 cursor-pointer transition">
-                                <input type="checkbox" class="sst-check w-4 h-4 accent-red-600">
-                                <span class="text-sm font-bold text-gray-700">Póliza Responsabilidad Civil (RC/ECC)</span>
+                                <input type="checkbox" class="sst-check w-4 h-4 accent-red-600" data-idx="3">
+                                <span class="text-sm font-bold text-gray-700">Licencia del Conductor</span>
                             </label>
                             <label class="flex items-center gap-3 p-3 border rounded hover:bg-gray-50 cursor-pointer transition">
-                                <input type="checkbox" class="sst-check w-4 h-4 accent-red-600">
-                                <span class="text-sm font-bold text-gray-700">Licencia y Planilla SS Conductor</span>
+                                <input type="checkbox" class="sst-check w-4 h-4 accent-red-600" data-idx="4">
+                                <span class="text-sm font-bold text-gray-700">Póliza de Responsabilidad Civil</span>
                             </label>
                         </form>
                     </div>
@@ -122,12 +132,11 @@
                             </div>
                         </div>
                         <div class="flex justify-between items-end border-b pb-1 mb-3">
-                            <h4 class="font-bold text-gray-700 text-sm flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-[#0077b6]"></i> 2. Pólizas y Consentimientos</h4>
+                            <h4 class="font-bold text-gray-700 text-sm flex items-center gap-2"><i data-lucide="users" class="w-4 h-4 text-[#0077b6]"></i> Estudiantes inscritos – verificar Póliza Vigente</h4>
                             <button onclick="sendConsents()" class="text-xs bg-[#0077b6] text-white px-2 py-1 rounded font-bold hover:bg-[#03045e] transition flex items-center gap-1">
                                 <i data-lucide="mail" class="w-3 h-3"></i> Notificar a Todos
                             </button>
                         </div>
-                        <p class="text-[10px] text-gray-500 mb-2">* Conexión simulada con BD de Bienestar Institucional.</p>
                         
                         <div class="border rounded overflow-hidden max-h-[220px] overflow-y-auto">
                             <table class="w-full text-left text-xs">
@@ -135,11 +144,11 @@
                                     <tr>
                                         <th class="p-2">Participante</th>
                                         <th class="p-2 text-center">Edad</th>
-                                        <th class="p-2 text-center">Póliza</th>
+                                        <th class="p-2 text-center">Póliza vigente</th>
                                     </tr>
                                 </thead>
                                 <tbody id="studentPolicyList" class="divide-y">
-                                    </tbody>
+                                </tbody>
                             </table>
                         </div>
                     </div>
@@ -157,9 +166,9 @@
             </div>
             
             <div class="bg-gray-50 p-4 border-t flex justify-end gap-3" id="mainActionButtons">
-                <button onclick="toggleRejectBox()" class="px-4 py-2 border border-red-300 text-red-700 bg-white rounded text-sm font-bold hover:bg-red-50 transition">Rechazar Salida</button>
+                <button onclick="toggleRejectBox()" class="px-4 py-2 border border-red-300 text-red-700 bg-white rounded text-sm font-bold hover:bg-red-50 transition">Rechazar (con justificación)</button>
                 <button onclick="approveSST()" class="px-6 py-2 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700 transition flex items-center gap-2">
-                    <i data-lucide="shield-check" class="w-4 h-4"></i> Registrar Aprobación
+                    <i data-lucide="shield-check" class="w-4 h-4"></i> Aprobar Salida
                 </button>
             </div>
         </div>
@@ -185,13 +194,13 @@
             lucide.createIcons();
         });
 
-        // 1. CARGA DE TABLA CON DATOS SIMULADOS
+        // REQ-14: Solo salidas donde el coordinador marcó SÍ en transporte por la Universidad
         function loadSSTTable() {
             const tbody = document.getElementById('sstTableBody');
             tbody.innerHTML = '';
             
             const salidas = safeParseArray(LS_SALIDAS)
-                .filter(s => s && s.requiereSST === true);
+                .filter(s => s && (s.requiereSST === true || s.transporte === 'UNIVERSIDAD'));
 
             const pendientes = salidas.filter(s => {
                 const estadoAcad = String(s.estadoAcad || '').toUpperCase();
@@ -248,48 +257,59 @@
             }
 
             document.getElementById('modalSstId').textContent = id;
+            document.getElementById('modalSstDestino').textContent = salida.destino || '—';
+            document.getElementById('modalSstDireccion').textContent = salida.direccion || '—';
             document.getElementById('modalSstUser').textContent = `${salida.profesorResponsable?.nombre || 'Profesor'} (${salida.profesorResponsable?.email || 'N/A'})`;
-            document.getElementById('modalSstDates').textContent = `Inicio: ${salida.fechaInicio || 'N/A'} / Fin: ${salida.fechaFin || 'N/A'}`;
+            document.getElementById('modalSstDates').textContent = `${salida.fechaInicio || 'N/A'} – ${salida.fechaFin || 'N/A'}`;
+            document.getElementById('modalSstActividad').textContent = salida.actividad || '—';
             
             document.querySelectorAll('.sst-check').forEach(cb => cb.checked = false);
+            const saved = salida.sstReview?.checklist;
+            if (saved) {
+                const checks = document.querySelectorAll('.sst-check');
+                checks.forEach((cb, i) => { cb.checked = [saved.placas, saved.soat, saved.tecnomecanica, saved.licenciaConductor, saved.polizaRc][i] === true; });
+            }
             document.getElementById('vehPlaca').value = salida.sstReview?.placaVehiculo || '';
             document.getElementById('polizaNumero').value = salida.sstReview?.numeroPoliza || '';
             document.getElementById('aseguradoraNombre').value = salida.sstReview?.entidadAseguradora || '';
             
-            // Reiniciar caja de rechazo
             document.getElementById('rejectContainer').classList.add('hidden');
             document.getElementById('mainActionButtons').classList.remove('hidden');
             document.getElementById('rejectReason').value = '';
 
-            // Simulación de BD de Estudiantes y Pólizas
             const participants = Array.isArray(salida.participantes) ? salida.participantes : [];
-            const mockStudents = participants
+            const students = participants
                 .filter(p => (p.rol || 'ESTUDIANTE') === 'ESTUDIANTE')
-                .map(p => ({ nombre: p.nombre || 'Estudiante', edad: null, polizaOk: true }));
+                .map((p, i) => ({
+                    key: p.email || `st-${i}`,
+                    nombre: p.nombre || 'Estudiante',
+                    edad: p.edad != null ? p.edad : null,
+                    polizaVigente: (salida.sstReview?.studentPolicies || {})[p.email || p.nombre] !== false
+                }));
 
             const tbodyList = document.getElementById('studentPolicyList');
             tbodyList.innerHTML = '';
-            
-            mockStudents.forEach(st => {
-                const polizaIcon = st.polizaOk 
-                    ? `<i data-lucide="check-circle" class="w-4 h-4 text-green-600 mx-auto" title="Vigente"></i>` 
-                    : `<i data-lucide="x-circle" class="w-4 h-4 text-red-600 mx-auto" title="Vencida"></i>`;
-                
+            students.forEach(st => {
                 const edadBadge = st.edad === null
                     ? `<span class="text-gray-400 text-[10px] italic">N/D</span>`
                     : (st.edad < 18
-                        ? `<span class="bg-yellow-100 text-yellow-800 px-2 py-[2px] rounded text-[10px] font-bold" title="Consentimiento a acudiente">Menor (Acudiente)</span>`
+                        ? `<span class="bg-yellow-100 text-yellow-800 px-2 py-[2px] rounded text-[10px] font-bold">Menor (Acudiente)</span>`
                         : `<span class="text-gray-500">${st.edad} años</span>`);
-
+                const safeKey = (st.key || '').replace(/'/g, "\\'");
                 tbodyList.innerHTML += `
                     <tr>
-                        <td class="p-2 font-semibold text-gray-700">${st.nombre}</td>
+                        <td class="p-2 font-semibold text-gray-700">${escapeHtml(st.nombre)}</td>
                         <td class="p-2 text-center">${edadBadge}</td>
-                        <td class="p-2 text-center bg-gray-50">${polizaIcon}</td>
+                        <td class="p-2 text-center">
+                            <label class="inline-flex items-center gap-1 cursor-pointer">
+                                <input type="checkbox" class="sst-poliza-estudiante w-4 h-4 accent-green-600" data-key="${escapeHtml(st.key)}" ${st.polizaVigente ? 'checked' : ''}>
+                                <span class="text-[10px] font-bold text-gray-600">Póliza vigente</span>
+                            </label>
+                        </td>
                     </tr>
                 `;
             });
-            if (mockStudents.length === 0) {
+            if (students.length === 0) {
                 tbodyList.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-400 italic">No hay estudiantes participantes registrados.</td></tr>`;
             }
 
@@ -307,19 +327,25 @@
             alert("Acción Simulada:\n\nSe han enviado correos con el formato FO-GT-073 (Consentimiento Informado).\n\n- Los estudiantes mayores de edad lo recibieron en su correo institucional.\n- Para los estudiantes menores de edad (Ej. Ana Gómez), el correo fue enviado al acudiente registrado en la base de datos de Registro y Control.\n- El profesor responsable recibió una copia general.");
         }
 
-        // 4. LÓGICA DE APROBACIÓN
         function approveSST() {
             const checkboxes = document.querySelectorAll('.sst-check');
             let allChecked = true;
-            checkboxes.forEach(cb => { if(!cb.checked) allChecked = false; });
+            checkboxes.forEach(cb => { if (!cb.checked) allChecked = false; });
 
-            if(!allChecked) {
-                alert("Operación Denegada:\nDebe verificar y marcar todos los documentos del transporte para proceder con la aprobación de la salida.");
+            if (!allChecked) {
+                alert("Debe marcar todos los ítems del checklist de validación del vehículo (Placas, SOAT, Revisión Tecnomecánica, Licencia del Conductor, Póliza de Responsabilidad Civil) para aprobar la salida.");
+                return;
+            }
+
+            const studentChecks = document.querySelectorAll('.sst-poliza-estudiante');
+            const allStudentsOk = studentChecks.length === 0 || Array.from(studentChecks).every(cb => cb.checked);
+            if (!allStudentsOk) {
+                alert("Debe marcar \"Póliza vigente\" para todos los estudiantes inscritos antes de aprobar la salida.");
                 return;
             }
 
             updateSalidaSst('APROBADO', 'Validación exitosa.');
-            alert("Aprobación Registrada.\nLa salida académica cuenta con el aval de Seguridad y Salud en el Trabajo.");
+            alert("Aprobación registrada. La salida académica cuenta con el aval de SST.");
         }
 
         // 5. LÓGICA DE RECHAZO
@@ -350,12 +376,19 @@
                 return;
             }
 
+            const checks = document.querySelectorAll('.sst-check');
             const checklist = {
-                soat: document.querySelectorAll('.sst-check')[0]?.checked === true,
-                tecnomecanica: document.querySelectorAll('.sst-check')[1]?.checked === true,
-                polizaRc: document.querySelectorAll('.sst-check')[2]?.checked === true,
-                licenciaConductor: document.querySelectorAll('.sst-check')[3]?.checked === true
+                placas: checks[0]?.checked === true,
+                soat: checks[1]?.checked === true,
+                tecnomecanica: checks[2]?.checked === true,
+                licenciaConductor: checks[3]?.checked === true,
+                polizaRc: checks[4]?.checked === true
             };
+            const studentPolicies = {};
+            document.querySelectorAll('.sst-poliza-estudiante').forEach(cb => {
+                const k = cb.getAttribute('data-key');
+                if (k) studentPolicies[k] = cb.checked;
+            });
 
             salidas[idx].sstReview = {
                 ...(salidas[idx].sstReview || {}),
@@ -365,6 +398,7 @@
                 entidadAseguradora: document.getElementById('aseguradoraNombre').value.trim(),
                 numeroPoliza: document.getElementById('polizaNumero').value.trim(),
                 checklist,
+                studentPolicies: Object.keys(studentPolicies).length ? studentPolicies : (salidas[idx].sstReview?.studentPolicies || {}),
                 reviewedAt: new Date().toISOString(),
                 reviewerEmail: reviewer?.email || ''
             };

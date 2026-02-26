@@ -169,19 +169,18 @@
                     <h3 class="font-bold text-[#0077b6] text-sm mb-3"><i data-lucide="map-pin"
                             class="inline w-4 h-4"></i> Información de Destino</h3>
                     <div id="destinoSearchContainer">
-                        <label class="form-label">Institución en Convenio</label>
+                        <label class="form-label">Institución de Convenio / Destino</label>
                         <select id="entity_select" class="form-input cursor-pointer border-[#0077b6]"
                             onchange="WizardLogic.checkOtherEntity()"></select>
                     </div>
                     <div id="destinoLibreContainer" class="hidden mt-4 pt-4 border-t border-blue-200">
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="md:col-span-3"><label class="form-label text-orange-600">Nombre Entidad /
-                                    Empresa</label><input type="text" id="other_entity_name"
-                                    class="form-input border-orange-200"></div>
-                            <div><label class="form-label">País</label><input type="text" id="field_country"
-                                    class="form-input"></div>
-                            <div><label class="form-label">Ciudad</label><input type="text" id="field_city"
-                                    class="form-input"></div>
+                            <div class="md:col-span-3"><label class="form-label text-orange-600">Nombre de la Entidad <span class="text-red-600">*</span></label><input type="text" id="other_entity_name"
+                                    class="form-input border-orange-200" placeholder="Obligatorio si eligió OTRA"></div>
+                            <div><label class="form-label">País <span class="text-red-600">*</span></label><input type="text" id="field_country"
+                                    class="form-input" placeholder="Obligatorio"></div>
+                            <div><label class="form-label">Ciudad <span class="text-red-600">*</span></label><input type="text" id="field_city"
+                                    class="form-input" placeholder="Obligatorio"></div>
                         </div>
                     </div>
                     <div id="practiceDetailsContainer"
@@ -211,8 +210,8 @@
                                 class="form-input" onchange="WizardLogic.calculateDuration()"></div>
                         <div><label class="form-label">Fecha de Finalización</label><input type="date" id="fechaFin"
                                 class="form-input" onchange="WizardLogic.calculateDuration()"></div>
-                        <div><label class="form-label">Duración Calculada</label><input type="text"
-                                id="duracionCalculada" class="form-input bg-gray-100" readonly></div>
+                        <div><label class="form-label">Duración de la movilidad</label><input type="text"
+                                id="duracionMovilidad" class="form-input bg-gray-100" readonly></div>
                     </div>
                     <div class="req-presencial md:col-span-2"><label class="form-label text-orange-600">Fecha Ida
                             (Viaje)</label><input type="date" class="form-input border-orange-200"></div>
@@ -275,6 +274,7 @@
                     </div>
                 </div>
 
+                <!-- REQ-06: Para internos (Estudiante, Profesor, Administrativo): perfil solo lectura -->
                 <div id="studentPersonalData" class="mt-8">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 relative">
                         <div class="md:col-span-4 font-bold text-xs text-gray-500 uppercase border-b pb-1">Perfil
@@ -282,7 +282,7 @@
                         <div><label class="form-label">Documento</label><input type="text" id="autoDoc"
                                 class="form-input bg-gray-100" readonly></div>
                         <div class="md:col-span-2"><label class="form-label">Programa</label><input type="text"
-                                value="Ingeniería de Software" class="form-input bg-gray-100" readonly></div>
+                                id="autoPrograma" class="form-input bg-gray-100" readonly></div>
                         <div><label class="form-label">Semestre / Promedio</label><input type="text" id="autoSem"
                                 class="form-input bg-gray-100" readonly></div>
 
@@ -305,6 +305,65 @@
                     </div>
                 </div>
 
+                <!-- REQ-06: Para EXTERNO (entrante): formulario integral FO-IN-012 + datos desagregados Q10 -->
+                <div id="externalFormData" class="mt-8 hidden">
+                    <div class="rounded-lg border-2 border-[#0077b6] bg-blue-50/30 p-4 mb-6">
+                        <p class="text-xs font-bold text-[#03045e] uppercase mb-4">Usuario entrante: complete sus datos personales, FO-IN-012 y académicos.</p>
+                    </div>
+                    <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos personales (desagregados para registro Q10)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div><label class="form-label">Primer Nombre <span class="text-red-600">*</span></label><input type="text" id="extPrimerNombre" class="form-input" required></div>
+                        <div><label class="form-label">Segundo Nombre</label><input type="text" id="extSegundoNombre" class="form-input"></div>
+                        <div><label class="form-label">Primer Apellido <span class="text-red-600">*</span></label><input type="text" id="extPrimerApellido" class="form-input" required></div>
+                        <div><label class="form-label">Segundo Apellido</label><input type="text" id="extSegundoApellido" class="form-input"></div>
+                        <div><label class="form-label">Sexo <span class="text-red-600">*</span></label>
+                            <select id="extSexo" class="form-input" required>
+                                <option value="">Seleccione...</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                                <option value="OTRO">Otro</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2"><label class="form-label">Dirección <span class="text-red-600">*</span></label><input type="text" id="extDireccion" class="form-input" required></div>
+                        <div><label class="form-label">Departamento <span class="text-red-600">*</span></label><input type="text" id="extDepartamento" class="form-input" required></div>
+                        <div><label class="form-label">Municipio <span class="text-red-600">*</span></label><input type="text" id="extMunicipio" class="form-input" required></div>
+                    </div>
+                    <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos documento e identificación (FO-IN-012)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div><label class="form-label">Tipo de documento <span class="text-red-600">*</span></label>
+                            <select id="extTipoDoc" class="form-input" required>
+                                <option value="">Seleccione...</option>
+                                <option value="CC">Cédula de Ciudadanía</option>
+                                <option value="TI">Tarjeta de Identidad</option>
+                                <option value="CE">Cédula de Extranjería</option>
+                                <option value="PA">Pasaporte</option>
+                            </select>
+                        </div>
+                        <div><label class="form-label">Número de documento <span class="text-red-600">*</span></label><input type="text" id="extNumDoc" class="form-input" required></div>
+                        <div><label class="form-label">Fecha de expedición</label><input type="date" id="extFecExpedicion" class="form-input"></div>
+                        <div><label class="form-label">Fecha de nacimiento</label><input type="date" id="extFecNacimiento" class="form-input"></div>
+                        <div><label class="form-label">Nacionalidad</label><input type="text" id="extNacionalidad" class="form-input"></div>
+                        <div><label class="form-label">Celular <span class="text-red-600">*</span></label><input type="tel" id="extCelular" class="form-input" required></div>
+                        <div class="md:col-span-2"><label class="form-label">Correo electrónico <span class="text-red-600">*</span></label><input type="email" id="extCorreo" class="form-input" required></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded border">
+                        <div class="md:col-span-2 font-bold text-xs text-[#03045e] uppercase mb-2">Contacto de emergencia</div>
+                        <div><label class="form-label">Nombre</label><input type="text" id="extContactoNombre" class="form-input"></div>
+                        <div><label class="form-label">Parentesco</label><input type="text" id="extContactoParentesco" class="form-input"></div>
+                        <div><label class="form-label">Teléfono</label><input type="tel" id="extContactoTelefono" class="form-input"></div>
+                        <div><label class="form-label">Correo</label><input type="email" id="extContactoCorreo" class="form-input"></div>
+                    </div>
+                    <div class="mb-6">
+                        <label class="form-label">Necesidades médicas</label>
+                        <textarea id="extNecesidadesMedicas" rows="2" class="form-input" placeholder="Alergias, medicamentos, condiciones especiales..."></textarea>
+                    </div>
+                    <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos académicos (registro)</h3>
+                    <div class="mb-4">
+                        <label class="form-label">Actividades a realizar o materias a cursar <span class="text-red-600">*</span></label>
+                        <textarea id="extActividadesMaterias" rows="4" class="form-input" required placeholder="Describa las actividades académicas o materias que cursará durante su movilidad en la CUE."></textarea>
+                    </div>
+                </div>
+
                 <div id="professorRosterData" class="hidden border-t pt-4">
                     <h3 class="font-bold text-[#0077b6] text-sm mb-4"><i data-lucide="users" class="inline w-4 h-4"></i>
                         Participantes</h3>
@@ -316,10 +375,12 @@
             <div class="hidden p-8" id="step-4">
                 <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-2">Paso 4: Repositorio Documental</h2>
                 <div id="docsList" class="space-y-3 mb-8"></div>
-                <div class="p-4 bg-blue-50 border border-[#0077b6] rounded flex gap-3">
-                    <input type="checkbox" id="termsCheck" class="mt-1 w-5 h-5 accent-[#03045e]">
-                    <label for="termsCheck" class="text-xs text-[#03045e]">Acepto política de tratamiento de
-                        datos.</label>
+                <div class="p-4 bg-blue-50 border border-[#0077b6] rounded flex gap-3 items-start">
+                    <input type="checkbox" id="termsCheck" class="mt-1 w-5 h-5 accent-[#03045e]" required>
+                    <label for="termsCheck" class="text-sm text-[#03045e]">
+                        ¿Acepta nuestra política de tratamiento de datos personales?
+                        <a href="https://unihumboldt.edu.co/es/normatividad/politica-de-tratamiento-de-datos-personales" target="_blank" rel="noopener noreferrer" class="text-[#0077b6] font-semibold underline hover:no-underline ml-1">Política de tratamiento de datos personales</a>
+                    </label>
                 </div>
             </div>
 

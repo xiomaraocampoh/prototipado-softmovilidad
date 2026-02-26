@@ -51,13 +51,18 @@
         <section id="tabPazSalvo" class="acad-tab-panel" data-active="true">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div class="lg:col-span-3 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div class="bg-gray-50 p-4 border-b flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div class="bg-gray-50 p-4 border-b flex flex-col gap-3">
                         <h3 class="font-bold text-[#03045e] flex items-center gap-2">
-                            <i data-lucide="clipboard-check" class="w-5 h-5 text-indigo-700"></i> Solicitudes pendientes de aprobación académica
+                            <i data-lucide="clipboard-check" class="w-5 h-5 text-indigo-700"></i> Paz y Salvo (REQ-11, REQ-12)
                         </h3>
-                        <div class="flex items-center gap-2">
-                            <input id="pazSearch" type="text" placeholder="Buscar por ID o correo…" class="border rounded-lg px-3 py-2 text-sm w-full md:w-64 focus:outline-none focus:border-indigo-400">
-                            <button onclick="loadPazYSalvoTable()" class="px-3 py-2 text-sm font-bold border rounded-lg hover:bg-gray-50">Filtrar</button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <input id="pazSearch" type="text" placeholder="Buscar por nombre, ID o correo…" class="border rounded-lg px-3 py-2 text-sm w-full md:w-56 focus:outline-none focus:border-indigo-400">
+                            <select id="pazFilterEstado" class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-400" onchange="loadPazYSalvoTable()">
+                                <option value="TODAS">Todas</option>
+                                <option value="PENDIENTES">Pendientes</option>
+                                <option value="APROBADAS">Aprobadas</option>
+                            </select>
+                            <button onclick="loadPazYSalvoTable()" class="px-3 py-2 text-sm font-bold border rounded-lg hover:bg-indigo-50 text-indigo-700">Buscar</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
@@ -94,93 +99,92 @@
                             <label class="block text-xs font-bold text-gray-500 mb-1">Nombre de la salida</label>
                             <input id="salidaNombre" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Ej: Visita empresarial - Planta Nestlé">
                         </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Tipo (opcional)</label>
+                            <select id="salidaTipo" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400">
+                                <option value="VISITA_EMPRESARIAL">Visita empresarial</option>
+                                <option value="SALIDA_CAMPO">Salida de campo</option>
+                                <option value="CONGRESO_EVENTO">Congreso / evento</option>
+                                <option value="OTRA">Otra</option>
+                            </select>
+                        </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Tipo</label>
-                                <select id="salidaTipo" required class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400">
-                                    <option value="" selected disabled>Seleccione…</option>
-                                    <option value="VISITA_EMPRESARIAL">Visita empresarial</option>
-                                    <option value="SALIDA_CAMPO">Salida de campo</option>
-                                    <option value="CONGRESO_EVENTO">Congreso / evento</option>
-                                    <option value="OTRA">Otra</option>
-                                </select>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Destino (Ciudad/Lugar) <span class="text-red-600">*</span></label>
+                                <input id="salidaDestino" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Ciudad o lugar">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Destino</label>
-                                <input id="salidaDestino" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Ciudad / lugar">
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Dirección <span class="text-red-600">*</span></label>
+                                <input id="salidaDireccion" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Dirección del destino">
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Fecha inicio</label>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Fecha de inicio <span class="text-red-600">*</span></label>
                                 <input id="salidaFechaInicio" required type="date" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Fecha fin</label>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Fecha de fin <span class="text-red-600">*</span></label>
                                 <input id="salidaFechaFin" required type="date" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400">
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Profesor responsable (correo)</label>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Profesor responsable (correo) <span class="text-red-600">*</span></label>
                                 <input id="salidaProfesorEmail" required type="email" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="profesor@cue.edu.co">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Profesor responsable (nombre)</label>
+                                <label class="block text-xs font-bold text-gray-500 mb-1">Profesor responsable (nombre) <span class="text-red-600">*</span></label>
                                 <input id="salidaProfesorNombre" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Nombre completo">
                             </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 mb-1">Actividad a realizar <span class="text-red-600">*</span></label>
+                            <input id="salidaActividad" required type="text" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-indigo-400" placeholder="Descripción de la actividad">
                         </div>
 
                         <div class="border rounded-lg p-3 bg-gray-50">
                             <p class="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-2">
-                                <i data-lucide="bus" class="w-4 h-4 text-indigo-700"></i> Transporte
+                                <i data-lucide="bus" class="w-4 h-4 text-indigo-700"></i> ¿La salida requiere transporte suministrado/contratado por la Universidad? <span class="text-red-600">*</span>
                             </p>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                                 <label class="flex items-center gap-3 p-3 border rounded bg-white cursor-pointer hover:bg-gray-50">
                                     <input type="radio" name="salidaTransporte" value="UNIVERSIDAD" class="w-4 h-4 accent-indigo-700" required>
                                     <div>
-                                        <p class="text-sm font-bold text-gray-800">Suministrado por la universidad</p>
+                                        <p class="text-sm font-bold text-gray-800">SÍ</p>
                                         <p class="text-[10px] text-gray-500">Activa revisión SST (SOAT, pólizas, etc.).</p>
                                     </div>
                                 </label>
                                 <label class="flex items-center gap-3 p-3 border rounded bg-white cursor-pointer hover:bg-gray-50">
                                     <input type="radio" name="salidaTransporte" value="PROPIO" class="w-4 h-4 accent-indigo-700" required>
                                     <div>
-                                        <p class="text-sm font-bold text-gray-800">Medios propios</p>
-                                        <p class="text-[10px] text-gray-500">No requiere transporte, no interviene SST en el proceso.</p>
+                                        <p class="text-sm font-bold text-gray-800">NO</p>
+                                        <p class="text-[10px] text-gray-500">Medios propios. No interviene SST.</p>
                                     </div>
                                 </label>
                             </div>
                         </div>
 
                         <div class="border rounded-lg p-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <p class="text-xs font-bold text-gray-500 uppercase flex items-center gap-2">
-                                    <i data-lucide="users" class="w-4 h-4 text-indigo-700"></i> Participantes (opcional)
-                                </p>
-                            </div>
-                            
+                            <p class="text-xs font-bold text-gray-500 uppercase mb-2 flex items-center gap-2">
+                                <i data-lucide="users" class="w-4 h-4 text-indigo-700"></i> Gestión de estudiantes
+                            </p>
                             <div class="mb-3">
-                                <label class="block text-[11px] font-bold text-gray-500 mb-1">Buscar por nombre o correo institucional</label>
+                                <label class="block text-[11px] font-bold text-gray-500 mb-1">Buscar por Nombre o Documento de Identidad</label>
                                 <div class="flex gap-2">
-                                    <input id="participantSearchInput" type="text" class="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:border-indigo-400" placeholder="Ej: ana.gomez@cue.edu.co">
-                                    <button type="button" onclick="searchParticipants()" class="px-3 py-2 text-xs font-bold border rounded bg-white text-indigo-700 hover:bg-indigo-50">Buscar</button>
+                                    <input id="participantSearchInput" type="text" class="flex-1 border rounded px-3 py-2 text-sm focus:outline-none focus:border-indigo-400" placeholder="Nombre o documento">
+                                    <button type="button" onclick="searchParticipants()" class="px-3 py-2 text-xs font-bold border rounded bg-white text-indigo-700 hover:bg-indigo-50">Agregar</button>
                                 </div>
-                                <p class="text-[10px] text-gray-500 mt-1">Se consultan estudiantes registrados en las solicitudes de movilidad (CUE_MY_REQUESTS) y una lista base simulada.</p>
                             </div>
-
                             <div id="participantSearchResults" class="space-y-1 mb-3 text-xs"></div>
-
                             <div>
-                                <p class="text-[11px] font-bold text-gray-500 uppercase mb-1">Participantes agregados</p>
+                                <p class="text-[11px] font-bold text-gray-500 uppercase mb-1">Estudiantes agregados</p>
                                 <div id="participantsSelected" class="space-y-1 text-sm"></div>
                             </div>
-
-                            <p class="text-[10px] text-gray-500 mt-2">Los participantes se guardan dentro de la salida académica (no se crean solicitudes en el wizard).</p>
                         </div>
 
                         <button type="submit" class="w-full bg-indigo-700 text-white py-2 rounded text-sm font-bold hover:bg-indigo-800 transition flex items-center justify-center gap-2">
-                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Crear Salida Académica
+                            <i data-lucide="save" class="w-4 h-4"></i> Guardar Salida
                         </button>
                     </form>
                 </div>
@@ -301,7 +305,9 @@
                             <div><span class="font-bold">Nombre:</span> <span id="salidaModalNombre"></span></div>
                             <div><span class="font-bold">Tipo:</span> <span id="salidaModalTipo"></span></div>
                             <div><span class="font-bold">Destino:</span> <span id="salidaModalDestino"></span></div>
+                            <div><span class="font-bold">Dirección:</span> <span id="salidaModalDireccion"></span></div>
                             <div><span class="font-bold">Fechas:</span> <span id="salidaModalFechas"></span></div>
+                            <div><span class="font-bold">Actividad:</span> <span id="salidaModalActividad"></span></div>
                             <div><span class="font-bold">Transporte:</span> <span id="salidaModalTransporte"></span></div>
                         </div>
                     </div>
@@ -347,10 +353,9 @@
             document.getElementById('userNameDisplay').textContent = user.name;
             document.getElementById('userRoleDisplay').textContent = user.role.name;
 
-            // Datos de prueba (solo si no hay nada en storage)
             seedDemoData();
+            ensureCoordinatorProgram(user);
 
-            // Estado inicial UI
             loadPazYSalvoTable();
             loadSalidasTable();
             lucide.createIcons();
@@ -387,7 +392,8 @@
                         dir: 'SALIENTE',
                         status: 'APROBADA_POSTULACION',
                         userEmail: 'estudiante1@cue.edu.co',
-                        userName: 'Estudiante Uno'
+                        userName: 'Estudiante Uno',
+                        expedienteData: { programa: 'Ingeniería de Software' }
                     },
                     {
                         id: 'REQ-2002',
@@ -397,7 +403,8 @@
                         status: 'APROBADA_POSTULACION',
                         userEmail: 'estudiante2@cue.edu.co',
                         userName: 'Estudiante Dos',
-                        academicReview: { estado: 'PENDIENTE' }
+                        academicReview: { estado: 'PENDIENTE' },
+                        expedienteData: { programa: 'Ingeniería de Software' }
                     },
                     {
                         id: 'REQ-3001',
@@ -509,23 +516,75 @@
             return st || 'PENDIENTE';
         }
 
+        function ensureCoordinatorProgram(user) {
+            const email = (user?.email || '').toLowerCase();
+            if (!email) return;
+            try {
+                let programas = JSON.parse(localStorage.getItem('CUE_PROGRAMAS') || '[]');
+                if (!Array.isArray(programas)) programas = [];
+                const asObj = p => typeof p === 'string' ? { nombre: p, correoCoordinador: '' } : p;
+                const hasMyProgram = programas.some(p => (asObj(p).correoCoordinador || '').toLowerCase() === email);
+                if (!hasMyProgram && programas.length < 20) {
+                    programas.push({ nombre: 'Ingeniería de Software', correoCoordinador: email });
+                    localStorage.setItem('CUE_PROGRAMAS', JSON.stringify(programas));
+                }
+            } catch (_) {}
+        }
+
+        function getCoordinatorProgramNames() {
+            const user = AuthService.checkAuth();
+            const email = (user?.email || '').toLowerCase();
+            if (!email) return [];
+            try {
+                const raw = localStorage.getItem('CUE_PROGRAMAS');
+                if (!raw) return [];
+                const data = JSON.parse(raw);
+                const arr = Array.isArray(data) ? data : [];
+                return arr
+                    .map(p => typeof p === 'string' ? { nombre: p, correoCoordinador: '' } : p)
+                    .filter(p => (p.correoCoordinador || '').toLowerCase() === email)
+                    .map(p => (p.nombre || '').trim())
+                    .filter(Boolean);
+            } catch { return []; }
+        }
+
+        function getRequestDisplayName(r) {
+            if (r.userName) return r.userName;
+            if (r.userFullName) return r.userFullName;
+            const ext = r.externoFOIN012;
+            if (ext && (ext.primerNombre || ext.primerApellido)) return [ext.primerNombre, ext.segundoNombre, ext.primerApellido, ext.segundoApellido].filter(Boolean).join(' ');
+            return r.userEmail || '';
+        }
+
         function loadPazYSalvoTable() {
             const tbody = document.getElementById('pazTableBody');
             tbody.innerHTML = '';
 
             const q = (document.getElementById('pazSearch')?.value || '').trim().toLowerCase();
+            const filterEstado = document.getElementById('pazFilterEstado')?.value || 'TODAS';
             const reqs = safeParseArray(LS_KEYS.requests);
+            const coordinatorPrograms = getCoordinatorProgramNames();
 
-            // Mostrar solicitudes salientes que requieren aval académico: ya aprobadas por ANI (APROBADA_POSTULACION)
-            // o pendientes de aprobación final ANI (EN_REVISION_DIRECCION_ANI) para que el coordinador vea el flujo
-            const visible = reqs.filter(r => {
+            let visible = reqs.filter(r => {
                 const dir = (r.dir || '').toUpperCase();
                 const status = (r.status || '').toUpperCase();
                 if (dir !== 'SALIENTE') return false;
                 const statusOk = status === 'APROBADA_POSTULACION' || status === 'EN_REVISION_DIRECCION_ANI';
                 if (!statusOk) return false;
                 if (status === 'APROBADA_POSTULACION' && getAcademicReviewState(r) === 'APROBADO') return false;
-                if (q && !(String(r.id || '').toLowerCase().includes(q) || String(r.userEmail || '').toLowerCase().includes(q))) return false;
+                if (coordinatorPrograms.length > 0) {
+                    const reqPrograma = (r.expedienteData?.programa || '').trim();
+                    if (!reqPrograma || !coordinatorPrograms.some(p => p === reqPrograma)) return false;
+                }
+                if (q) {
+                    const name = getRequestDisplayName(r).toLowerCase();
+                    const id = String(r.id || '').toLowerCase();
+                    const email = String(r.userEmail || '').toLowerCase();
+                    const doc = String((r.expedienteData?.documento || r.externoFOIN012?.numDoc) || '').toLowerCase();
+                    if (!id.includes(q) && !email.includes(q) && !name.includes(q) && !doc.includes(q)) return false;
+                }
+                if (filterEstado === 'PENDIENTES' && getAcademicReviewState(r) === 'APROBADO') return false;
+                if (filterEstado === 'APROBADAS' && getAcademicReviewState(r) !== 'APROBADO') return false;
                 return true;
             });
 
@@ -625,20 +684,22 @@
                 if (!r.userEmail) return;
                 const email = String(r.userEmail).toLowerCase();
                 if (!map.has(email)) {
+                    const doc = r.expedienteData?.documento || r.externoFOIN012?.numDoc || '';
                     map.set(email, {
-                        nombre: r.userName || r.userFullName || email,
+                        nombre: getRequestDisplayName(r),
                         email,
+                        documento: String(doc).trim(),
                         rol: 'ESTUDIANTE'
                     });
                 }
             });
 
-            // Mocks básicos si no hay nada en storage
             if (map.size === 0) {
                 ['ana.gomez@cue.edu.co', 'juan.perez@cue.edu.co', 'laura.rodriguez@cue.edu.co'].forEach((email, idx) => {
                     map.set(email, {
                         nombre: ['Ana Gómez', 'Juan Pérez', 'Laura Rodríguez'][idx],
                         email,
+                        documento: ['1098000001', '1098000002', '1098000003'][idx],
                         rol: 'ESTUDIANTE'
                     });
                 });
@@ -660,8 +721,9 @@
 
             const catalog = getParticipantCatalog();
             const results = catalog.filter(p =>
-                p.nombre.toLowerCase().includes(q) ||
-                p.email.toLowerCase().includes(q)
+                (p.nombre || '').toLowerCase().includes(q) ||
+                (p.email || '').toLowerCase().includes(q) ||
+                (p.documento || '').toLowerCase().includes(q)
             ).slice(0, 10);
 
             if (results.length === 0) {
@@ -670,14 +732,15 @@
             }
 
             results.forEach(p => {
+                const safeEmail = (p.email || '').replace(/'/g, "\\'");
                 const already = selectedParticipants.some(sp => sp.email === p.email);
                 resultsDiv.innerHTML += `
                     <div class="flex items-center justify-between border rounded px-2 py-1 bg-gray-50">
                         <div>
                             <div class="text-[12px] font-semibold text-gray-800">${escapeHtml(p.nombre)}</div>
-                            <div class="text-[10px] text-gray-500">${escapeHtml(p.email)}</div>
+                            <div class="text-[10px] text-gray-500">${escapeHtml(p.email)}${p.documento ? ' · Doc: ' + escapeHtml(p.documento) : ''}</div>
                         </div>
-                        <button type="button" onclick="addParticipantFromCatalog('${p.email}')" class="text-[11px] font-bold px-2 py-1 rounded ${already ? 'border border-gray-300 text-gray-400 cursor-not-allowed' : 'border border-indigo-300 text-indigo-700 hover:bg-indigo-50'}" ${already ? 'disabled' : ''}>
+                        <button type="button" onclick="addParticipantFromCatalog('${safeEmail}')" class="text-[11px] font-bold px-2 py-1 rounded ${already ? 'border border-gray-300 text-gray-400 cursor-not-allowed' : 'border border-indigo-300 text-indigo-700 hover:bg-indigo-50'}" ${already ? 'disabled' : ''}>
                             ${already ? 'Agregado' : 'Agregar'}
                         </button>
                     </div>
@@ -709,13 +772,14 @@
                 return;
             }
             selectedParticipants.forEach(p => {
+                const safeEmail = (p.email || '').replace(/'/g, "\\'");
                 c.innerHTML += `
                     <div class="flex items-center justify-between border rounded px-3 py-1 bg-white">
                         <div>
                             <div class="text-[12px] font-semibold text-gray-800">${escapeHtml(p.nombre)}</div>
                             <div class="text-[10px] text-gray-500">${escapeHtml(p.email)}</div>
                         </div>
-                        <button type="button" onclick="removeSelectedParticipant('${p.email}')" class="text-[11px] font-bold px-2 py-1 rounded border border-gray-300 text-gray-600 hover:bg-gray-50">Quitar</button>
+                        <button type="button" onclick="removeSelectedParticipant('${safeEmail}')" class="text-[11px] font-bold px-2 py-1 rounded border border-red-200 text-red-600 hover:bg-red-50">Eliminar</button>
                     </div>
                 `;
             });
@@ -735,15 +799,17 @@
             const user = AuthService.checkAuth();
 
             const nombre = document.getElementById('salidaNombre').value.trim();
-            const tipo = document.getElementById('salidaTipo').value;
+            const tipo = document.getElementById('salidaTipo')?.value || 'OTRA';
             const destino = document.getElementById('salidaDestino').value.trim();
+            const direccion = document.getElementById('salidaDireccion').value.trim();
             const fechaInicio = document.getElementById('salidaFechaInicio').value;
             const fechaFin = document.getElementById('salidaFechaFin').value;
             const profesorEmail = document.getElementById('salidaProfesorEmail').value.trim().toLowerCase();
             const profesorNombre = document.getElementById('salidaProfesorNombre').value.trim();
+            const actividad = document.getElementById('salidaActividad').value.trim();
             const transporte = document.querySelector('input[name="salidaTransporte"]:checked')?.value;
 
-            if (!transporte) return alert("Seleccione el tipo de transporte.");
+            if (!transporte) return alert("Indique si la salida requiere transporte suministrado por la Universidad (SÍ/NO).");
             if (fechaFin && fechaInicio && fechaFin < fechaInicio) return alert("La fecha fin no puede ser anterior a la fecha inicio.");
 
             const requiereSST = transporte === 'UNIVERSIDAD';
@@ -754,6 +820,8 @@
                 nombre,
                 tipo,
                 destino,
+                direccion,
+                actividad,
                 fechaInicio,
                 fechaFin,
                 transporte,
@@ -844,8 +912,10 @@
             document.getElementById('salidaModalNombre').textContent = s.nombre || '-';
             document.getElementById('salidaModalTipo').textContent = s.tipo || '-';
             document.getElementById('salidaModalDestino').textContent = s.destino || '-';
+            document.getElementById('salidaModalDireccion').textContent = s.direccion || '—';
             document.getElementById('salidaModalFechas').textContent = formatDateRange(s.fechaInicio, s.fechaFin);
-            document.getElementById('salidaModalTransporte').textContent = s.transporte === 'UNIVERSIDAD' ? 'Suministrado por la universidad' : 'Medios propios';
+            document.getElementById('salidaModalActividad').textContent = s.actividad || '—';
+            document.getElementById('salidaModalTransporte').textContent = s.transporte === 'UNIVERSIDAD' ? 'SÍ (Universidad)' : 'NO (Medios propios)';
             document.getElementById('salidaModalEstado').textContent = (s.estadoAcad || '-').toUpperCase();
             document.getElementById('salidaModalProfesor').textContent = `${s.profesorResponsable?.nombre || '-'} (${s.profesorResponsable?.email || '-'})`;
 

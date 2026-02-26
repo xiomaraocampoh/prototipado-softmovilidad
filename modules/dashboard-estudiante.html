@@ -270,7 +270,7 @@
                 tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500 italic">Aún no tienes trámites de movilidad registrados.</td></tr>`;
             } else {
                 userReqs.forEach(req => {
-                    let statusConfig = getStatusConfig(req.status, req.id);
+                    let statusConfig = getStatusConfig(req.status, req.id, currentUser);
                     tbody.innerHTML += `
                         <tr class="hover:bg-gray-50 border-b last:border-0 transition">
                             <td class="p-4 font-mono font-bold text-[#03045e]">${req.id}</td>
@@ -292,7 +292,9 @@
             lucide.createIcons();
         });
 
-        function getStatusConfig(status, id) {
+        function getStatusConfig(status, id, currentUser) {
+            const isExterno = currentUser && currentUser.role && currentUser.role.code === 'EXTERNO';
+            const certBtn = (id, green) => isExterno ? '' : `<button onclick="solicitarCertificado('${id}')" class="${green ? 'border border-green-600 text-green-600 hover:bg-green-50' : 'border border-[#0077b6] text-[#0077b6] hover:bg-blue-50'} px-3 py-1 rounded text-xs font-bold transition">Pedir Certificado</button>`;
             let config = { badgeClass: 'bg-gray-100 text-gray-600 border-gray-200', label: status, actionHtml: '<span class="text-xs text-gray-400 italic">En proceso...</span>' };
             switch(status) {
                 case 'EN_REVISION_POSTULACION':
@@ -309,18 +311,18 @@
                     config.actionHtml = `
                         <div class="flex flex-col gap-1">
                             <a href="mobility-wizard.html?mode=docs&id=${id}" class="inline-block bg-[#0077b6] text-white px-3 py-1 rounded text-xs font-bold hover:bg-[#03045e] transition text-center">Fase 2: Adjuntar Docs</a>
-                            <button onclick="solicitarCertificado('${id}')" class="border border-[#0077b6] text-[#0077b6] px-3 py-1 rounded text-xs font-bold hover:bg-blue-50 transition">Pedir Certificado</button>
+                            ${certBtn(id, false)}
                         </div>`;
                     break;
                 case 'EN_REVISION_LEGALIZACION':
                     config.badgeClass = 'bg-blue-100 text-blue-800 border-blue-200';
                     config.label = 'En Legalización';
-                    config.actionHtml = `<button onclick="solicitarCertificado('${id}')" class="border border-[#0077b6] text-[#0077b6] px-3 py-1 rounded text-xs font-bold hover:bg-blue-50 transition">Pedir Certificado</button>`;
+                    config.actionHtml = certBtn(id, false);
                     break;
                 case 'MOVILIDAD_ACTIVA':
                     config.badgeClass = 'bg-green-100 text-green-800 border-green-200';
                     config.label = 'Activa / Vigente';
-                    config.actionHtml = `<button onclick="solicitarCertificado('${id}')" class="border border-green-600 text-green-600 px-3 py-1 rounded text-xs font-bold hover:bg-green-50 transition">Pedir Certificado</button>`;
+                    config.actionHtml = certBtn(id, true);
                     break;
             }
             return config;
