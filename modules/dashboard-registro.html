@@ -40,8 +40,7 @@
             </button>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
+        <div class="grid grid-cols-1 gap-8">
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
                 <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
                     <h3 class="font-bold text-[#03045e] flex items-center gap-2">
@@ -51,19 +50,6 @@
                 <div class="p-4 flex-grow overflow-y-auto max-h-[600px]">
                     <p class="text-xs text-gray-500 mb-4">Estudiantes externos aprobados por Dirección ANI. Requieren creación de usuario en Q10 y asignación de materias.</p>
                     <div id="matriculasContainer" class="space-y-4"></div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
-                <div class="bg-gray-50 p-4 border-b flex justify-between items-center">
-                    <h3 class="font-bold text-[#03045e] flex items-center gap-2">
-                        <i data-lucide="award" class="w-5 h-5 text-blue-700"></i> Bandeja de Certificados ($0 COP)
-                    </h3>
-                </div>
-                <div class="p-4 flex-grow overflow-y-auto max-h-[600px]">
-                    <p class="text-xs text-gray-500 mb-4">Recepción y despacho de certificados solicitados por estudiantes con movilidad activa.</p>
-                    <div id="certificadosContainer" class="space-y-4">
-                        </div>
                 </div>
             </div>
 
@@ -99,23 +85,81 @@
 
         function loadRegistroDashboards() {
             const matriculasContainer = document.getElementById('matriculasContainer');
-            const certificadosContainer = document.getElementById('certificadosContainer');
-            
             matriculasContainer.innerHTML = '';
-            certificadosContainer.innerHTML = '';
 
-            // Mocks de base de datos
+            // Mocks de base de datos: estudiantes externos por matricular (datos completos Q10)
             const mockRequests = [
                 { 
-                    id: 'REQ-2005', date: '15/02/2026', type: 'Intercambio Académico', dir: 'ENTRANTE', 
-                    status: 'PENDIENTE_MATRICULA', userEmail: 'externo@unam.mx', 
-                    materias: '- Ingeniería de Software II\n- Bases de Datos Avanzadas\n- Ética Profesional' 
+                    id: 'REQ-XM1',
+                    date: '2026-02-10',
+                    type: 'Intercambio Académico (Semestre - Asignaturas)',
+                    dir: 'ENTRANTE',
+                    status: 'PENDIENTE_MATRICULA',
+                    userEmail: 'carlos.extern@unam.mx',
+                    externoFOIN012: {
+                        primerNombre: 'Carlos',
+                        segundoNombre: 'Alberto',
+                        primerApellido: 'Méndez',
+                        segundoApellido: 'López',
+                        sexo: 'M',
+                        direccion: 'Calle 10 # 20-30',
+                        departamento: 'Quindío',
+                        municipio: 'Armenia',
+                        tipoDoc: 'CC',
+                        numDoc: '80123456',
+                        fecNacimiento: '1998-05-20',
+                        celular: '3009998877',
+                        correo: 'carlos.extern@unam.mx',
+                        actividadesMaterias: 'Cursar Ingeniería de Software II, Bases de Datos Avanzadas y Ética Profesional.'
+                    }
                 },
                 { 
-                    id: 'REQ-1002', date: '10/01/2026', type: 'Intercambio Académico', dir: 'SALIENTE', 
-                    status: 'MOVILIDAD_ACTIVA', userEmail: 'estudiante@cue.edu.co', 
-                    certRequested: true, certReady: false, certType: 'Certificado de Notas (Historial Completo)', 
-                    certObs: 'Favor incluir el promedio ponderado acumulado.', certStatus: 'PAGADO' 
+                    id: 'REQ-XM2',
+                    date: '2026-02-12',
+                    type: 'Curso Corto',
+                    dir: 'ENTRANTE',
+                    status: 'PENDIENTE_MATRICULA',
+                    userEmail: 'maria.ext@ula.ve',
+                    externoFOIN012: {
+                        primerNombre: 'María',
+                        segundoNombre: 'Fernanda',
+                        primerApellido: 'García',
+                        segundoApellido: 'Sánchez',
+                        sexo: 'F',
+                        direccion: 'Av. Principal 45',
+                        departamento: 'Valencia',
+                        municipio: 'Valencia',
+                        tipoDoc: 'PA',
+                        numDoc: 'V12345678',
+                        fecNacimiento: '1997-03-15',
+                        celular: '3012223344',
+                        correo: 'maria.ext@ula.ve',
+                        actividadesMaterias: 'Curso corto en Innovación Empresarial y Emprendimiento.'
+                    }
+                },
+                { 
+                    id: 'REQ-XM3',
+                    date: '2026-02-15',
+                    type: 'Estancia Investigación',
+                    dir: 'ENTRANTE',
+                    status: 'PENDIENTE_MATRICULA',
+                    userEmail: 'juan.ext@uni.edu.pe',
+                    externoFOIN012: {
+                        primerNombre: 'Juan',
+                        segundoNombre: '',
+                        primerApellido: 'Pérez',
+                        segundoApellido: 'Ruiz',
+                        sexo: 'M',
+                        direccion: 'Jr. Las Flores 123',
+                        departamento: 'Lima',
+                        municipio: 'Lima',
+                        tipoDoc: 'CE',
+                        numDoc: '45678901',
+                        fecNacimiento: '1996-11-02',
+                        celular: '3025556677',
+                        correo: 'juan.ext@uni.edu.pe',
+                        actividadesMaterias: 'Estancia de investigación en laboratorio de Ingeniería de Software.'
+                    }
                 }
             ];
 
@@ -186,44 +230,6 @@
                 });
             }
 
-            // 2. Renderizar Certificados
-            const certificados = allReqs.filter(req => req.certRequested === true && req.certStatus !== 'ENTREGADO');
-            if(certificados.length === 0) {
-                certificadosContainer.innerHTML = `<p class="text-center text-sm text-gray-400 italic py-8">Bandeja al día. No hay tickets pendientes.</p>`;
-            } else {
-                certificados.forEach(req => {
-                    certificadosContainer.innerHTML += `
-                        <div class="border rounded-lg p-4 bg-white shadow-sm border-l-4 border-blue-500">
-                            <div class="flex justify-between items-start border-b pb-2 mb-3">
-                                <div>
-                                    <span class="font-mono text-xs font-bold text-[#03045e]">${req.id}</span>
-                                    <h4 class="font-bold text-gray-800 text-sm mt-1">${req.userEmail}</h4>
-                                </div>
-                                <span class="bg-green-100 text-green-800 text-[10px] px-2 py-1 rounded font-bold border border-green-200">ESTADO: ${req.certStatus || 'PAGADO'}</span>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <span class="block font-bold text-xs text-gray-400 uppercase mb-1">Documento Solicitado</span>
-                                <p class="text-sm font-semibold text-blue-800 bg-blue-50 p-2 rounded">${req.certType || 'Certificado Académico'}</p>
-                            </div>
-
-                            <div class="mb-4">
-                                <span class="block font-bold text-xs text-gray-400 uppercase mb-1">Observaciones del Usuario</span>
-                                <p class="text-xs text-gray-600 bg-gray-50 p-2 rounded border">${req.certObs || 'Sin observaciones adicionales.'}</p>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <button class="flex-1 border border-gray-300 text-gray-600 py-2 rounded text-xs font-bold hover:bg-gray-50 transition flex items-center justify-center gap-2">
-                                    <i data-lucide="paperclip" class="w-4 h-4"></i> Adjuntar PDF
-                                </button>
-                                <button onclick="dispatchCertificado('${req.id}')" class="flex-1 bg-blue-600 text-white py-2 rounded text-xs font-bold hover:bg-blue-700 transition flex items-center justify-center gap-2">
-                                    <i data-lucide="send" class="w-4 h-4"></i> Enviar a Usuario
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
             lucide.createIcons();
         }
 

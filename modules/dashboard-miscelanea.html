@@ -93,26 +93,15 @@
             window.location.href = '../menu-sistema.html';
         }
 
-        // 2. Cargar Datos Simulados (Seed Data) si no existen
-        function injectSeedData() {
-            if (!localStorage.getItem('CUE_CERTIFICATE_REQUESTS')) {
-                const mockCerts = [
-                    { id: 1, date: '2026-10-25', studentId: '1094890642', studentName: 'Xiomara Ocampo Hurtado', phone: '3000020207', type: 'Certificado de Notas', obs: 'Orden de Pedido Automática #MOV-001', op: 'MOV-001', status: 'PENDIENTE' },
-                    { id: 2, date: '2026-10-26', studentId: '111222333', studentName: 'sara sanchez estrada', phone: '3000010101', type: 'Certificado de Estudio', obs: 'Orden de Pedido Automática #MOV-002', op: 'MOV-002', status: 'PENDIENTE' }
-                ];
-                localStorage.setItem('CUE_CERTIFICATE_REQUESTS', JSON.stringify(mockCerts));
-            }
-        }
-        injectSeedData();
-
-        // 3. Renderizar Tabla con las columnas exactas
+        // 2. Renderizar tabla leyendo solicitudes de movilidad (certificados desde CUE_MY_REQUESTS)
         function loadCertificados() {
             const tbody = document.getElementById('tablaCertificadosBody');
             const totalSpan = document.getElementById('totalRegistros');
             tbody.innerHTML = '';
 
-            let requests = JSON.parse(localStorage.getItem('CUE_CERTIFICATE_REQUESTS')) || [];
-            let pendientes = requests.filter(r => r.status === 'PENDIENTE');
+            // Tomar solicitudes de movilidad salientes con certificado pedido ($0, estado PAGADO) y movilidad activa
+            let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            let pendientes = requests.filter(r => r.dir === 'SALIENTE' && r.certRequested === true && r.certStatus === 'PAGADO' && r.status === 'MOVILIDAD_ACTIVA');
 
             if (pendientes.length === 0) {
                 totalSpan.textContent = '0';
@@ -120,15 +109,16 @@
             }
 
             pendientes.forEach(req => {
+                const exp = req.expedienteData || {};
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${req.date}</td>
-                    <td>${req.studentId}</td>
-                    <td>${req.studentName}</td>
-                    <td>${req.phone}</td>
-                    <td>${req.type}</td>
-                    <td>${req.obs}</td>
-                    <td>${req.op || ''}</td>
+                    <td>${req.date || ''}</td>
+                    <td>${exp.documento || ''}</td>
+                    <td>${req.userName || req.userEmail || ''}</td>
+                    <td>${exp.contactoTel || ''}</td>
+                    <td>${req.certType || 'Certificado Académico'}</td>
+                    <td>${req.certObs || ''}</td>
+                    <td>${req.id}</td>
                     <td>0</td>
                 `;
                 tbody.appendChild(tr);

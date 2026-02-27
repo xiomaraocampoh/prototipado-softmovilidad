@@ -295,6 +295,9 @@
                 <div id="modalExpedienteContent" class="text-sm space-y-4 mb-6">
                     <!-- Contenido dinámico: datos FO-IN-012 completos (REQ-10) -->
                 </div>
+                <div id="modalDocsContent" class="text-sm space-y-3 mb-6">
+                    <!-- REQ-XX: Lista de documentos cargados / simulados para revisión individual -->
+                </div>
                 <div id="modalActions" class="flex justify-end gap-3 pt-4 border-t"></div>
             </div>
         </div>
@@ -511,6 +514,88 @@
             return html;
         }
 
+        function getRequiredDocsForReq(req) {
+            const ed = req.expedienteData || {};
+            const dir = req.dir || ed.direccion || 'SALIENTE';
+            const type = ed.tipo || req.type || '';
+            const modalidad = ed.modalidad || 'PRESENCIAL';
+            const isPresencial = modalidad === 'PRESENCIAL';
+            const docs = [];
+
+            // Fase de postulación
+            docs.push({ id: 'DOC_ID', nombre: 'Documento de Identidad', desc: 'Ambas caras' });
+            if (dir === 'ENTRANTE') {
+                docs.push({ id: 'CARTA_POST', nombre: 'Carta de Postulación', desc: 'Emitida por la institución de origen' });
+                docs.push({ id: 'NOTAS', nombre: 'Notas', desc: 'Certificado de calificaciones expedido por la universidad de origen' });
+            } else {
+                docs.push({ id: 'CARTA_MOT', nombre: 'Carta de Motivación', desc: 'Motivos personales para la movilidad' });
+            }
+
+            // Fase de documentación / legalización
+            if (dir === 'SALIENTE') {
+                docs.push({ id: 'CARTA_ACEPT', nombre: 'Carta de Aceptación Oficial', desc: 'Emitida por la institución de destino' });
+            }
+            if (['Práctica Empresarial - Pasantía', 'Rotación Médica', 'Práctica Integral'].includes(type)) {
+                docs.push({ id: 'CERT_ARL', nombre: 'Certificado de ARL', desc: 'Afiliación a Riesgos Laborales' });
+            }
+            if (isPresencial) {
+                docs.push({ id: 'SEGURO_MED', nombre: 'Seguro Médico', desc: 'Póliza o certificado de seguro médico vigente' });
+                if (ed.alcance === 'INTERNACIONAL' || dir === 'ENTRANTE') {
+                    docs.push({ id: 'TIQUETES_VISA', nombre: 'Tiquetes y/o Visa', desc: 'Soportes de viaje y visado cuando aplique' });
+                }
+            }
+            return docs;
+        }
+
+        function renderDocsReview(req) {
+            const container = document.getElementById('modalDocsContent');
+            if (!container) return;
+            const docs = getRequiredDocsForReq(req);
+            if (!docs.length) {
+                container.innerHTML = '<p class="text-xs text-gray-500 italic">No hay lista de documentos configurada para este tipo de movilidad.</p>';
+                return;
+            }
+            const statusMap = req.aniDocsStatus || {};
+            const badge = (st) => {
+                if (st === 'APROBADO') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-green-100 text-green-800 border border-green-200">APROBADO</span>';
+                if (st === 'RECHAZADO') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">RECHAZADO</span>';
+                return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-600 border border-gray-200">PENDIENTE</span>';
+            };
+            container.innerHTML = docs.map(d => {
+                const st = statusMap[d.id] || 'PENDIENTE';
+                return `
+                    <div class="border rounded-lg p-3 bg-white flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                        <div>
+                            <p class="text-xs font-bold text-[#03045e] uppercase mb-0.5">${escapeHtml(d.nombre)}</p>
+                            <p class="text-[11px] text-gray-500">${escapeHtml(d.desc)}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${badge(st)}
+                            <button onclick="verDocumento('${req.id}', '${d.id}')" class="px-2 py-1 text-[11px] font-bold border border-gray-400 text-gray-700 rounded hover:bg-gray-50">Ver</button>
+                            <button onclick="setDocDecision('${req.id}', '${d.id}', 'APROBADO')" class="px-2 py-1 text-[11px] font-bold border border-green-500 text-green-700 rounded hover:bg-green-50">Aprobar</button>
+                            <button onclick="setDocDecision('${req.id}', '${d.id}', 'RECHAZADO')" class="px-2 py-1 text-[11px] font-bold border border-red-500 text-red-700 rounded hover:bg-red-50">Rechazar</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function verDocumento(reqId, docId) {
+            alert('Simulación de apertura del documento "' + docId + '" para la solicitud ' + reqId + '. En un entorno real aquí se abriría el PDF cargado.');
+        }
+
+        function setDocDecision(reqId, docId, decision) {
+            let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            const idx = reqs.findIndex(r => r.id === reqId);
+            if (idx === -1) return;
+            const req = reqs[idx];
+            if (!req.aniDocsStatus) req.aniDocsStatus = {};
+            req.aniDocsStatus[docId] = decision;
+            reqs[idx] = req;
+            localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+            openReview(req);
+        }
+
         function openReview(req) {
             if (!req || !req.id) return;
             currentRequestId = req.id;
@@ -519,6 +604,7 @@
 
             const content = document.getElementById('modalExpedienteContent');
             content.innerHTML = req.expedienteData || req.externoFOIN012 ? buildExpedienteHtml(req) : '<p class="text-gray-500 italic">No hay datos de expediente registrados para esta solicitud.</p>';
+            renderDocsReview(req);
 
             const actionsDiv = document.getElementById('modalActions');
             const dir = req.dir || 'SALIENTE';

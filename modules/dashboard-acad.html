@@ -292,11 +292,16 @@
                     
                     const statusBadge = isPendiente 
                         ? `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Pendiente Aval</span>`
-                        : `<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Aprobada</span>`;
+                        : (req.status === 'RECHAZADA_PAZ_SALVO'
+                            ? `<span class="px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Rechazada</span>`
+                            : `<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Aprobada</span>`);
                     
                     const actionButton = isPendiente
-                        ? `<button onclick="aprobarPazYSalvo(${req.id})" class="bg-[#00529C] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-800 transition shadow-sm">Dar Aval (Aprobar)</button>`
-                        : `<span class="text-xs text-gray-400 italic">En proceso ANI</span>`;
+                        ? `<div class="flex flex-col gap-1 items-center">
+                                <button onclick="aprobarPazYSalvo(${req.id})" class="bg-[#00529C] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-800 transition shadow-sm w-full">Dar Aval (Aprobar)</button>
+                                <button onclick="rechazarPazYSalvo(${req.id})" class="border border-red-400 text-red-600 px-3 py-1.5 rounded text-xs font-bold hover:bg-red-50 transition shadow-sm w-full">Rechazar</button>
+                           </div>`
+                        : `<span class="text-xs text-gray-400 italic">Aval registrado</span>`;
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
@@ -324,6 +329,18 @@
                 requests[index].status = 'REVISION_ANI';
                 localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
                 mostrarAlerta('Solicitud aprobada académicamente. Enviada a revisión documental (ANI).', 'success');
+                loadSolicitudes();
+            }
+        }
+
+        function rechazarPazYSalvo(id) {
+            if (!confirm('¿Confirmar que esta movilidad se rechaza desde Coordinación Académica?')) return;
+            let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')) || [];
+            const index = requests.findIndex(r => r.id === id);
+            if(index !== -1) {
+                requests[index].status = 'RECHAZADA_PAZ_SALVO';
+                localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
+                mostrarAlerta('Movilidad rechazada académicamente. El solicitante podrá ver el estado actualizado en su panel.', 'error');
                 loadSolicitudes();
             }
         }
