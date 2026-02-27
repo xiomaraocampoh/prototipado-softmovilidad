@@ -11,6 +11,9 @@
         body { font-family: 'Montserrat', sans-serif; background-color: #f3f4f6; }
         .bg-cue { background-color: #00529C; }
         .text-cue { color: #00529C; }
+        /* Scrollbar personalizado para el autocomplete */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden">
@@ -42,15 +45,14 @@
             <h1 id="headerTitle" class="text-xl font-bold text-gray-800">Cargando...</h1>
         </header>
 
-        <div class="flex-1 overflow-y-auto p-8">
+        <div class="flex-1 overflow-y-auto p-8 relative">
             
-            <div id="alertBox" class="hidden mb-6 p-4 rounded-lg flex items-center gap-3 text-sm font-bold shadow-sm">
+            <div id="alertBox" class="hidden mb-6 p-4 rounded-lg flex items-center gap-3 text-sm font-bold shadow-sm transition-all duration-300">
                 <i id="alertIcon" data-lucide="check-circle" class="w-5 h-5"></i>
                 <span id="alertMessage">Operación exitosa</span>
             </div>
 
             <div id="view-solicitudes" class="space-y-6">
-                
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 rounded-lg shadow-sm border border-gray-100">
                     <div class="relative w-full md:w-96">
                         <i data-lucide="search" class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"></i>
@@ -88,7 +90,7 @@
                 </div>
             </div>
 
-            <div id="view-salidas" class="hidden max-w-4xl mx-auto">
+            <div id="view-salidas" class="hidden max-w-4xl mx-auto pb-10">
                 <div class="bg-white rounded-lg shadow-md border border-gray-200 p-8">
                     <h2 class="text-lg font-bold text-gray-800 border-b pb-3 mb-6">Formulario de Salida Académica</h2>
                     
@@ -137,32 +139,42 @@
                             </div>
                         </div>
 
-                        <div class="border border-gray-200 rounded-lg p-5">
+                        <div class="border border-gray-200 rounded-lg p-5 bg-gray-50">
                             <h3 class="text-sm font-bold text-gray-800 mb-4">Lista de Estudiantes Participantes</h3>
                             
-                            <div class="flex gap-2 mb-4">
-                                <input type="text" id="add_identificacion" placeholder="Número de Identificación..." class="w-1/3 p-2 border border-gray-300 rounded outline-none text-sm">
-                                <input type="text" id="add_nombre" placeholder="Nombre completo del estudiante..." class="flex-1 p-2 border border-gray-300 rounded outline-none text-sm">
-                                <button type="button" onclick="agregarEstudiante()" class="bg-gray-800 text-white px-4 py-2 rounded text-sm font-bold hover:bg-black transition flex items-center gap-2">
-                                    <i data-lucide="plus" class="w-4 h-4"></i> Agregar
-                                </button>
+                            <div class="relative w-full mb-6">
+                                <label class="block text-xs font-bold text-gray-700 mb-1">Buscar Estudiante de tu Programa *</label>
+                                <div class="flex gap-2 relative">
+                                    <div class="relative flex-1">
+                                        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                                        <input type="text" id="inputBuscador" autocomplete="off" oninput="filtrarBuscador()" placeholder="Escribe el nombre (ej. Alejandro) o cédula..." class="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded bg-white outline-none text-sm focus:border-[#00529C] shadow-sm">
+                                    </div>
+                                    <button type="button" id="btnAgregar" onclick="agregarAlListado()" class="bg-gray-800 text-white px-5 py-2 rounded text-sm font-bold hover:bg-black transition flex items-center gap-2 opacity-50 cursor-not-allowed" disabled>
+                                        <i data-lucide="plus" class="w-4 h-4"></i> Agregar
+                                    </button>
+                                </div>
+                                
+                                <ul id="dropdownResultados" class="absolute z-50 left-0 right-[120px] bg-white border border-gray-200 shadow-xl rounded-b-lg mt-1 hidden max-h-48 overflow-y-auto custom-scrollbar">
+                                    </ul>
                             </div>
 
-                            <table class="w-full text-left text-sm border-collapse mt-2">
-                                <thead>
-                                    <tr class="bg-gray-100 text-gray-600 border-y border-gray-200">
-                                        <th class="p-2 font-semibold">Identificación</th>
-                                        <th class="p-2 font-semibold">Nombre Completo</th>
-                                        <th class="p-2 font-semibold text-center w-24">Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tablaEstudiantes" class="divide-y divide-gray-200">
-                                    </tbody>
-                            </table>
-                            <p id="msgSinEstudiantes" class="text-xs text-gray-400 mt-3 text-center italic">Aún no has agregado estudiantes a la lista.</p>
+                            <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
+                                <table class="w-full text-left text-sm border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-100 text-gray-600 border-b border-gray-200 text-xs">
+                                            <th class="p-3 font-semibold">Identificación</th>
+                                            <th class="p-3 font-semibold">Nombre Completo</th>
+                                            <th class="p-3 font-semibold text-center w-24">Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tablaEstudiantes" class="divide-y divide-gray-100">
+                                        </tbody>
+                                </table>
+                            </div>
+                            <p id="msgSinEstudiantes" class="text-xs text-gray-500 mt-4 text-center italic">No hay estudiantes agregados a la salida todavía.</p>
                         </div>
 
-                        <div class="flex justify-end pt-4 border-t border-gray-100">
+                        <div class="flex justify-end pt-4 border-t border-gray-200">
                             <button type="submit" class="bg-[#00529C] text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-blue-800 transition shadow-md flex items-center gap-2">
                                 <i data-lucide="save" class="w-4 h-4"></i> Guardar Salida Académica
                             </button>
@@ -175,16 +187,14 @@
     </main>
 
     <script>
-        // Inicializar iconos
         lucide.createIcons();
 
-        // 1. SESIÓN Y FILTRO DE PROGRAMA
+        // 1. SESIÓN Y DETERMINACIÓN DE PROGRAMA
         const currentUser = JSON.parse(localStorage.getItem('CUE_AUTH_USER'));
         if (!currentUser || currentUser.role.code !== 'COORD_ACAD') {
             window.location.href = '../index-sistema.html';
         }
 
-        // Mapeo automático de programa según correo para el prototipo
         let programaCoordinador = "INGENIERÍA DE SOFTWARE"; 
         if(currentUser.email.includes('medicina')) programaCoordinador = "MEDICINA";
         if(currentUser.email.includes('derecho')) programaCoordinador = "DERECHO";
@@ -192,22 +202,38 @@
         document.getElementById('coordNameDisplay').textContent = `${currentUser.name} (${programaCoordinador})`;
         document.getElementById('headerTitle').textContent = `Solicitudes de ${programaCoordinador}`;
 
-        // 2. INYECTAR DATOS DE PRUEBA (SEED DATA)
+        // =========================================================================
+        // 2. BASE DE DATOS SIMULADA DE ESTUDIANTES DE LA UNIVERSIDAD (Para el buscador)
+        // =========================================================================
+        const dbTotalEstudiantes = [
+            { id: "10924570982", nombre: "Xiomara Ocampo Hurtado", programa: "INGENIERÍA DE SOFTWARE" },
+            { id: "1111111111", nombre: "Alejandro Martinez Rios", programa: "INGENIERÍA DE SOFTWARE" },
+            { id: "2222222222", nombre: "Alejandra Gomez Perez", programa: "INGENIERÍA DE SOFTWARE" },
+            { id: "3333333333", nombre: "Luis Alejandro Gomes", programa: "INGENIERÍA DE SOFTWARE" },
+            { id: "0123456789", nombre: "Miguel Angel Gallardo", programa: "INGENIERÍA INDUSTRIAL" },
+            { id: "4444444444", nombre: "Alejandro Ruiz Ramirez", programa: "MEDICINA" }, 
+            { id: "5555555555", nombre: "Maria Alejandra Lopez", programa: "DERECHO" },
+            { id: "6666666666", nombre: "Ana Sofia Rodríguez", programa: "INGENIERÍA DE SOFTWARE" },
+            { id: "7777777777", nombre: "Carlos Eduardo Giraldo", programa: "INGENIERÍA DE SOFTWARE" }
+        ];
+
+        // =========================================================================
+        // 3. INYECTAR DATOS DE PRUEBA PARA PAZ Y SALVO (Seed Data)
+        // =========================================================================
         function injectSeedData() {
             let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS'));
             if (!requests || requests.length === 0) {
                 const mockData = [
                     { id: 101, applicantName: 'Carlos López', email: 'clopez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Intercambio Académico (Semestre - Asignaturas)', destinyInst: 'Universidad de Monterrey', dateStart: '2026-08-01', dateEnd: '2026-12-15', status: 'PENDIENTE_PAZ_SALVO' },
                     { id: 102, applicantName: 'Ana Rodríguez', email: 'arodriguez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Práctica Empresarial - Pasantía', destinyInst: 'Microsoft Colombia', dateStart: '2026-07-01', dateEnd: '2026-12-30', status: 'REVISION_ANI' },
-                    { id: 103, applicantName: 'Luis Fernández', email: 'lfernandez@cue.edu.co', program: 'DERECHO', type: 'Diplomado Opción de Grado', destinyInst: 'Cámara de Comercio', dateStart: '2026-05-10', dateEnd: '2026-07-20', status: 'PENDIENTE_PAZ_SALVO' },
-                    { id: 104, applicantName: 'Sofía Martínez', email: 'smartinez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Curso Corto', destinyInst: 'Platzi', dateStart: '2026-09-01', dateEnd: '2026-09-30', status: 'PENDIENTE_PAZ_SALVO' }
+                    { id: 103, applicantName: 'Alejandro Martinez', email: 'amartinez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Diplomado Opción de Grado', destinyInst: 'Cámara de Comercio', dateStart: '2026-05-10', dateEnd: '2026-07-20', status: 'PENDIENTE_PAZ_SALVO' }
                 ];
                 localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(mockData));
             }
         }
         injectSeedData();
 
-        // 3. GESTIÓN DE PESTAÑAS (TABS)
+        // 4. NAVEGACIÓN ENTRE PESTAÑAS
         function switchTab(tabId) {
             document.getElementById('view-solicitudes').classList.add('hidden');
             document.getElementById('view-salidas').classList.add('hidden');
@@ -220,18 +246,14 @@
             document.getElementById('headerTitle').textContent = tabId === 'solicitudes' ? `Solicitudes de ${programaCoordinador}` : 'Creación de Salidas Académicas';
         }
 
-        // 4. LÓGICA DE FILTRADO Y RENDERIZADO DE TABLA
+        // 5. BANDEJA DE PAZ Y SALVO
         let allRequests = [];
-
         function loadSolicitudes() {
             let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')) || [];
-            
-            // Filtro maestro: Solo los de este programa
             allRequests = requests.filter(req => {
                 const prog = req.program ? req.program.toUpperCase() : '';
                 return prog === programaCoordinador;
             });
-            
             filterTable();
         }
 
@@ -251,7 +273,7 @@
                 let matchesStatus = true;
                 
                 if (statusFilter === 'PENDIENTE') matchesStatus = isPendiente;
-                if (statusFilter === 'APROBADA') matchesStatus = !isPendiente; // Si no es PENDIENTE_PAZ_SALVO, el coordinador ya la aprobó
+                if (statusFilter === 'APROBADA') matchesStatus = !isPendiente;
 
                 return matchesSearch && matchesStatus;
             });
@@ -263,12 +285,10 @@
                 filtered.forEach(req => {
                     const isPendiente = req.status === 'PENDIENTE_PAZ_SALVO';
                     
-                    // Badge de Estado
                     const statusBadge = isPendiente 
                         ? `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Pendiente Aval</span>`
                         : `<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Aprobada</span>`;
                     
-                    // Botón de Acción
                     const actionButton = isPendiente
                         ? `<button onclick="aprobarPazYSalvo(${req.id})" class="bg-[#00529C] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-800 transition shadow-sm">Dar Aval (Aprobar)</button>`
                         : `<span class="text-xs text-gray-400 italic">En proceso ANI</span>`;
@@ -296,57 +316,121 @@
             let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')) || [];
             const index = requests.findIndex(r => r.id === id);
             if(index !== -1) {
-                requests[index].status = 'REVISION_ANI'; // Pasa a la bandeja de secretaría ANI
+                requests[index].status = 'REVISION_ANI';
                 localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
                 mostrarAlerta('Solicitud aprobada académicamente. Enviada a revisión documental (ANI).', 'success');
-                loadSolicitudes(); // Recargar datos locales
+                loadSolicitudes();
             }
         }
 
-        // 5. LÓGICA DE SALIDAS ACADÉMICAS Y LISTA DINÁMICA
+        // =========================================================================
+        // 6. LÓGICA DEL BUSCADOR INTELIGENTE Y LISTA DE ESTUDIANTES (SALIDAS)
+        // =========================================================================
         let listaEstudiantesSalida = [];
+        let estudiantePreSeleccionado = null; // Guarda el estudiante clicado en el dropdown
 
-        function agregarEstudiante() {
-            const idInput = document.getElementById('add_identificacion');
-            const nombreInput = document.getElementById('add_nombre');
+        function filtrarBuscador() {
+            const input = document.getElementById('inputBuscador').value.toLowerCase();
+            const dropdown = document.getElementById('dropdownResultados');
+            const btn = document.getElementById('btnAgregar');
             
-            if(!idInput.value || !nombreInput.value) {
-                mostrarAlerta('Debes digitar Identificación y Nombre.', 'error');
+            // Si el usuario vuelve a escribir, borramos la pre-selección
+            estudiantePreSeleccionado = null;
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+
+            if (input.length < 2) {
+                dropdown.classList.add('hidden');
+                return;
+            }
+
+            // Filtrar SOLO los del programa del coordinador y que coincidan con la búsqueda
+            const resultados = dbTotalEstudiantes.filter(est => {
+                const deMiPrograma = est.programa === programaCoordinador;
+                const matchTexto = est.nombre.toLowerCase().includes(input) || est.id.includes(input);
+                return deMiPrograma && matchTexto;
+            });
+
+            dropdown.innerHTML = '';
+            
+            if (resultados.length > 0) {
+                resultados.forEach(est => {
+                    const li = document.createElement('li');
+                    li.className = 'px-4 py-3 hover:bg-blue-50 cursor-pointer border-b border-gray-100 flex justify-between items-center transition-colors';
+                    li.innerHTML = `
+                        <div>
+                            <p class="text-sm font-bold text-gray-800">${est.nombre}</p>
+                            <p class="text-xs text-gray-500">Programa: ${est.programa}</p>
+                        </div>
+                        <span class="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-600">ID: ${est.id}</span>
+                    `;
+                    li.onclick = () => fijarSeleccionEstudiante(est);
+                    dropdown.appendChild(li);
+                });
+            } else {
+                dropdown.innerHTML = `<li class="px-4 py-3 text-sm text-gray-500 italic">No se encontraron estudiantes de ${programaCoordinador} con esa búsqueda.</li>`;
+            }
+
+            dropdown.classList.remove('hidden');
+        }
+
+        function fijarSeleccionEstudiante(estudiante) {
+            estudiantePreSeleccionado = estudiante;
+            document.getElementById('inputBuscador').value = `${estudiante.nombre} (ID: ${estudiante.id})`;
+            document.getElementById('dropdownResultados').classList.add('hidden');
+            
+            // Activar el botón Agregar
+            const btn = document.getElementById('btnAgregar');
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function agregarAlListado() {
+            if (!estudiantePreSeleccionado) return;
+
+            // Evitar duplicados
+            const yaExiste = listaEstudiantesSalida.find(e => e.identificacion === estudiantePreSeleccionado.id);
+            if (yaExiste) {
+                mostrarAlerta('El estudiante ya se encuentra en la lista.', 'error');
                 return;
             }
 
             listaEstudiantesSalida.push({
-                identificacion: idInput.value,
-                nombre: nombreInput.value
+                identificacion: estudiantePreSeleccionado.id,
+                nombre: estudiantePreSeleccionado.nombre
             });
 
-            idInput.value = '';
-            nombreInput.value = '';
-            renderTablaEstudiantes();
+            // Limpiar buscador y estado
+            document.getElementById('inputBuscador').value = '';
+            estudiantePreSeleccionado = null;
+            document.getElementById('btnAgregar').disabled = true;
+            document.getElementById('btnAgregar').classList.add('opacity-50', 'cursor-not-allowed');
+
+            renderListaVisual();
         }
 
-        function eliminarEstudiante(index) {
+        function eliminarDeLaLista(index) {
             listaEstudiantesSalida.splice(index, 1);
-            renderTablaEstudiantes();
+            renderListaVisual();
         }
 
-        function renderTablaEstudiantes() {
+        function renderListaVisual() {
             const tbody = document.getElementById('tablaEstudiantes');
             const msg = document.getElementById('msgSinEstudiantes');
             tbody.innerHTML = '';
 
-            if(listaEstudiantesSalida.length === 0) {
+            if (listaEstudiantesSalida.length === 0) {
                 msg.classList.remove('hidden');
             } else {
                 msg.classList.add('hidden');
                 listaEstudiantesSalida.forEach((est, index) => {
                     tbody.innerHTML += `
-                        <tr>
-                            <td class="p-2 text-gray-700">${est.identificacion}</td>
-                            <td class="p-2 text-gray-700">${est.nombre}</td>
-                            <td class="p-2 text-center">
-                                <button type="button" onclick="eliminarEstudiante(${index})" class="text-red-500 hover:text-red-700">
-                                    <i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i>
+                        <tr class="hover:bg-gray-50 transition-colors">
+                            <td class="p-3 text-gray-600 font-mono text-xs">${est.identificacion}</td>
+                            <td class="p-3 text-gray-800 font-medium">${est.nombre}</td>
+                            <td class="p-3 text-center">
+                                <button type="button" onclick="eliminarDeLaLista(${index})" class="text-red-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50" title="Eliminar">
+                                    <i data-lucide="x" class="w-5 h-5 mx-auto"></i>
                                 </button>
                             </td>
                         </tr>
@@ -356,12 +440,14 @@
             lucide.createIcons();
         }
 
-        // 6. GUARDAR SALIDA (El Bypass de SST)
+        // =========================================================================
+        // 7. GUARDAR SALIDA (Con Bypass SST)
+        // =========================================================================
         document.getElementById('salidaForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
-            if(listaEstudiantesSalida.length === 0) {
-                mostrarAlerta('Debes agregar al menos un estudiante a la lista.', 'error');
+            if (listaEstudiantesSalida.length === 0) {
+                mostrarAlerta('Debes buscar y agregar al menos un estudiante a la salida.', 'error');
                 return;
             }
 
@@ -389,13 +475,13 @@
 
             mostrarAlerta(requiereSST === 'SI' ? 'Salida Guardada. Enviada a SST para revisión de vehículo.' : 'Salida Guardada y Aprobada Exitosamente (Bypass SST).', 'success');
             
-            // Limpiar form
+            // Limpiar formulario y reiniciar
             e.target.reset();
             listaEstudiantesSalida = [];
-            renderTablaEstudiantes();
+            renderListaVisual();
         });
 
-        // UTILIDADES
+        // 8. ALERTAS Y LOGOUT
         function mostrarAlerta(mensaje, tipo) {
             const box = document.getElementById('alertBox');
             const icon = document.getElementById('alertIcon');
@@ -403,7 +489,7 @@
             
             box.classList.remove('hidden', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800');
             
-            if(tipo === 'success') {
+            if (tipo === 'success') {
                 box.classList.add('bg-green-100', 'text-green-800');
                 icon.setAttribute('data-lucide', 'check-circle');
             } else {
@@ -412,7 +498,11 @@
             }
             lucide.createIcons();
             
-            setTimeout(() => box.classList.add('hidden'), 5000);
+            // Mostrar y luego ocultar a los 5 segundos
+            box.classList.remove('opacity-0');
+            setTimeout(() => {
+                box.classList.add('hidden');
+            }, 5000);
         }
 
         function logout() {
@@ -420,9 +510,18 @@
             window.location.href = '../index-sistema.html';
         }
 
-        // INIT
+        // Click fuera del buscador cierra el dropdown
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('dropdownResultados');
+            const input = document.getElementById('inputBuscador');
+            if (e.target !== input && e.target !== dropdown && !dropdown.contains(e.target)) {
+                dropdown.classList.add('hidden');
+            }
+        });
+
+        // INICIALIZACIÓN
         loadSolicitudes();
-        renderTablaEstudiantes();
+        renderListaVisual();
 
     </script>
 </body>
