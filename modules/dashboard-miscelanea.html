@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitudes de certificados pendientes por atender</title>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #ffffff;
+            margin: 20px;
+            color: #000;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .btn-volver {
+            background-color: #ffffff;
+            border: 1px solid #cc0000;
+            color: #cc0000;
+            padding: 6px 14px;
+            font-size: 11px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .btn-volver:hover {
+            background-color: #ffecec;
+        }
+        table {
+            border-collapse: collapse;
+            font-size: 11px;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #0000ff;
+            padding: 4px 6px;
+            white-space: nowrap;
+        }
+        th {
+            background-color: #f5f5ff;
+            font-weight: bold;
+        }
+        .total-registros {
+            margin-top: 8px;
+            font-size: 11px;
+        }
+        .btn-cerrar {
+            margin-top: 6px;
+            font-size: 11px;
+            padding: 3px 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div>
+        <button class="btn-volver" onclick="volverLobby()">Volver al menú</button>
+    </div>
+
+    <h1>Solicitudes de certificados pendientes por atender</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>FECHA PAGO</th>
+                <th>ID ESTUDIANTE</th>
+                <th>NOMBRE ESTUDIANTE</th>
+                <th>CELULAR</th>
+                <th>CERTIFICADOS</th>
+                <th>OBSERVACION</th>
+                <th>O.P.</th>
+                <th>VALOR PAGADO</th>
+            </tr>
+        </thead>
+        <tbody id="tablaCertificadosBody">
+        </tbody>
+    </table>
+
+    <div class="total-registros">
+        Total registros: <span id="totalRegistros">0</span>
+    </div>
+
+    <button class="btn-cerrar" onclick="window.close()">Cerrar</button>
+
+    <script>
+        // 1. Verificación de Rol
+        const currentUser = JSON.parse(localStorage.getItem('CUE_AUTH_USER'));
+        if (!currentUser || currentUser.role.code !== 'REGISTRO') {
+            window.location.href = '../index-sistema.html';
+        }
+
+        function volverLobby() {
+            window.location.href = '../menu-sistema.html';
+        }
+
+        // 2. Cargar Datos Simulados (Seed Data) si no existen
+        function injectSeedData() {
+            if (!localStorage.getItem('CUE_CERTIFICATE_REQUESTS')) {
+                const mockCerts = [
+                    { id: 1, date: '2026-10-25', studentId: '1094890642', studentName: 'Xiomara Ocampo Hurtado', phone: '3000020207', type: 'Certificado de Notas', obs: 'Orden de Pedido Automática #MOV-001', op: 'MOV-001', status: 'PENDIENTE' },
+                    { id: 2, date: '2026-10-26', studentId: '111222333', studentName: 'sara sanchez estrada', phone: '3000010101', type: 'Certificado de Estudio', obs: 'Orden de Pedido Automática #MOV-002', op: 'MOV-002', status: 'PENDIENTE' }
+                ];
+                localStorage.setItem('CUE_CERTIFICATE_REQUESTS', JSON.stringify(mockCerts));
+            }
+        }
+        injectSeedData();
+
+        // 3. Renderizar Tabla con las columnas exactas
+        function loadCertificados() {
+            const tbody = document.getElementById('tablaCertificadosBody');
+            const totalSpan = document.getElementById('totalRegistros');
+            tbody.innerHTML = '';
+
+            let requests = JSON.parse(localStorage.getItem('CUE_CERTIFICATE_REQUESTS')) || [];
+            let pendientes = requests.filter(r => r.status === 'PENDIENTE');
+
+            if (pendientes.length === 0) {
+                totalSpan.textContent = '0';
+                return;
+            }
+
+            pendientes.forEach(req => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${req.date}</td>
+                    <td>${req.studentId}</td>
+                    <td>${req.studentName}</td>
+                    <td>${req.phone}</td>
+                    <td>${req.type}</td>
+                    <td>${req.obs}</td>
+                    <td>${req.op || ''}</td>
+                    <td>0</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            totalSpan.textContent = pendientes.length.toString();
+        }
+
+        loadCertificados();
+    </script>
+</body>
+</html>

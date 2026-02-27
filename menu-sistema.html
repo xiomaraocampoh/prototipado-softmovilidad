@@ -109,7 +109,7 @@
             <a href="#">Archivo</a>
             <a href="#">Control documental</a>
             <a href="#">Paz y Salvo</a>
-            <a href="#">Miscelánea</a>
+            <a href="#" id="linkMiscelanea">Miscelánea</a>
             <a href="modules/dashboard-estudiante.html" id="linkMovilidad" class="movilidad">Movilidad</a>
             <a href="#">Créditos</a>
             <a href="#">Digitalización de documentos para aprobación</a>
@@ -151,12 +151,24 @@
             document.getElementById('sidebarUserName').textContent = name;
 
             const dashboardPath = user.role.redirect || 'dashboard-ani.html';
+
             const movilidadLink = document.getElementById('linkMovilidad');
             movilidadLink.href = 'modules/' + dashboardPath;
             movilidadLink.addEventListener('click', function(e) {
                 e.preventDefault();
                 window.location.href = 'modules/' + dashboardPath;
             });
+
+            const miscelaneaLink = document.getElementById('linkMiscelanea');
+            if (miscelaneaLink) {
+                if (user.role.code === 'REGISTRO') {
+                    // Control y Registro puede ingresar a la bandeja de certificados de Miscelánea
+                    miscelaneaLink.href = 'modules/dashboard-miscelanea.html';
+                } else {
+                    // Otros roles ven la opción apagada (sin navegación)
+                    miscelaneaLink.classList.add('opacity-60', 'pointer-events-none', 'cursor-not-allowed');
+                }
+            }
 
             if (typeof lucide !== 'undefined') lucide.createIcons();
         })();
