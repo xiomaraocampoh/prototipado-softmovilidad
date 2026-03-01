@@ -75,6 +75,7 @@
                                 <tr class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
                                     <th class="p-4 font-semibold">Solicitante</th>
                                     <th class="p-4 font-semibold">Destino / Movilidad</th>
+                                    <th class="p-4 font-semibold">Actividades a realizar</th>
                                     <th class="p-4 font-semibold">Fechas</th>
                                     <th class="p-4 font-semibold">Estado</th>
                                     <th class="p-4 font-semibold text-center">Acciones</th>
@@ -223,18 +224,29 @@
         ];
 
         // =========================================================================
-        // 3. INYECTAR DATOS DE PRUEBA PARA PAZ Y SALVO (Seed Data)
+        // 3. INYECTAR DATOS DE PRUEBA PARA PAZ Y SALVO (Seed Data) – siempre visibles en la bandeja
         // =========================================================================
+        const MOCK_SOLICITUDES_COORD = [
+            { id: 101, applicantName: 'Carlos López', email: 'clopez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Intercambio Académico (Semestre - Asignaturas)', destinyInst: 'Universidad de Monterrey', dateStart: '2026-08-01', dateEnd: '2026-12-15', status: 'PENDIENTE_PAZ_SALVO', actividadesRealizar: 'Cursar asignaturas: Ingeniería de Software II, Bases de Datos Avanzadas y Ética Profesional. Reconocimiento por convenio.' },
+            { id: 102, applicantName: 'Ana Rodríguez', email: 'arodriguez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Práctica Empresarial - Pasantía', destinyInst: 'Microsoft Colombia', dateStart: '2026-07-01', dateEnd: '2026-12-30', status: 'REVISION_ANI', actividadesRealizar: 'Desarrollo de software en equipo, soporte a proyectos cloud. Línea de profundización: Ingeniería de Software.' },
+            { id: 103, applicantName: 'Alejandro Martinez', email: 'amartinez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Diplomado Opción de Grado', destinyInst: 'Cámara de Comercio', dateStart: '2026-05-10', dateEnd: '2026-07-20', status: 'PENDIENTE_PAZ_SALVO', actividadesRealizar: 'Diplomado en Innovación Empresarial y Emprendimiento. Entregable: proyecto de emprendimiento.' },
+            { id: 104, applicantName: 'Xiomara Ocampo Hurtado', email: 'xiomaraocampoh@gmail.com', program: 'INGENIERÍA DE SOFTWARE', type: 'Curso Corto', destinyInst: 'Universidad de los Andes', dateStart: '2026-06-01', dateEnd: '2026-07-15', status: 'PENDIENTE_PAZ_SALVO', actividadesRealizar: 'Curso corto en Gestión de Proyectos y Metodologías Ágiles.' },
+            { id: 105, applicantName: 'Luis Alejandro Gomes', email: 'lgomes@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Estancia Investigación', destinyInst: 'UNAM (México)', dateStart: '2026-09-01', dateEnd: '2026-12-20', status: 'PENDIENTE_PAZ_SALVO', actividadesRealizar: 'Estancia en laboratorio de investigación en Ingeniería de Software. Proyecto: calidad y pruebas automatizadas.' },
+            { id: 201, applicantName: 'Alejandro Ruiz Ramirez', email: 'aruiz@cue.edu.co', program: 'MEDICINA', type: 'Rotación Médica', destinyInst: 'Hospital Universitario', dateStart: '2026-07-15', dateEnd: '2026-11-30', status: 'PENDIENTE_PAZ_SALVO', actividadesRealizar: 'Rotación en áreas de urgencias e internación. Seguimiento bajo supervisión docente.' },
+            { id: 202, applicantName: 'María Fernanda López', email: 'mlopez@cue.edu.co', program: 'MEDICINA', type: 'Práctica Integral', destinyInst: 'Clínica Valle del Lili', dateStart: '2026-08-01', dateEnd: '2026-12-15', status: 'REVISION_ANI', actividadesRealizar: 'Práctica integral en servicios de medicina interna y apoyo en consulta externa.' },
+            { id: 301, applicantName: 'Maria Alejandra Lopez', email: 'malopez@cue.edu.co', program: 'DERECHO', type: 'Intercambio Académico (Semestre - Asignaturas)', destinyInst: 'Universidad Externado', dateStart: '2026-08-15', dateEnd: '2026-12-20', status: 'PENDIENTE_PAZ_SALVO', actividadesRealizar: 'Asignaturas de derecho internacional y derechos humanos. Reconocimiento según convenio.' }
+        ];
+
         function injectSeedData() {
-            let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS'));
-            if (!requests || requests.length === 0) {
-                const mockData = [
-                    { id: 101, applicantName: 'Carlos López', email: 'clopez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Intercambio Académico (Semestre - Asignaturas)', destinyInst: 'Universidad de Monterrey', dateStart: '2026-08-01', dateEnd: '2026-12-15', status: 'PENDIENTE_PAZ_SALVO' },
-                    { id: 102, applicantName: 'Ana Rodríguez', email: 'arodriguez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Práctica Empresarial - Pasantía', destinyInst: 'Microsoft Colombia', dateStart: '2026-07-01', dateEnd: '2026-12-30', status: 'REVISION_ANI' },
-                    { id: 103, applicantName: 'Alejandro Martinez', email: 'amartinez@cue.edu.co', program: 'INGENIERÍA DE SOFTWARE', type: 'Diplomado Opción de Grado', destinyInst: 'Cámara de Comercio', dateStart: '2026-05-10', dateEnd: '2026-07-20', status: 'PENDIENTE_PAZ_SALVO' }
-                ];
-                localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(mockData));
-            }
+            let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')) || [];
+            const ids = new Set(requests.map(r => r.id));
+            MOCK_SOLICITUDES_COORD.forEach(mock => {
+                if (!ids.has(mock.id)) {
+                    requests.push(mock);
+                    ids.add(mock.id);
+                }
+            });
+            localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
         }
         injectSeedData();
 
@@ -249,6 +261,22 @@
             document.getElementById(`tab-${tabId}`).classList.add('bg-blue-800/50');
             
             document.getElementById('headerTitle').textContent = tabId === 'solicitudes' ? `Solicitudes de ${programaCoordinador}` : 'Creación de Salidas Académicas';
+        }
+
+        // Helpers para actividades y escape
+        function getActividadesRealizar(req) {
+            if (req.actividadesRealizar) return req.actividadesRealizar;
+            if (req.expedienteData && req.expedienteData.actividadesDesc) return req.expedienteData.actividadesDesc;
+            if (req.externoFOIN012 && req.externoFOIN012.actividadesMaterias) return req.externoFOIN012.actividadesMaterias;
+            return '';
+        }
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function escapeAttr(str) {
+            if (str == null) return '';
+            return String(str).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
         }
 
         // 5. BANDEJA DE PAZ Y SALVO
@@ -303,16 +331,22 @@
                            </div>`
                         : `<span class="text-xs text-gray-400 italic">Aval registrado</span>`;
 
+                    const actividadesTexto = getActividadesRealizar(req);
+                    const actividadesHtml = actividadesTexto
+                        ? `<p class="text-xs text-gray-700 max-w-xs line-clamp-3" title="${escapeAttr(actividadesTexto)}">${escapeHtml(actividadesTexto)}</p>`
+                        : '<span class="text-xs text-gray-400 italic">—</span>';
+
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
                         <td class="p-4">
-                            <p class="font-bold text-gray-800">${req.applicantName}</p>
-                            <p class="text-xs text-gray-500">${req.email}</p>
+                            <p class="font-bold text-gray-800">${escapeHtml(req.applicantName)}</p>
+                            <p class="text-xs text-gray-500">${escapeHtml(req.email)}</p>
                         </td>
                         <td class="p-4">
-                            <p class="font-medium text-gray-700">${req.destinyInst || 'Institución'}</p>
-                            <p class="text-xs text-gray-500">${req.type || 'Movilidad'}</p>
+                            <p class="font-medium text-gray-700">${escapeHtml(req.destinyInst || 'Institución')}</p>
+                            <p class="text-xs text-gray-500">${escapeHtml(req.type || 'Movilidad')}</p>
                         </td>
+                        <td class="p-4">${actividadesHtml}</td>
                         <td class="p-4 text-xs text-gray-600">${req.dateStart} a <br> ${req.dateEnd}</td>
                         <td class="p-4">${statusBadge}</td>
                         <td class="p-4 text-center">${actionButton}</td>
