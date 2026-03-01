@@ -153,19 +153,22 @@
             const dashboardPath = user.role.redirect || 'dashboard-ani.html';
 
             const movilidadLink = document.getElementById('linkMovilidad');
-            movilidadLink.href = 'modules/' + dashboardPath;
-            movilidadLink.addEventListener('click', function(e) {
-                e.preventDefault();
-                window.location.href = 'modules/' + dashboardPath;
-            });
-
             const miscelaneaLink = document.getElementById('linkMiscelanea');
-            if (miscelaneaLink) {
-                if (user.role.code === 'REGISTRO') {
-                    // Control y Registro puede ingresar a la bandeja de certificados de Miscelánea
+
+            if (user.role.code === 'REGISTRO') {
+                // REGISTRO solo ve Miscelánea (Caja); no ve Software Movilidad
+                movilidadLink.style.display = 'none';
+                if (miscelaneaLink) {
                     miscelaneaLink.href = 'modules/dashboard-miscelanea.html';
-                } else {
-                    // Otros roles ven la opción apagada (sin navegación)
+                    miscelaneaLink.textContent = 'Miscelánea (Caja)';
+                }
+            } else {
+                movilidadLink.href = 'modules/' + dashboardPath;
+                movilidadLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = 'modules/' + dashboardPath;
+                });
+                if (miscelaneaLink) {
                     miscelaneaLink.classList.add('opacity-60', 'pointer-events-none', 'cursor-not-allowed');
                 }
             }

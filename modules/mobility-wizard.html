@@ -106,6 +106,9 @@
 
             <div class="p-8" id="step-1">
                 <h2 class="text-xl font-bold text-[#03045e] border-b pb-3 mb-6">Paso 1: Naturaleza de la Movilidad</h2>
+                <div id="nombreUnicoContainer" class="mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="md:col-span-2"><label class="form-label">Nombre completo (solo internos)</label><input type="text" id="nombreUnico" class="form-input bg-gray-100" placeholder="Cargado desde perfil para estudiantes CUE"></div>
+                </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div><label class="form-label">Dirección</label><input type="text" id="mobilityDirection"
                             class="form-input font-bold text-[#0077b6]" readonly></div>
@@ -210,8 +213,8 @@
                                 class="form-input" onchange="WizardLogic.calculateDuration()"></div>
                         <div><label class="form-label">Fecha de Finalización</label><input type="date" id="fechaFin"
                                 class="form-input" onchange="WizardLogic.calculateDuration()"></div>
-                        <div><label class="form-label">Duración de la movilidad</label><input type="text"
-                                id="duracionMovilidad" class="form-input bg-gray-100" readonly></div>
+                        <div><label class="form-label">Duración de movilidad</label><input type="text"
+                                id="duracionMovilidad" class="form-input bg-gray-100" readonly placeholder="Se calcula automáticamente"></div>
                     </div>
                     <div class="req-presencial md:col-span-2"><label class="form-label text-orange-600">Fecha Ida
                             (Viaje)</label><input type="date" class="form-input border-orange-200"></div>
@@ -274,14 +277,14 @@
                     </div>
                 </div>
 
-                <!-- REQ-06: Para internos (Estudiante, Profesor, Administrativo): perfil solo lectura -->
+                <!-- REQ-06: Para internos (Estudiante, Profesor, Administrativo): perfil solo lectura. Para EXTERNO se oculta y se usa externalFormData -->
                 <div id="studentPersonalData" class="mt-8">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 relative">
                         <div class="md:col-span-4 font-bold text-xs text-gray-500 uppercase border-b pb-1">Perfil
                             Académico (Solo Lectura)</div>
                         <div><label class="form-label">Documento</label><input type="text" id="autoDoc"
                                 class="form-input bg-gray-100" readonly></div>
-                        <div class="md:col-span-2"><label class="form-label">Programa</label><input type="text"
+                        <div id="programaSelectWrapper" class="md:col-span-2"><label class="form-label">Programa al que pertenece</label><input type="text"
                                 id="autoPrograma" class="form-input bg-gray-100" readonly></div>
                         <div><label class="form-label">Semestre / Promedio</label><input type="text" id="autoSem"
                                 class="form-input bg-gray-100" readonly></div>

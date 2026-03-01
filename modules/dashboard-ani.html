@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 
 <body class="bg-[#f0f4f8] font-['Inter'] flex h-screen overflow-hidden">
@@ -611,9 +612,11 @@
             if (currentRole === 'ANI_SECRETARIA') {
                 actionsDiv.innerHTML = `<button onclick="processRequest('EN_REVISION_DIRECCION_ANI')" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition">Pre-Aprobar (Enviar a Dirección)</button>`;
             } else {
-                let btnAprobar = dir === 'ENTRANTE'
-                    ? `<button onclick="processRequest('PENDIENTE_MATRICULA')" class="px-6 py-2 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700 transition">Aprobar y Enviar a Registro (Matrícula)</button>`
-                    : `<button onclick="processRequest('APROBADA_POSTULACION')" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition">Aprobar Postulación (Pasa a Fase 2)</button>`;
+                let btnAprobar = (currentRole === 'ANI_DIRECCION' && dir === 'ENTRANTE')
+                    ? `<button onclick="processRequestEntranteConPlantillas()" class="px-6 py-2 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700 transition">Aprobar y Enviar Plantillas a Registro</button>`
+                    : (dir === 'ENTRANTE'
+                        ? `<button onclick="processRequest('PENDIENTE_MATRICULA')" class="px-6 py-2 bg-green-600 text-white rounded text-sm font-bold hover:bg-green-700 transition">Aprobar y Enviar a Registro (Matrícula)</button>`
+                        : `<button onclick="processRequest('APROBADA_POSTULACION')" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e] transition">Aprobar Postulación (Pasa a Fase 2)</button>`);
                 actionsDiv.innerHTML = `<button onclick="document.getElementById('reviewModal').classList.add('hidden')" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold">Cancelar</button> ${btnAprobar}`;
             }
             document.getElementById('reviewModal').classList.remove('hidden');
@@ -628,6 +631,61 @@
             localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
             document.getElementById('reviewModal').classList.add('hidden');
             loadTable();
+        }
+
+        function processRequestEntranteConPlantillas() {
+            const allReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            const req = allReqs.find(r => r.id === currentRequestId);
+            if (!req) return;
+            processRequest('MOVILIDAD_ACTIVA');
+            enviarPlantillasRegistro(req);
+        }
+
+        function enviarPlantillasRegistro(req) {
+            if (typeof XLSX === 'undefined') {
+                alert('No se pudo cargar la librería SheetJS.');
+                return;
+            }
+            const ext = req.externoFOIN012 || {};
+            const v = (x) => (x === undefined || x === null || x === '') ? '' : String(x);
+
+            const headersInscripcion = [
+                'Primer nombre', 'Segundo nombre', 'Primer apellido', 'Segundo apellido',
+                'Tipo documento', 'Número identificación', 'Sexo', 'Fecha nacimiento',
+                'Teléfono', 'Celular', 'Email', 'Dirección',
+                'País dirección', 'Departamento dirección', 'Municipio dirección'
+            ];
+            const rowInscripcion = [
+                v(ext.primerNombre), v(ext.segundoNombre), v(ext.primerApellido), v(ext.segundoApellido),
+                v(ext.tipoDoc), v(ext.numDoc), v(ext.sexo), v(ext.fecNacimiento),
+                v(ext.contactoTelefono), v(ext.celular), v(ext.correo) || v(req.userEmail), v(ext.direccion),
+                v(ext.pais), v(ext.departamento), v(ext.municipio)
+            ];
+            const dataInscripcion = [];
+            for (let i = 0; i < 6; i++) dataInscripcion.push([]);
+            dataInscripcion.push(headersInscripcion);
+            dataInscripcion.push(rowInscripcion);
+
+            const wbInsc = XLSX.utils.book_new();
+            const wsInsc = XLSX.utils.aoa_to_sheet(dataInscripcion);
+            XLSX.utils.book_append_sheet(wbInsc, wsInsc, 'Inscripcion');
+            XLSX.writeFile(wbInsc, 'Inscripcion_Q10.xlsx');
+
+            const headersMatricula = headersInscripcion.concat(['Código matrícula', 'Fecha matrícula', 'Formalizada', 'Condición de matrícula']);
+            const codigoMat = 'Q10-' + (req.id || '');
+            const fechaMat = new Date().toISOString().slice(0, 10);
+            const rowMatricula = rowInscripcion.concat([codigoMat, fechaMat, 'Sí', 'Movilidad entrante']);
+            const dataMatricula = [];
+            for (let i = 0; i < 6; i++) dataMatricula.push([]);
+            dataMatricula.push(headersMatricula);
+            dataMatricula.push(rowMatricula);
+
+            const wbMat = XLSX.utils.book_new();
+            const wsMat = XLSX.utils.aoa_to_sheet(dataMatricula);
+            XLSX.utils.book_append_sheet(wbMat, wsMat, 'Matricula');
+            XLSX.writeFile(wbMat, 'Matricula_Q10.xlsx');
+
+            alert('Aprobado exitosamente. Se han generado las plantillas Q10 y se ha simulado el envío automático con los adjuntos al correo: xiomaraocampoh@gmail.com (Control y Registro).');
         }
 
         document.addEventListener('DOMContentLoaded', () => {

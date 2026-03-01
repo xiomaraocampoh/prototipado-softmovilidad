@@ -31,6 +31,7 @@ const WizardLogic = {
         this.loadProfile();
         this.loadAgreements();
         this.toggleExternoForm();
+        this.attachDurationListeners();
         
         if(this.role !== 'EXTERNO' && this.role !== 'DOCENTE') {
             this.lockContactFields();
@@ -60,16 +61,22 @@ const WizardLogic = {
         if(dirEl) dirEl.value = (this.role === 'EXTERNO') ? 'ENTRANTE' : 'SALIENTE';
     },
 
-    // REQ-06: Mostrar formulario integral para EXTERNO, perfil solo lectura para internos
+    // REQ-06: Paso 1 (Datos Personales): EXTERNO no ve "nombre único", ve campos separados en paso 3. Paso 2 (Académico): EXTERNO no ve "Programa al que pertenece", ve textarea "Actividades a realizar o materias a cursar".
     toggleExternoForm: function() {
         const interno = document.getElementById('studentPersonalData');
         const externo = document.getElementById('externalFormData');
+        const programaWrapper = document.getElementById('programaSelectWrapper');
+        const nombreUnicoContainer = document.getElementById('nombreUnicoContainer');
         if (this.role === 'EXTERNO') {
+            if (nombreUnicoContainer) nombreUnicoContainer.classList.add('hidden');
             if (interno) interno.classList.add('hidden');
             if (externo) externo.classList.remove('hidden');
+            if (programaWrapper) programaWrapper.classList.add('hidden');
         } else {
+            if (nombreUnicoContainer) nombreUnicoContainer.classList.remove('hidden');
             if (interno) interno.classList.remove('hidden');
             if (externo) externo.classList.add('hidden');
+            if (programaWrapper) programaWrapper.classList.remove('hidden');
         }
     },
 
@@ -500,6 +507,12 @@ const WizardLogic = {
         setReadonlyAndNA(document.getElementById('sstContactName'), contactName);
         setReadonlyAndNA(document.getElementById('sstContactRel'), contactRel);
         setReadonlyAndNA(document.getElementById('sstContactPhone'), contactPhone);
+    },
+    attachDurationListeners: function() {
+        const inicio = document.getElementById('fechaInicio');
+        const fin = document.getElementById('fechaFin');
+        if (inicio) inicio.addEventListener('change', () => this.calculateDuration());
+        if (fin) fin.addEventListener('change', () => this.calculateDuration());
     },
     // REQ-03: Cálculo automático Duración de la movilidad (días o meses), campo solo lectura
     calculateDuration: function() {

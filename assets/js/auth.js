@@ -19,7 +19,7 @@ const ROLES = {
     ANI_DIRECCION: { code: 'ANI_DIRECCION', redirect: 'dashboard-ani.html', name: 'Dirección ANI (Aprobación Final)' },
     COORD_ACAD: { code: 'COORD_ACAD', redirect: 'dashboard-acad.html', name: 'Coordinación Académica' },
     SST: { code: 'SST', redirect: 'dashboard-sst.html', name: 'Seguridad y Salud en el Trabajo' },
-    REGISTRO: { code: 'REGISTRO', redirect: 'dashboard-registro.html', name: 'Control y Registro Académico' }
+    REGISTRO: { code: 'REGISTRO', redirect: 'dashboard-miscelanea.html', name: 'Control y Registro Académico' }
 };
 
 const MOCK_USERS = [
