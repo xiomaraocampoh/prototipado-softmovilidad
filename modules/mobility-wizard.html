@@ -209,19 +209,34 @@
                     <div class="md:col-span-4 font-bold text-xs text-[#03045e] uppercase border-b pb-1 mb-2">Cronograma
                     </div>
                     <div class="md:col-span-4 grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <div><label class="form-label">Fecha de Inicio</label><input type="date" id="fechaInicio"
-                                class="form-input" onchange="WizardLogic.calculateDuration()"></div>
-                        <div><label class="form-label">Fecha de Finalización</label><input type="date" id="fechaFin"
-                                class="form-input" onchange="WizardLogic.calculateDuration()"></div>
-                        <div><label class="form-label">Duración de movilidad</label><input type="text"
-                                id="duracionMovilidad" class="form-input bg-gray-100" readonly placeholder="Se calcula automáticamente"></div>
+                        <div>
+                            <label class="form-label">Fecha de Inicio (Académica)</label>
+                            <input type="date" id="fechaInicio"
+                                class="form-input" onchange="WizardLogic.calculateDuration()">
+                        </div>
+                        <div>
+                            <label class="form-label">Fecha de Finalización (Académica)</label>
+                            <input type="date" id="fechaFin"
+                                class="form-input" onchange="WizardLogic.calculateDuration()">
+                        </div>
+                        <div>
+                            <label class="form-label">Duración de movilidad</label>
+                            <input type="text"
+                                id="duracionMovilidad" class="form-input bg-gray-100" readonly placeholder="Se calcula automáticamente">
+                        </div>
                     </div>
-                    <div class="req-presencial md:col-span-2"><label class="form-label text-orange-600">Fecha Ida
-                            (Viaje)</label><input type="date" class="form-input border-orange-200"></div>
-                    <div class="req-presencial md:col-span-2"><label class="form-label text-orange-600">Fecha
-                            Regreso</label><input type="date" class="form-input border-orange-200"></div>
-                    <div class="req-presencial md:col-span-4 mt-2"><label class="form-label">Dir. Residencia
-                            (Destino)</label><input type="text" class="form-input"></div>
+                    <div class="req-presencial md:col-span-2">
+                        <label class="form-label text-orange-600">Fecha Ida (Viaje)</label>
+                        <input type="date" id="fechaViajeIda" class="form-input border-orange-200">
+                    </div>
+                    <div class="req-presencial md:col-span-2">
+                        <label class="form-label text-orange-600">Fecha Regreso (Viaje)</label>
+                        <input type="date" id="fechaViajeRegreso" class="form-input border-orange-200">
+                    </div>
+                    <div class="req-presencial md:col-span-4 mt-2">
+                        <label class="form-label">Dir. Residencia (Destino)</label>
+                        <input type="text" id="direccionResidenciaDestino" class="form-input">
+                    </div>
                 </div>
 
                 <div id="transportContainer" class="hidden border-t pt-4">
@@ -282,12 +297,21 @@
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 relative">
                         <div class="md:col-span-4 font-bold text-xs text-gray-500 uppercase border-b pb-1">Perfil
                             Académico (Solo Lectura)</div>
-                        <div><label class="form-label">Documento</label><input type="text" id="autoDoc"
-                                class="form-input bg-gray-100" readonly></div>
-                        <div id="programaSelectWrapper" class="md:col-span-2"><label class="form-label">Programa al que pertenece</label><input type="text"
-                                id="autoPrograma" class="form-input bg-gray-100" readonly></div>
-                        <div><label class="form-label">Semestre / Promedio</label><input type="text" id="autoSem"
-                                class="form-input bg-gray-100" readonly></div>
+                        <div>
+                            <label class="form-label">Documento</label>
+                            <input type="text" id="autoDoc"
+                                class="form-input bg-gray-100" readonly>
+                        </div>
+                        <div id="programaSelectWrapper" class="md:col-span-2">
+                            <label id="programaLabel" class="form-label">Programa al que pertenece</label>
+                            <input type="text"
+                                id="autoPrograma" class="form-input bg-gray-100" readonly>
+                        </div>
+                        <div id="autoSemWrapper">
+                            <label class="form-label">Semestre / Promedio</label>
+                            <input type="text" id="autoSem"
+                                class="form-input bg-gray-100" readonly>
+                        </div>
 
                         <div class="req-presencial md:col-span-4 border-t pt-4">
                             <h3 class="font-bold text-red-600 text-sm mb-4 uppercase"><i data-lucide="heart-pulse"

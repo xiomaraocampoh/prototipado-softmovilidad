@@ -596,7 +596,12 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-blue-50 transition border-b">
                         <td class="p-4 font-mono font-bold text-[#03045e]">${escapeHtml(req.id)}</td>
-                        <td class="p-4">${escapeHtml(req.userEmail)}</td>
+                        <td class="p-4">
+                            <p class="font-medium text-gray-800">${escapeHtml(req.userEmail)}</p>
+                            <p class="mt-1 inline-flex px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200 text-[10px] font-bold tracking-wider uppercase">
+                                ${escapeHtml(String((req.applicantRole || (req.dir === 'ENTRANTE' ? 'EXTERNO' : 'ESTUDIANTE'))).toUpperCase())}
+                            </p>
+                        </td>
                         <td class="p-4">${escapeHtml(req.type)}</td>
                         <td class="p-4 text-center">
                             <div class="flex flex-col gap-2 items-center">
@@ -640,6 +645,9 @@
             const body = document.getElementById('estadoMovilidadBody');
             if (!body) return;
 
+            const applicantRole = String(req.applicantRole || '').toUpperCase();
+            const sinAvalCoord = ['PROFESOR', 'ADMINISTRATIVO', 'EGRESADO'].includes(applicantRole);
+
             const paso1Ok = true;
             const paso2Ok = status !== 'PENDIENTE_PAZ_SALVO' && status !== '';
             const mostrarPaso3 = requiereTransporte;
@@ -655,7 +663,7 @@
                 const iconColor = noAplica ? 'text-gray-400' : (done ? 'text-green-600' : 'text-gray-400');
                 const circle = noAplica ? 'bg-gray-100 border-gray-300' : (done ? 'bg-green-100 border-green-500' : 'bg-white border-gray-300');
                 const line = done ? 'border-green-200' : 'border-gray-200';
-                const descFinal = noAplica ? 'No aplica: esta movilidad no requiere transporte suministrado por la Universidad.' : desc;
+                const descFinal = desc;
                 return `
                     <li class="relative pl-10 pb-6 last:pb-0">
                         <div class="absolute left-1 top-1 w-6 h-6 rounded-full border-2 ${circle} flex items-center justify-center">
@@ -672,8 +680,22 @@
 
             const steps = [];
             steps.push(renderStep('Radicación', 'El estudiante radica la solicitud FO-IN-012 en el sistema de movilidad.', paso1Ok, false));
-            steps.push(renderStep('Aval Coordinación', 'Coordinación Académica revisa requisitos del programa y decide si la movilidad es viable.', paso2Ok, false));
-            steps.push(renderStep('Aval SST', 'SST verifica condiciones de transporte y seguridad cuando la movilidad requiere vehículo o transporte suministrado.', paso3Ok, !mostrarPaso3));
+            steps.push(renderStep(
+                'Aval Coordinación Académica',
+                sinAvalCoord
+                    ? 'No aplica: para Profesores, Administrativos y Egresados no se requiere aval de Coordinación Académica.'
+                    : 'Coordinación Académica revisa requisitos del programa y decide si la movilidad es viable.',
+                sinAvalCoord ? true : paso2Ok,
+                sinAvalCoord
+            ));
+            steps.push(renderStep(
+                'Aval SST',
+                mostrarPaso3
+                    ? 'SST verifica condiciones de transporte y seguridad cuando la movilidad requiere vehículo o transporte suministrado.'
+                    : 'No aplica: esta movilidad no requiere transporte suministrado por la Universidad.',
+                paso3Ok,
+                !mostrarPaso3
+            ));
             steps.push(renderStep('Revisión Secretaría ANI', 'Secretaría ANI valida la documentación y soportes requeridos para la movilidad.', paso4Ok, false));
             steps.push(renderStep('Aprobación Final Dirección ANI', 'Dirección ANI emite la aprobación final de la movilidad (activa o pendiente de matrícula).', paso5Ok, false));
 
@@ -697,51 +719,188 @@
             const ed = req.expedienteData || {};
             const ext = req.externoFOIN012 || {};
             const isExterno = !!req.externoFOIN012;
-            const v = (val) => (val === undefined || val === null || val === '') ? '—' : String(val);
+            const val = (v) => (v === undefined || v === null || v === '') ? 'N/A' : String(v);
+
+            const nombreCompletoExt = [
+                ext.primerNombre, ext.segundoNombre,
+                ext.primerApellido, ext.segundoApellido
+            ].filter(Boolean).join(' ');
+
+            const datosPersonales = isExterno ? {
+                nombres: nombreCompletoExt || val(req.applicantName || ''),
+                documento: `${val(ext.tipoDoc || '')} ${val(ext.numDoc || '')}`.trim(),
+                programa: val(ed.programa || req.program || ''),
+                correo: val(ext.correo || req.userEmail || ''),
+                celular: val(ext.celular || '')
+            } : {
+                nombres: val(req.applicantName || req.userName || req.userEmail || ''),
+                documento: val(ed.documento),
+                programa: val(ed.programa || req.program || ''),
+                correo: val(req.userEmail || ''),
+                celular: 'N/A'
+            };
+
+            const fechasAcademicas = `${val(ed.fechaInicio)} — ${val(ed.fechaFin)}`;
+            const fechasViaje = `${val(ed.fechaViajeIda)} — ${val(ed.fechaViajeRegreso)}`;
 
             let html = '';
 
-            html += '<div class="border rounded-lg p-4 bg-gray-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Movilidad y destino</h4><div class="grid grid-cols-2 gap-2 text-sm">';
-            html += '<div><span class="text-gray-500">Tipo</span><br>' + v(ed.tipo) + '</div>';
-            html += '<div><span class="text-gray-500">Dirección</span><br>' + v(ed.direccion) + '</div>';
-            html += '<div><span class="text-gray-500">Institución destino</span><br>' + v(ed.institucionDestino) + (ed.otraEntidad ? ' / ' + v(ed.otraEntidad) : '') + '</div>';
-            html += '<div><span class="text-gray-500">País / Ciudad</span><br>' + v(ed.pais) + ' / ' + v(ed.ciudad) + '</div>';
-            html += '<div><span class="text-gray-500">Fechas</span><br>' + v(ed.fechaInicio) + ' – ' + v(ed.fechaFin) + '</div>';
-            html += '<div><span class="text-gray-500">Duración</span><br>' + v(ed.duracion) + '</div>';
-            html += '<div class="col-span-2"><span class="text-gray-500">Actividades / materias</span><br>' + v(ed.actividadesDesc) + '</div></div></div>';
+            // Datos Personales
+            html += `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
+                    <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Datos Personales</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Nombres</p>
+                            <p class="font-medium text-gray-800">${val(datosPersonales.nombres)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Documento</p>
+                            <p class="font-medium text-gray-800">${val(datosPersonales.documento)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Programa</p>
+                            <p class="font-medium text-gray-800">${val(datosPersonales.programa)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Correo</p>
+                            <p class="font-medium text-gray-800 break-all">${val(datosPersonales.correo)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Celular</p>
+                            <p class="font-medium text-gray-800">${val(datosPersonales.celular)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-            html += '<div class="border rounded-lg p-4 bg-gray-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Datos personales y documento</h4><div class="grid grid-cols-2 gap-2 text-sm">';
-            if (isExterno) {
-                html += '<div><span class="text-gray-500">Primer nombre</span><br>' + v(ext.primerNombre) + '</div><div><span class="text-gray-500">Segundo nombre</span><br>' + v(ext.segundoNombre) + '</div>';
-                html += '<div><span class="text-gray-500">Primer apellido</span><br>' + v(ext.primerApellido) + '</div><div><span class="text-gray-500">Segundo apellido</span><br>' + v(ext.segundoApellido) + '</div>';
-                html += '<div><span class="text-gray-500">Sexo</span><br>' + v(ext.sexo) + '</div><div><span class="text-gray-500">Dirección</span><br>' + v(ext.direccion) + '</div>';
-                html += '<div><span class="text-gray-500">Departamento</span><br>' + v(ext.departamento) + '</div><div><span class="text-gray-500">Municipio</span><br>' + v(ext.municipio) + '</div>';
-                html += '<div><span class="text-gray-500">Tipo doc</span><br>' + v(ext.tipoDoc) + '</div><div><span class="text-gray-500">Número doc</span><br>' + v(ext.numDoc) + '</div>';
-                html += '<div><span class="text-gray-500">Celular</span><br>' + v(ext.celular) + '</div><div><span class="text-gray-500">Correo</span><br>' + v(ext.correo) + '</div>';
-            } else {
-                html += '<div><span class="text-gray-500">Documento</span><br>' + v(ed.documento) + '</div><div><span class="text-gray-500">Programa</span><br>' + v(ed.programa) + '</div>';
-                html += '<div><span class="text-gray-500">Semestre / Promedio</span><br>' + v(ed.semestrePromedio) + '</div>';
-            }
-            html += '</div></div>';
+            // Detalles de la Movilidad
+            html += `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
+                    <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Detalles de la Movilidad</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Tipo</p>
+                            <p class="font-medium text-gray-800">${val(ed.tipo || req.type)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Modalidad</p>
+                            <p class="font-medium text-gray-800">${val(ed.modalidad)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Dirección</p>
+                            <p class="font-medium text-gray-800">${val(ed.direccion || req.dir)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Institución Destino</p>
+                            <p class="font-medium text-gray-800">${val(ed.institucionDestino || ed.otraEntidad || req.destinyInst)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">País</p>
+                            <p class="font-medium text-gray-800">${val(ed.pais)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Ciudad</p>
+                            <p class="font-medium text-gray-800">${val(ed.ciudad)}</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Dirección residencia (Destino)</p>
+                            <p class="font-medium text-gray-800">${val(ed.direccionResidenciaDestino)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-            html += '<div class="border rounded-lg p-4 bg-gray-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Costos, apoyos y becas</h4><div class="grid grid-cols-2 gap-2 text-sm">';
-            html += '<div><span class="text-gray-500">Costo matrícula</span><br>' + v(ed.hasCosto) + (ed.montoCosto ? ' – ' + ed.montoCosto : '') + '</div>';
-            html += '<div><span class="text-gray-500">Beca / apoyo</span><br>' + v(ed.hasBeca) + (ed.montoBeca ? ' – ' + ed.montoBeca : '') + '</div></div></div>';
+            // Tiempos
+            html += `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
+                    <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Tiempos</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Fechas Académicas (Inicio / Fin)</p>
+                            <p class="font-medium text-gray-800">${fechasAcademicas}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Duración estimada</p>
+                            <p class="font-medium text-gray-800">${val(ed.duracion)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Fechas de Viaje (Ida / Regreso)</p>
+                            <p class="font-medium text-gray-800">${fechasViaje}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-            html += '<div class="border rounded-lg p-4 bg-gray-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Riesgos médicos y contacto de emergencia</h4><div class="grid grid-cols-2 gap-2 text-sm">';
-            if (isExterno) {
-                html += '<div class="col-span-2"><span class="text-gray-500">Necesidades médicas</span><br>' + v(ext.necesidadesMedicas) + '</div>';
-                html += '<div><span class="text-gray-500">Contacto emergencia</span><br>' + v(ext.contactoNombre) + ' ' + v(ext.contactoParentesco) + '</div>';
-                html += '<div><span class="text-gray-500">Tel / Correo</span><br>' + v(ext.contactoTelefono) + ' / ' + v(ext.contactoCorreo) + '</div>';
-            } else {
-                html += '<div><span class="text-gray-500">EPS</span><br>' + v(ed.eps) + '</div><div><span class="text-gray-500">Alergias/Meds</span><br>' + v(ed.alergiasMeds) + '</div>';
-                html += '<div><span class="text-gray-500">Contacto emergencia</span><br>' + v(ed.contactoNombre) + ' ' + v(ed.contactoParentesco) + ' ' + v(ed.contactoTel) + '</div>';
-            }
-            html += '</div></div>';
+            // Información Financiera
+            html += `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
+                    <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Información Financiera</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">¿Genera costo de matrícula?</p>
+                            <p class="font-medium text-gray-800">${val(ed.hasCosto)}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Monto: ${val(ed.montoCosto)}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">¿Cuenta con beca o apoyo?</p>
+                            <p class="font-medium text-gray-800">${val(ed.hasBeca)}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Monto: ${val(ed.montoBeca)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
 
-            if (isExterno) {
-                html += '<div class="border rounded-lg p-4 bg-blue-50"><h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Actividades a realizar / materias a cursar</h4><p class="text-sm">' + v(ext.actividadesMaterias) + '</p></div>';
-            }
+            // Salud y Emergencia
+            html += `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
+                    <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Salud y Emergencia</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        ${isExterno ? `
+                            <div class="md:col-span-2">
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Necesidades médicas</p>
+                                <p class="font-medium text-gray-800">${val(ext.necesidadesMedicas)}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Contacto de emergencia</p>
+                                <p class="font-medium text-gray-800">${val(ext.contactoNombre)} (${val(ext.contactoParentesco)})</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Teléfono / Correo</p>
+                                <p class="font-medium text-gray-800">${val(ext.contactoTelefono)} / ${val(ext.contactoCorreo)}</p>
+                            </div>
+                        ` : `
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">EPS / Seguro</p>
+                                <p class="font-medium text-gray-800">${val(ed.eps)}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Alergias / Medicamentos</p>
+                                <p class="font-medium text-gray-800">${val(ed.alergiasMeds)}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Contacto de emergencia</p>
+                                <p class="font-medium text-gray-800">
+                                    ${val(ed.contactoNombre)} (${val(ed.contactoParentesco)}) · ${val(ed.contactoTel)}
+                                </p>
+                            </div>
+                        `}
+                    </div>
+                </div>
+            `;
+
+            // Propósito
+            const proposito = isExterno
+                ? (ext.actividadesMaterias || '')
+                : (ed.actividadesDesc || req.actividadesRealizar || '');
+
+            html += `
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-2">
+                    <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Propósito de la Movilidad</h4>
+                    <p class="text-sm text-gray-800 whitespace-pre-wrap">${val(proposito)}</p>
+                </div>
+            `;
+
             return html;
         }
 

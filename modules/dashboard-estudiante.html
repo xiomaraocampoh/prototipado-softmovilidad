@@ -252,6 +252,57 @@
         </div>
     </div>
 
+    <div id="modalEstadoMovilidad" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-xl max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50">
+                <div>
+                    <h3 class="text-sm font-semibold text-[#03045e]">Estado de la Movilidad</h3>
+                    <p id="estadoMovilidadSub" class="text-[11px] text-gray-500 mt-0.5"></p>
+                </div>
+                <button onclick="cerrarModalEstadoMovilidadEst()" class="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="estadoMovilidadBody" class="p-5 text-sm">
+            </div>
+        </div>
+    </div>
+
+    <div id="docUpdateModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden flex flex-col">
+            <div class="bg-[#0077b6] p-4 flex justify-between items-center text-white">
+                <h3 class="font-bold flex items-center gap-2">
+                    <i data-lucide="file-up" class="w-5 h-5"></i>
+                    Actualizar Documentos de la Solicitud
+                </h3>
+                <button onclick="cerrarModalActualizarDocs()" class="text-blue-100 hover:text-white">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <p id="docUpdateSubtitle" class="text-xs text-gray-500 mb-2"></p>
+                <div class="space-y-3 text-sm">
+                    <div>
+                        <p class="font-semibold text-gray-700 mb-1">Reemplazar Cédula de Ciudadanía (PDF)</p>
+                        <input type="file" accept=".pdf" class="w-full text-xs file:bg-gray-100 file:border file:border-gray-300 file:px-3 file:py-1 file:rounded file:text-gray-700">
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-700 mb-1">Reemplazar Seguro Médico / EPS (PDF)</p>
+                        <input type="file" accept=".pdf" class="w-full text-xs file:bg-gray-100 file:border file:border-gray-300 file:px-3 file:py-1 file:rounded file:text-gray-700">
+                    </div>
+                </div>
+            </div>
+            <div class="px-6 py-3 border-t bg-gray-50 flex justify-end gap-2">
+                <button type="button" onclick="cerrarModalActualizarDocs()" class="px-4 py-2 border rounded text-sm font-bold text-gray-600 hover:bg-gray-100">
+                    Cancelar
+                </button>
+                <button type="button" onclick="guardarActualizacionDocs()" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold hover:bg-[#03045e]">
+                    Guardar cambios
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -276,6 +327,8 @@
                 { id: 'REQ-2005', date: '15/02/2026', type: 'Intercambio Académico', dest: 'CUE Alexander von Humboldt', status: 'EN_REVISION_TOTAL', userEmail: 'externo@unam.mx' }
             ];
 
+            window.CUE_STUDENT_MOCK_REQS = mockRequests;
+
             const localReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             const allReqs = [...mockRequests, ...localReqs];
             const userReqs = allReqs.filter(req => req.userEmail === currentUser.email);
@@ -287,6 +340,7 @@
             } else {
                 userReqs.forEach(req => {
                     let statusConfig = getStatusConfig(req.status, req.id, currentUser);
+                    const dropdownId = `stu-kebab-dd-${req.id}`;
                     tbody.innerHTML += `
                         <tr class="hover:bg-gray-50 border-b last:border-0 transition">
                             <td class="p-4 font-mono font-bold text-[#03045e]">${req.id}</td>
@@ -299,7 +353,22 @@
                                 <span class="px-2 py-1 rounded text-xs font-bold border ${statusConfig.badgeClass}">${statusConfig.label}</span>
                             </td>
                             <td class="p-4 text-center align-middle">
-                                ${statusConfig.actionHtml}
+                                <div class="relative inline-flex">
+                                    <button type="button" data-stu-kebab-btn="1" onclick="toggleKebabEstudiante('${dropdownId}')" class="p-2 rounded-full hover:bg-gray-100 transition" title="Menú de acciones">
+                                        <i data-lucide="more-vertical" class="w-5 h-5 text-gray-600"></i>
+                                    </button>
+                                    <div id="${dropdownId}" class="hidden absolute right-0 mt-1 top-full z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[220px] text-left">
+                                        <button type="button" onclick="abrirEstadoMovilidadEst('${req.id}'); closeKebabEstudiante('${dropdownId}')" class="w-full px-4 py-2 text-xs hover:bg-gray-50 flex items-center gap-2">
+                                            <span>Ver Estado (Trazabilidad)</span>
+                                        </button>
+                                        <button type="button" onclick="window.location.href='mobility-wizard.html?editId=${req.id}'" class="w-full px-4 py-2 text-xs hover:bg-gray-50 flex items-center gap-2">
+                                            <span>Editar Información</span>
+                                        </button>
+                                        <button type="button" onclick="abrirModalActualizarDocs('${req.id}'); closeKebabEstudiante('${dropdownId}')" class="w-full px-4 py-2 text-xs hover:bg-gray-50 flex items-center gap-2">
+                                            <span>Actualizar Documentos</span>
+                                        </button>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -378,8 +447,7 @@
 
         function getStatusConfig(status, id, currentUser) {
             const isExterno = currentUser && currentUser.role && currentUser.role.code === 'EXTERNO';
-            const certBtn = (id, green) => isExterno ? '' : `<button onclick="solicitarCertificado('${id}')" class="${green ? 'border border-green-600 text-green-600 hover:bg-green-50' : 'border border-[#0077b6] text-[#0077b6] hover:bg-blue-50'} px-3 py-1 rounded text-xs font-bold transition">Pedir Certificado</button>`;
-            let config = { badgeClass: 'bg-gray-100 text-gray-600 border-gray-200', label: status, actionHtml: '<span class="text-xs text-gray-400 italic">En proceso...</span>' };
+            let config = { badgeClass: 'bg-gray-100 text-gray-600 border-gray-200', label: status };
             switch(status) {
                 case 'EN_REVISION_POSTULACION':
                 case 'EN_REVISION_SECRETARIA_ANI':
@@ -392,24 +460,142 @@
                 case 'APROBADA_POSTULACION':
                     config.badgeClass = 'bg-orange-100 text-orange-800 border-orange-200';
                     config.label = 'Aprobada / Requiere Anexos';
-                    config.actionHtml = `
-                        <div class="flex flex-col gap-1">
-                            <a href="mobility-wizard.html?mode=docs&id=${id}" class="inline-block bg-[#0077b6] text-white px-3 py-1 rounded text-xs font-bold hover:bg-[#03045e] transition text-center">Fase 2: Adjuntar Docs</a>
-                            ${certBtn(id, false)}
-                        </div>`;
                     break;
                 case 'EN_REVISION_LEGALIZACION':
                     config.badgeClass = 'bg-blue-100 text-blue-800 border-blue-200';
                     config.label = 'En Legalización';
-                    config.actionHtml = certBtn(id, false);
                     break;
                 case 'MOVILIDAD_ACTIVA':
                     config.badgeClass = 'bg-green-100 text-green-800 border-green-200';
                     config.label = 'Activa / Vigente';
-                    config.actionHtml = certBtn(id, true);
                     break;
             }
             return config;
+        }
+
+        function toggleKebabEstudiante(dropdownId) {
+            document.querySelectorAll('[id^="stu-kebab-dd-"]').forEach(dd => {
+                if (dd.id !== dropdownId) dd.classList.add('hidden');
+            });
+            const dd = document.getElementById(dropdownId);
+            if (dd) dd.classList.toggle('hidden');
+        }
+
+        function closeKebabEstudiante(dropdownId) {
+            const dd = document.getElementById(dropdownId);
+            if (dd) dd.classList.add('hidden');
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('[id^="stu-kebab-dd-"]') && !e.target.closest('[data-stu-kebab-btn="1"]')) {
+                document.querySelectorAll('[id^="stu-kebab-dd-"]').forEach(dd => dd.classList.add('hidden'));
+            }
+        });
+
+        function abrirEstadoMovilidadEst(id) {
+            const modal = document.getElementById('modalEstadoMovilidad');
+            const body = document.getElementById('estadoMovilidadBody');
+            const sub = document.getElementById('estadoMovilidadSub');
+            if (!modal || !body) return;
+
+            const localReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            const mocks = (window.CUE_STUDENT_MOCK_REQS || []);
+            let req = localReqs.find(r => String(r.id) === String(id)) || mocks.find(r => String(r.id) === String(id)) || { id, status: '' };
+
+            const status = String(req.status || '').toUpperCase();
+            const tipo = req.type || 'Movilidad';
+            const dir = (req.dir || 'SALIENTE').toUpperCase();
+            const requiereTransporte = req.requiereTransporte === true || req.sstReviewFlag === true;
+
+            if (sub) {
+                const estadoLegible = status || 'SIN_ESTADO';
+                sub.textContent = `ID: ${req.id} · Tipo: ${tipo} · Dirección: ${dir === 'ENTRANTE' ? 'Entrante' : 'Saliente'} · Estado actual: ${estadoLegible}`;
+            }
+
+            const applicantRole = String(req.applicantRole || '').toUpperCase();
+            const sinAvalCoord = ['PROFESOR', 'ADMINISTRATIVO', 'EGRESADO'].includes(applicantRole);
+
+            const paso1Ok = true;
+            const paso2Ok = status !== 'PENDIENTE_PAZ_SALVO' && status !== '';
+            const mostrarPaso3 = requiereTransporte;
+            const sstAprobado = req.sstReviewFlag === true || (req.sstReview && req.sstReview.estado === 'APROBADO');
+            const paso3Ok = mostrarPaso3 && sstAprobado;
+            const estadosPaso4Ok = ['EN_REVISION_DIRECCION_ANI', 'PENDIENTE_MATRICULA', 'MOVILIDAD_ACTIVA', 'APROBADA_POSTULACION', 'EN_REVISION_TOTAL'];
+            const paso4Ok = estadosPaso4Ok.includes(status);
+            const estadosPaso5Ok = ['MOVILIDAD_ACTIVA', 'PENDIENTE_MATRICULA', 'APROBADA_FINAL'];
+            const paso5Ok = estadosPaso5Ok.includes(status);
+
+            const renderStep = (label, desc, done, noAplica) => {
+                const icon = noAplica ? 'minus-circle' : (done ? 'check-circle-2' : 'clock-3');
+                const iconColor = noAplica ? 'text-gray-400' : (done ? 'text-green-600' : 'text-gray-400');
+                const circle = noAplica ? 'bg-gray-100 border-gray-300' : (done ? 'bg-green-100 border-green-500' : 'bg-white border-gray-300');
+                const line = done ? 'border-green-200' : 'border-gray-200';
+                const descFinal = desc;
+                return `
+                    <li class="relative pl-10 pb-6 last:pb-0">
+                        <div class="absolute left-1 top-1 w-6 h-6 rounded-full border-2 ${circle} flex items-center justify-center">
+                            <i data-lucide="${icon}" class="w-3.5 h-3.5 ${iconColor}"></i>
+                        </div>
+                        <div class="ml-4 border-l-2 ${line} h-full absolute left-4 top-6"></div>
+                        <div class="relative ml-4">
+                            <div class="inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${noAplica ? 'bg-gray-100 text-gray-500 border border-gray-200' : (done ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-600 border border-gray-200')}">${label}</div>
+                            <p class="mt-1 text-xs text-gray-600">${descFinal}</p>
+                        </div>
+                    </li>
+                `;
+            };
+
+            const steps = [];
+            steps.push(renderStep('Radicación por Estudiante', 'El solicitante radica la solicitud FO-IN-012 en el sistema de movilidad.', paso1Ok, false));
+            steps.push(renderStep(
+                'Aval Coordinación Académica',
+                sinAvalCoord
+                    ? 'No aplica: para Profesores, Administrativos y Egresados no se requiere aval de Coordinación Académica.'
+                    : 'Coordinación Académica revisa requisitos del programa y decide si la movilidad es viable.',
+                sinAvalCoord ? true : paso2Ok,
+                sinAvalCoord
+            ));
+            steps.push(renderStep(
+                'Revisión Vehículo / SST',
+                mostrarPaso3
+                    ? 'SST verifica condiciones de transporte cuando la movilidad requiere vehículo suministrado.'
+                    : 'No aplica: esta movilidad no requiere transporte suministrado por la Universidad.',
+                paso3Ok,
+                !mostrarPaso3
+            ));
+            steps.push(renderStep('Revisión Secretaría ANI', 'Secretaría ANI valida la documentación y soportes requeridos para la movilidad.', paso4Ok, false));
+            steps.push(renderStep('Aprobación Dirección ANI', 'Dirección ANI emite la aprobación final de la movilidad (activa o pendiente de matrícula).', paso5Ok, false));
+
+            body.innerHTML = `<ol class="relative">${steps.join('')}</ol>`;
+            modal.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function cerrarModalEstadoMovilidadEst() {
+            const modal = document.getElementById('modalEstadoMovilidad');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        let currentDocUpdateReqId = null;
+
+        function abrirModalActualizarDocs(id) {
+            currentDocUpdateReqId = id;
+            const modal = document.getElementById('docUpdateModal');
+            if (!modal) return;
+            const subtitle = document.getElementById('docUpdateSubtitle');
+            if (subtitle) subtitle.textContent = `Radicado: ${id}`;
+            modal.classList.remove('hidden');
+        }
+
+        function cerrarModalActualizarDocs() {
+            const modal = document.getElementById('docUpdateModal');
+            if (modal) modal.classList.add('hidden');
+            currentDocUpdateReqId = null;
+        }
+
+        function guardarActualizacionDocs() {
+            alert("Documentos actualizados exitosamente");
+            cerrarModalActualizarDocs();
         }
 
         function saveProfileAndClose() {

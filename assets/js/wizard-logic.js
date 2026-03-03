@@ -5,6 +5,7 @@ const WizardLogic = {
     role: null,
     isDocPhase: false, 
     draftId: null,
+    editId: null,
 
     init: function() {
         console.log("Inicializando WizardLogic...");
@@ -26,11 +27,13 @@ const WizardLogic = {
         const urlParams = new URLSearchParams(window.location.search);
         this.isDocPhase = urlParams.get('mode') === 'docs';
         this.draftId = urlParams.get('draft');
+        this.editId = urlParams.get('editId');
 
         this.setupUI();
         this.loadProfile();
         this.loadAgreements();
         this.toggleExternoForm();
+        this.applyFoIn012RoleTweaks();
         this.attachDurationListeners();
         
         if(this.role !== 'EXTERNO' && this.role !== 'DOCENTE') {
@@ -45,7 +48,11 @@ const WizardLogic = {
             alert("Postulación Aprobada. Se ha habilitado la carga de sus documentos definitivos de viaje.");
         } else {
             this.filterTypesByModality(); 
-            if(this.draftId) this.loadDraft(this.draftId);
+            if (this.editId) {
+                this.loadForEdit(this.editId);
+            } else if(this.draftId) {
+                this.loadDraft(this.draftId);
+            }
             this.updateUI();
             this.calculateDuration();
         }
@@ -77,6 +84,42 @@ const WizardLogic = {
             if (interno) interno.classList.remove('hidden');
             if (externo) externo.classList.add('hidden');
             if (programaWrapper) programaWrapper.classList.remove('hidden');
+        }
+    },
+
+    mapApplicantRole: function() {
+        switch (this.role) {
+            case 'ESTUDIANTE':
+                return 'ESTUDIANTE';
+            case 'EXTERNO':
+                return 'EXTERNO';
+            case 'DOCENTE':
+            case 'PROFESOR':
+                return 'PROFESOR';
+            case 'COLABORADOR':
+            case 'ADMINISTRATIVO':
+                return 'ADMINISTRATIVO';
+            case 'EGRESADO':
+                return 'EGRESADO';
+            default:
+                return this.role || '';
+        }
+    },
+
+    applyFoIn012RoleTweaks: function() {
+        const rolesNoSemestre = ['DOCENTE', 'PROFESOR', 'COLABORADOR', 'ADMINISTRATIVO', 'EGRESADO'];
+        const isProfAdminGrad = rolesNoSemestre.includes(this.role);
+
+        const semWrapper = document.getElementById('autoSemWrapper');
+        const programaWrapper = document.getElementById('programaSelectWrapper');
+        const programaLabel = document.getElementById('programaLabel');
+
+        if (isProfAdminGrad) {
+            if (semWrapper) semWrapper.classList.add('hidden');
+            if (programaLabel) programaLabel.textContent = 'Programa / Dependencia';
+        } else {
+            if (semWrapper) semWrapper.classList.remove('hidden');
+            if (programaLabel) programaLabel.textContent = 'Programa al que pertenece';
         }
     },
 
@@ -325,6 +368,7 @@ const WizardLogic = {
         // Por lo tanto, no se muestra el UI especial de “salida” aquí.
         document.getElementById('professorRosterData')?.classList.add('hidden');
         this.toggleExternoForm();
+        this.applyFoIn012RoleTweaks();
 
         const prev = document.getElementById('prevBtn');
         const next = document.getElementById('nextBtn');
@@ -375,6 +419,97 @@ const WizardLogic = {
         }
     },
 
+    loadForEdit: function(id) {
+        const reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+        const req = reqs.find(r => String(r.id) === String(id));
+        if (!req) return;
+
+        const expediente = req.expedienteData || {};
+        const externo = req.externoFOIN012 || {};
+
+        const dirEl = document.getElementById('mobilityDirection');
+        if (dirEl) dirEl.value = req.dir || expediente.direccion || (this.role === 'EXTERNO' ? 'ENTRANTE' : 'SALIENTE');
+
+        const typeEl = document.getElementById('mobilityType');
+        if (typeEl) {
+            this.filterTypesByModality();
+            typeEl.value = req.type || expediente.tipo || '';
+        }
+
+        const modEl = document.getElementById('mobilityModality');
+        if (modEl && expediente.modalidad) modEl.value = expediente.modalidad;
+
+        const scopeEl = document.getElementById('mobilityScope');
+        if (scopeEl && expediente.alcance) scopeEl.value = expediente.alcance;
+
+        this.updateFields();
+
+        const entitySel = document.getElementById('entity_select');
+        if (entitySel) {
+            const inst = expediente.institucionDestino || '';
+            if (inst && Array.from(entitySel.options).some(o => o.value === inst)) {
+                entitySel.value = inst;
+            } else if (expediente.otraEntidad) {
+                entitySel.value = 'OTRA';
+                const otherName = document.getElementById('other_entity_name');
+                const country = document.getElementById('field_country');
+                const city = document.getElementById('field_city');
+                if (otherName) otherName.value = expediente.otraEntidad || '';
+                if (country) country.value = expediente.pais || '';
+                if (city) city.value = expediente.ciudad || '';
+            }
+            this.checkOtherEntity();
+        }
+
+        const setVal = (id, value) => {
+            const el = document.getElementById(id);
+            if (el && value != null) el.value = value;
+        };
+
+        setVal('fechaInicio', expediente.fechaInicio || '');
+        setVal('fechaFin', expediente.fechaFin || '');
+        setVal('duracionMovilidad', expediente.duracion || '');
+        setVal('fechaViajeIda', expediente.fechaViajeIda || '');
+        setVal('fechaViajeRegreso', expediente.fechaViajeRegreso || '');
+        setVal('direccionResidenciaDestino', expediente.direccionResidenciaDestino || '');
+        setVal('hasCosto', expediente.hasCosto || 'NO');
+        setVal('montoCosto', expediente.montoCosto || '');
+        setVal('hasBeca', expediente.hasBeca || 'NO');
+        setVal('montoBeca', expediente.montoBeca || '');
+        this.toggleFinance();
+        setVal('actividadesMovilidad', expediente.actividadesDesc || '');
+
+        if (this.role === 'EXTERNO') {
+            setVal('extPrimerNombre', externo.primerNombre || '');
+            setVal('extSegundoNombre', externo.segundoNombre || '');
+            setVal('extPrimerApellido', externo.primerApellido || '');
+            setVal('extSegundoApellido', externo.segundoApellido || '');
+            setVal('extSexo', externo.sexo || '');
+            setVal('extDireccion', externo.direccion || '');
+            setVal('extPais', externo.pais || '');
+            setVal('extDepartamento', externo.departamento || '');
+            setVal('extMunicipio', externo.municipio || '');
+            setVal('extTipoDoc', externo.tipoDoc || '');
+            setVal('extNumDoc', externo.numDoc || '');
+            setVal('extFecExpedicion', externo.fecExpedicion || '');
+            setVal('extFecNacimiento', externo.fecNacimiento || '');
+            setVal('extNacionalidad', externo.nacionalidad || '');
+            setVal('extCelular', externo.celular || '');
+            setVal('extCorreo', externo.correo || this.user.email || '');
+            setVal('extContactoNombre', externo.contactoNombre || '');
+            setVal('extContactoParentesco', externo.contactoParentesco || '');
+            setVal('extContactoTelefono', externo.contactoTelefono || '');
+            setVal('extContactoCorreo', externo.contactoCorreo || '');
+            setVal('extNecesidadesMedicas', externo.necesidadesMedicas || '');
+            setVal('extActividadesMaterias', externo.actividadesMaterias || '');
+        }
+
+        const formTitle = document.getElementById('formTitle');
+        if (formTitle) {
+            formTitle.innerText = 'Editar Solicitud de Movilidad';
+        }
+    },
+
     submit: function(e) {
         e.preventDefault();
         // REQ-05: Checkbox obligatorio política de tratamiento de datos personales
@@ -396,20 +531,44 @@ const WizardLogic = {
             reqs = reqs.map(r => { if(r.id === reqId) r.status = 'EN_REVISION_LEGALIZACION'; return r; });
         } else {
             const dir = document.getElementById('mobilityDirection')?.value || 'SALIENTE';
+            const existingId = this.editId || this.draftId;
+            const existingReq = existingId ? reqs.find(r => String(r.id) === String(existingId)) : null;
+            const idFinal = existingId || ("REQ-" + Math.floor(Math.random()*10000));
+            const applicantRole = this.mapApplicantRole();
+            const isEstOrExt = applicantRole === 'ESTUDIANTE' || applicantRole === 'EXTERNO';
+            const isProfAdminEgr = ['PROFESOR', 'ADMINISTRATIVO', 'EGRESADO'].includes(applicantRole);
+            let statusFinal;
+            if (existingReq) {
+                statusFinal = existingReq.status || (dir === 'ENTRANTE' ? 'EN_REVISION_TOTAL' : 'EN_REVISION_SECRETARIA_ANI');
+            } else if (isEstOrExt) {
+                statusFinal = 'PENDIENTE_PAZ_SALVO';
+            } else if (isProfAdminEgr) {
+                statusFinal = 'EN_REVISION_SECRETARIA_ANI';
+            } else {
+                statusFinal = (dir === 'ENTRANTE' ? 'EN_REVISION_TOTAL' : 'EN_REVISION_SECRETARIA_ANI');
+            }
+            const fechaOriginal = existingReq?.date;
+
             const data = {
-                id: this.draftId || "REQ-" + Math.floor(Math.random()*10000),
-                date: new Date().toLocaleDateString(),
+                id: idFinal,
+                date: fechaOriginal || new Date().toLocaleDateString(),
                 type: type,
                 dir: dir,
-                status: dir === 'ENTRANTE' ? 'EN_REVISION_TOTAL' : 'EN_REVISION_SECRETARIA_ANI',
-                userEmail: this.user.email
+                status: statusFinal,
+                userEmail: this.user.email,
+                applicantRole
             };
             data.expedienteData = this.gatherExpedienteData();
             if (this.role === 'EXTERNO') {
                 data.externoFOIN012 = this.gatherExternoFormData();
             }
-            if(this.draftId) reqs = reqs.map(r => r.id === this.draftId ? {...r, ...data} : r);
-            else reqs.push(data);
+            if (existingReq) {
+                reqs = reqs.map(r => String(r.id) === String(idFinal) ? { ...r, ...data } : r);
+            } else if(this.draftId) {
+                reqs = reqs.map(r => r.id === this.draftId ? {...r, ...data} : r);
+            } else {
+                reqs.push(data);
+            }
             alert("Postulación Radicada exitosamente.");
         }
         localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
@@ -429,6 +588,9 @@ const WizardLogic = {
             ciudad: get('field_city'),
             fechaInicio: get('fechaInicio'),
             fechaFin: get('fechaFin'),
+            fechaViajeIda: get('fechaViajeIda'),
+            fechaViajeRegreso: get('fechaViajeRegreso'),
+            direccionResidenciaDestino: get('direccionResidenciaDestino'),
             duracion: get('duracionMovilidad'),
             hasCosto: document.getElementById('hasCosto')?.value || '',
             montoCosto: get('montoCosto'),

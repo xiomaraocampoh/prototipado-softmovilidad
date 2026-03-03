@@ -429,7 +429,7 @@
                                     <i data-lucide="eye" class="w-4 h-4"></i> Ver Expediente
                                 </button>
                                 <button onclick="abrirModalEstadoMovilidad(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2">
-                                    <i data-lucide="map-pin" class="w-4 h-4"></i> Ver Estado
+                                    <i data-lucide="map-pin" class="w-4 h-4"></i> Ver Estado (Trazabilidad)
                                 </button>
                                 ${isPendiente ? `
                                 <button onclick="aprobarPazYSalvo(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-green-50 text-green-700 flex items-center gap-2">
@@ -519,7 +519,7 @@
                             <button onclick="toggleKebab('${dropdownId}')" class="p-2 rounded hover:bg-gray-100"><i data-lucide="more-vertical" class="w-5 h-5 text-gray-600"></i></button>
                             <div id="${dropdownId}" class="hidden absolute right-0 mt-1 top-full z-50 bg-white border rounded-lg shadow-lg py-1 min-w-[160px]">
                                 <button onclick="verDetallesSolicitud(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2"><i data-lucide="eye" class="w-4 h-4"></i> Ver Expediente</button>
-                                <button onclick="abrirModalEstadoMovilidad(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> Ver Estado</button>
+                                <button onclick="abrirModalEstadoMovilidad(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> Ver Estado (Trazabilidad)</button>
                             </div>
                         </div>
                     `;
@@ -792,6 +792,173 @@
             renderListaVisual();
         });
 
+        function buildExpedienteHtmlCoord(req) {
+            const ed = req.expedienteData || {};
+            const ext = req.externoFOIN012 || {};
+            const isExterno = !!req.externoFOIN012;
+            const v = (val) => (val === undefined || val === null || val === '') ? 'N/A' : String(val);
+
+            const nombreCompletoExt = [
+                ext.primerNombre, ext.segundoNombre,
+                ext.primerApellido, ext.segundoApellido
+            ].filter(Boolean).join(' ');
+
+            const datosPersonales = isExterno ? {
+                nombres: nombreCompletoExt || v(req.applicantName || ''),
+                documento: `${v(ext.tipoDoc || '')} ${v(ext.numDoc || '')}`.trim(),
+                programa: v(ed.programa || req.program || ''),
+                correo: v(ext.correo || req.email || ''),
+                celular: v(ext.celular || '')
+            } : {
+                nombres: v(req.applicantName || ''),
+                documento: v(ed.documento),
+                programa: v(ed.programa || req.program || ''),
+                correo: v(req.email || ''),
+                celular: 'N/A'
+            };
+
+            const fechasAcademicas = `${v(ed.fechaInicio || req.dateStart)} — ${v(ed.fechaFin || req.dateEnd)}`;
+            const fechasViaje = `${v(ed.fechaViajeIda)} — ${v(ed.fechaViajeRegreso)}`;
+            const proposito = isExterno
+                ? (ext.actividadesMaterias || '')
+                : (ed.actividadesDesc || getActividadesRealizar(req));
+
+            return `
+                <div class="p-6 space-y-5 text-sm text-gray-700">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Nombres</p>
+                            <p class="font-medium">${escapeHtml(v(datosPersonales.nombres))}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Documento</p>
+                            <p class="font-medium">${escapeHtml(v(datosPersonales.documento))}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Programa</p>
+                            <p class="font-medium">${escapeHtml(v(datosPersonales.programa))}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Correo</p>
+                            <p class="font-medium break-all">${escapeHtml(v(datosPersonales.correo))}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Celular</p>
+                            <p class="font-medium">${escapeHtml(v(datosPersonales.celular))}</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 border rounded-lg p-4 space-y-3">
+                        <h4 class="text-xs font-bold text-[#03045e] uppercase tracking-wider mb-1">Detalles de la Movilidad</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Tipo</p>
+                                <p class="font-medium">${escapeHtml(v(ed.tipo || req.type))}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Modalidad</p>
+                                <p class="font-medium">${escapeHtml(v(ed.modalidad))}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Dirección</p>
+                                <p class="font-medium">${escapeHtml(v(ed.direccion || req.dir))}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Institución Destino</p>
+                                <p class="font-medium">${escapeHtml(v(ed.institucionDestino || ed.otraEntidad || req.destinyInst))}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">País</p>
+                                <p class="font-medium">${escapeHtml(v(ed.pais))}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Ciudad</p>
+                                <p class="font-medium">${escapeHtml(v(ed.ciudad))}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Dirección residencia (Destino)</p>
+                                <p class="font-medium">${escapeHtml(v(ed.direccionResidenciaDestino))}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 border rounded-lg p-4 space-y-3">
+                        <h4 class="text-xs font-bold text-[#03045e] uppercase tracking-wider mb-1">Tiempos</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Fechas Académicas</p>
+                                <p class="font-medium">${escapeHtml(fechasAcademicas)}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Duración</p>
+                                <p class="font-medium">${escapeHtml(v(ed.duracion))}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Fechas de Viaje (Ida / Regreso)</p>
+                                <p class="font-medium">${escapeHtml(fechasViaje)}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 border rounded-lg p-4 space-y-3">
+                        <h4 class="text-xs font-bold text-[#03045e] uppercase tracking-wider mb-1">Información Financiera</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">¿Genera costo de matrícula?</p>
+                                <p class="font-medium">${escapeHtml(v(ed.hasCosto))}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">Monto: ${escapeHtml(v(ed.montoCosto))}</p>
+                            </div>
+                            <div>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">¿Cuenta con beca o apoyo?</p>
+                                <p class="font-medium">${escapeHtml(v(ed.hasBeca))}</p>
+                                <p class="text-xs text-gray-500 mt-0.5">Monto: ${escapeHtml(v(ed.montoBeca))}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 border rounded-lg p-4 space-y-3">
+                        <h4 class="text-xs font-bold text-[#03045e] uppercase tracking-wider mb-1">Salud y Emergencia</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${isExterno ? `
+                                <div class="md:col-span-2">
+                                    <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Necesidades médicas</p>
+                                    <p class="font-medium">${escapeHtml(v(ext.necesidadesMedicas))}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Contacto de emergencia</p>
+                                    <p class="font-medium">${escapeHtml(v(ext.contactoNombre))} (${escapeHtml(v(ext.contactoParentesco))})</p>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Teléfono / Correo</p>
+                                    <p class="font-medium">${escapeHtml(v(ext.contactoTelefono))} / ${escapeHtml(v(ext.contactoCorreo))}</p>
+                                </div>
+                            ` : `
+                                <div>
+                                    <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">EPS / Seguro</p>
+                                    <p class="font-medium">${escapeHtml(v(ed.eps))}</p>
+                                </div>
+                                <div>
+                                    <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Alergias / Medicamentos</p>
+                                    <p class="font-medium">${escapeHtml(v(ed.alergiasMeds))}</p>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Contacto de emergencia</p>
+                                    <p class="font-medium">
+                                        ${escapeHtml(v(ed.contactoNombre))} (${escapeHtml(v(ed.contactoParentesco))}) · ${escapeHtml(v(ed.contactoTel))}
+                                    </p>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="text-xs font-bold text-[#03045e] uppercase tracking-wider mb-1">Propósito de la Movilidad</h4>
+                        <p class="text-sm whitespace-pre-wrap">${escapeHtml(v(proposito))}</p>
+                    </div>
+                </div>
+            `;
+        }
+
         function verDetallesSolicitud(id) {
             const overlay = document.getElementById('detalleModal');
             const body = document.getElementById('detalleModalBody');
@@ -816,8 +983,6 @@
                 statusLabel = 'En trámite / Aprobada';
             }
 
-            const actividadesTexto = getActividadesRealizar(req);
-
             body.innerHTML = `
                 <div class="px-6 pt-6 pb-4 border-b border-gray-200 flex items-center justify-between">
                     <div>
@@ -826,54 +991,15 @@
                     </div>
                     <span class="inline-flex px-2 py-1 rounded-full bg-gray-100 text-gray-700 text-[10px] font-semibold uppercase tracking-wider">${escapeHtml(statusLabel)}</span>
                 </div>
-
-                <div class="p-6 space-y-5 text-sm text-gray-700">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Nombre del Estudiante</p>
-                            <p class="font-medium">${escapeHtml(req.applicantName || '—')}</p>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Correo Institucional</p>
-                            <p class="font-medium">${escapeHtml(req.email || '—')}</p>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Programa Académico</p>
-                            <p class="font-medium">${escapeHtml(req.program || '—')}</p>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Tipo de Movilidad</p>
-                            <p class="font-medium">${escapeHtml(req.type || '—')}</p>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Institución / Entidad Destino</p>
-                            <p class="font-medium">${escapeHtml(req.destinyInst || '—')}</p>
-                        </div>
-                        <div>
-                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Fechas de la Movilidad</p>
-                            <p class="font-medium">${escapeHtml(req.dateStart || '—')} a ${escapeHtml(req.dateEnd || '—')}</p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Actividades / Asignaturas a Realizar</p>
-                        <p class="text-sm">${actividadesTexto ? escapeHtml(actividadesTexto) : '—'}</p>
-                    </div>
-
-                    ${req.motivoRechazo ? `
+                ${buildExpedienteHtmlCoord(req)}
+                ${req.motivoRechazo ? `
+                    <div class="px-6 pb-6">
                         <div class="border border-red-200 bg-red-50 rounded-lg p-4">
                             <p class="text-xs font-bold text-red-700 uppercase tracking-wider mb-1">Motivo de Rechazo Registrado</p>
                             <p class="text-sm text-red-800">${escapeHtml(req.motivoRechazo)}</p>
                         </div>
-                    ` : ''}
-
-                    ${req.expedienteData || req.externoFOIN012 ? `
-                        <div class="border border-gray-200 bg-gray-50 rounded-lg p-4">
-                            <p class="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Otros datos del expediente (simulación FO-IN-012)</p>
-                            <pre class="text-[11px] text-gray-700 whitespace-pre-wrap break-words">${escapeHtml(JSON.stringify({ expedienteData: req.expedienteData || null, externoFOIN012: req.externoFOIN012 || null }, null, 2))}</pre>
-                        </div>
-                    ` : ''}
-                </div>
+                    </div>
+                ` : ''}
             `;
 
             overlay.classList.remove('hidden');
@@ -912,6 +1038,9 @@
                 sub.textContent = `ID: ${escapeHtml(String(req.id || '—'))} · Tipo: ${escapeHtml(tipo)} · Dirección: ${dir === 'ENTRANTE' ? 'Entrante' : 'Saliente'} · Estado actual: ${escapeHtml(estadoLegible)}`;
             }
 
+            const applicantRole = String(req.applicantRole || '').toUpperCase();
+            const sinAvalCoord = ['PROFESOR', 'ADMINISTRATIVO', 'EGRESADO'].includes(applicantRole);
+
             const paso1Ok = true;
             const paso2Ok = status !== 'PENDIENTE_PAZ_SALVO' && status !== '';
             const mostrarPaso3 = requiereTransporte;
@@ -927,7 +1056,7 @@
                 const iconColor = noAplica ? 'text-gray-400' : (done ? 'text-green-600' : 'text-gray-400');
                 const circle = noAplica ? 'bg-gray-100 border-gray-300' : (done ? 'bg-green-100 border-green-500' : 'bg-white border-gray-300');
                 const line = done ? 'border-green-200' : 'border-gray-200';
-                const descFinal = noAplica ? 'No aplica: esta movilidad no requiere transporte suministrado por la Universidad.' : desc;
+                const descFinal = desc;
                 return `
                     <li class="relative pl-10 pb-6 last:pb-0">
                         <div class="absolute left-1 top-1 w-6 h-6 rounded-full border-2 ${circle} flex items-center justify-center">
@@ -944,8 +1073,22 @@
 
             const steps = [];
             steps.push(renderStep('Radicación', 'El estudiante radica la solicitud FO-IN-012 en el sistema de movilidad.', paso1Ok, false));
-            steps.push(renderStep('Aval Coordinación', 'Coordinación Académica revisa requisitos del programa y decide si la movilidad es viable.', paso2Ok, false));
-            steps.push(renderStep('Aval SST', 'SST verifica condiciones de transporte y seguridad cuando la movilidad requiere vehículo o transporte suministrado.', paso3Ok, !mostrarPaso3));
+            steps.push(renderStep(
+                'Aval Coordinación Académica',
+                sinAvalCoord
+                    ? 'No aplica: para Profesores, Administrativos y Egresados no se requiere aval de Coordinación Académica.'
+                    : 'Coordinación Académica revisa requisitos del programa y decide si la movilidad es viable.',
+                sinAvalCoord ? true : paso2Ok,
+                sinAvalCoord
+            ));
+            steps.push(renderStep(
+                'Aval SST',
+                mostrarPaso3
+                    ? 'SST verifica condiciones de transporte y seguridad cuando la movilidad requiere vehículo o transporte suministrado.'
+                    : 'No aplica: esta movilidad no requiere transporte suministrado por la Universidad.',
+                paso3Ok,
+                !mostrarPaso3
+            ));
             steps.push(renderStep('Revisión Secretaría ANI', 'Secretaría ANI valida la documentación y soportes requeridos para la movilidad.', paso4Ok, false));
             steps.push(renderStep('Aprobación Final Dirección ANI', 'Dirección ANI emite la aprobación final de la movilidad (activa o pendiente de matrícula).', paso5Ok, false));
 
