@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/cue-core.js"></script>
     <style>
         body { font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background-color: #f0f4f8; }
         .bg-cue { background-color: #03045e; }
@@ -26,11 +27,14 @@
             <p id="coordNameDisplay" class="text-xs text-blue-200 mt-1">Cargando...</p>
         </div>
         <nav class="flex-1 p-4 space-y-2">
-            <button onclick="switchTab('solicitudes')" id="tab-solicitudes" class="w-full flex items-center gap-3 px-4 py-3 bg-blue-800/50 rounded-lg text-sm font-medium transition-colors">
-                <i data-lucide="file-check" class="w-5 h-5"></i> Solicitudes
+            <button onclick="switchTab('pendientes')" id="tab-pendientes" class="w-full flex items-center gap-3 px-4 py-3 bg-blue-800/50 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="clock" class="w-5 h-5"></i> Pendientes
+            </button>
+            <button onclick="switchTab('historial')" id="tab-historial" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-800/50 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="history" class="w-5 h-5"></i> Historial
             </button>
             <button onclick="switchTab('salidas')" id="tab-salidas" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-800/50 rounded-lg text-sm font-medium transition-colors">
-                <i data-lucide="bus" class="w-5 h-5"></i> Crear Salida Académica
+                <i data-lucide="bus" class="w-5 h-5"></i> Salidas Académicas
             </button>
         </nav>
         <div class="p-4 border-t border-blue-800">
@@ -42,7 +46,23 @@
 
     <main class="flex-1 flex flex-col overflow-hidden">
         <header class="bg-white border-b-4 border-[#03045e] shadow-sm h-16 flex items-center px-6 md:px-8 z-10">
-            <h1 id="headerTitle" class="text-xl font-bold text-[#03045e]">Cargando...</h1>
+            <div class="flex items-center justify-between w-full">
+                <h1 id="headerTitle" class="text-xl font-bold text-[#03045e]">Cargando...</h1>
+                <div class="relative">
+                    <button id="notificationBell" class="relative flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 bg-white hover:bg-gray-50 hover:border-[#0077b6] transition">
+                        <i data-lucide="bell" class="w-4 h-4 text-gray-600"></i>
+                        <span id="notificationDot" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 hidden"></span>
+                    </button>
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg text-xs z-50">
+                        <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+                            <span class="font-semibold text-gray-700">Notificaciones</span>
+                        </div>
+                        <div id="notificationList" class="max-h-64 overflow-y-auto">
+                            <!-- Contenido dinámico -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </header>
 
         <div class="flex-1 overflow-y-auto px-4 py-6 md:p-8 relative bg-[#f0f4f8]">
@@ -53,7 +73,7 @@
                     <span id="alertMessage">Operación exitosa</span>
                 </div>
 
-                <div id="view-solicitudes" class="space-y-6">
+                <div id="view-pendientes" class="space-y-6">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-200">
                     <div class="relative w-full md:w-96">
                         <i data-lucide="search" class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"></i>
@@ -61,9 +81,7 @@
                     </div>
                     <div class="w-full md:w-auto">
                         <select id="statusFilter" class="w-full md:w-auto border border-gray-300 rounded-lg text-sm px-4 py-2 outline-none focus:ring-2 focus:ring-[#0077b6] text-gray-700 font-medium cursor-pointer" onchange="filterTable()">
-                            <option value="ALL">Todas las solicitudes</option>
                             <option value="PENDIENTE">Pendientes de Aval</option>
-                            <option value="APROBADA">Aprobadas</option>
                         </select>
                     </div>
                 </div>
@@ -88,6 +106,43 @@
                     <div id="emptyStateBandeja" class="hidden p-10 text-center flex flex-col items-center justify-center">
                         <i data-lucide="inbox" class="w-12 h-12 text-gray-300 mb-3"></i>
                         <p class="text-gray-500 font-medium">No se encontraron solicitudes con estos filtros.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-historial" class="hidden space-y-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-4 md:p-5 rounded-xl shadow-sm border border-gray-200">
+                    <div class="relative w-full md:w-96">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 w-5 h-5 text-gray-400"></i>
+                        <input type="text" id="searchInputHistorial" placeholder="Buscar estudiante o correo..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#0077b6] outline-none" onkeyup="filterHistorialTable()">
+                    </div>
+                    <div class="w-full md:w-auto">
+                        <select id="statusFilterHistorial" class="w-full md:w-auto border border-gray-300 rounded-lg text-sm px-4 py-2 outline-none focus:ring-2 focus:ring-[#0077b6] text-gray-700 font-medium cursor-pointer" onchange="filterHistorialTable()">
+                            <option value="ALL">Aprobadas y Rechazadas</option>
+                            <option value="APROBADA">Solo Aprobadas</option>
+                            <option value="RECHAZADA">Solo Rechazadas</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
+                                    <th class="p-4 font-semibold">Solicitante</th>
+                                    <th class="p-4 font-semibold">Destino / Movilidad</th>
+                                    <th class="p-4 font-semibold">Actividades</th>
+                                    <th class="p-4 font-semibold">Fechas</th>
+                                    <th class="p-4 font-semibold">Estado</th>
+                                    <th class="p-4 font-semibold text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historialTableBody" class="divide-y divide-gray-100 text-sm"></tbody>
+                        </table>
+                    </div>
+                    <div id="emptyStateHistorial" class="hidden p-10 text-center flex flex-col items-center justify-center">
+                        <i data-lucide="inbox" class="w-12 h-12 text-gray-300 mb-3"></i>
+                        <p class="text-gray-500 font-medium">No hay registros en el historial.</p>
                     </div>
                 </div>
             </div>
@@ -169,6 +224,8 @@
                                         <tr class="bg-gray-100 text-gray-600 border-b border-gray-200 text-xs">
                                             <th class="p-3 font-semibold">Identificación</th>
                                             <th class="p-3 font-semibold">Nombre Completo</th>
+                                            <th class="p-3 font-semibold">Curso Vial</th>
+                                            <th class="p-3 font-semibold">Póliza</th>
                                             <th class="p-3 font-semibold text-center w-24">Acción</th>
                                         </tr>
                                     </thead>
@@ -201,6 +258,8 @@
             window.location.href = '../index-sistema.html';
         }
 
+        const currentRole = currentUser.role.code;
+
         let programaCoordinador = "INGENIERÍA DE SOFTWARE"; 
         if(currentUser.email.includes('medicina')) programaCoordinador = "MEDICINA";
         if(currentUser.email.includes('derecho')) programaCoordinador = "DERECHO";
@@ -212,15 +271,15 @@
         // 2. BASE DE DATOS SIMULADA DE ESTUDIANTES DE LA UNIVERSIDAD (Para el buscador)
         // =========================================================================
         const dbTotalEstudiantes = [
-            { id: "10924570982", nombre: "Xiomara Ocampo Hurtado", programa: "INGENIERÍA DE SOFTWARE" },
-            { id: "1111111111", nombre: "Alejandro Martinez Rios", programa: "INGENIERÍA DE SOFTWARE" },
-            { id: "2222222222", nombre: "Alejandra Gomez Perez", programa: "INGENIERÍA DE SOFTWARE" },
-            { id: "3333333333", nombre: "Luis Alejandro Gomes", programa: "INGENIERÍA DE SOFTWARE" },
-            { id: "0123456789", nombre: "Miguel Angel Gallardo", programa: "INGENIERÍA INDUSTRIAL" },
-            { id: "4444444444", nombre: "Alejandro Ruiz Ramirez", programa: "MEDICINA" }, 
-            { id: "5555555555", nombre: "Maria Alejandra Lopez", programa: "DERECHO" },
-            { id: "6666666666", nombre: "Ana Sofia Rodríguez", programa: "INGENIERÍA DE SOFTWARE" },
-            { id: "7777777777", nombre: "Carlos Eduardo Giraldo", programa: "INGENIERÍA DE SOFTWARE" }
+            { id: "10924570982", nombre: "Xiomara Ocampo Hurtado", programa: "INGENIERÍA DE SOFTWARE", tienePoliza: true, tieneCursoVial: true },
+            { id: "1111111111", nombre: "Alejandro Martinez Rios", programa: "INGENIERÍA DE SOFTWARE", tienePoliza: true, tieneCursoVial: false }, // estudiante de prueba sin curso vial
+            { id: "2222222222", nombre: "Alejandra Gomez Perez", programa: "INGENIERÍA DE SOFTWARE", tienePoliza: true, tieneCursoVial: true },
+            { id: "3333333333", nombre: "Luis Alejandro Gomes", programa: "INGENIERÍA DE SOFTWARE", tienePoliza: true, tieneCursoVial: true },
+            { id: "0123456789", nombre: "Miguel Angel Gallardo", programa: "INGENIERÍA INDUSTRIAL", tienePoliza: true, tieneCursoVial: true },
+            { id: "4444444444", nombre: "Alejandro Ruiz Ramirez", programa: "MEDICINA", tienePoliza: true, tieneCursoVial: true }, 
+            { id: "5555555555", nombre: "Maria Alejandra Lopez", programa: "DERECHO", tienePoliza: true, tieneCursoVial: true },
+            { id: "6666666666", nombre: "Ana Sofia Rodríguez", programa: "INGENIERÍA DE SOFTWARE", tienePoliza: true, tieneCursoVial: true },
+            { id: "7777777777", nombre: "Carlos Eduardo Giraldo", programa: "INGENIERÍA DE SOFTWARE", tienePoliza: false, tieneCursoVial: true } // ejemplo sin póliza
         ];
 
         // =========================================================================
@@ -250,17 +309,29 @@
         }
         injectSeedData();
 
+        // =========================================================================
+        // 1.b SISTEMA DE NOTIFICACIONES CRUZADAS (cue-core.js)
+        // =========================================================================
+        const pushCueNotification = CUECore ? CUECore.pushCueNotification : () => {};
+
         // 4. NAVEGACIÓN ENTRE PESTAÑAS
         function switchTab(tabId) {
-            document.getElementById('view-solicitudes').classList.add('hidden');
-            document.getElementById('view-salidas').classList.add('hidden');
-            document.getElementById('tab-solicitudes').classList.remove('bg-blue-800/50');
-            document.getElementById('tab-salidas').classList.remove('bg-blue-800/50');
+            ['view-pendientes', 'view-historial', 'view-salidas'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            ['tab-pendientes', 'tab-historial', 'tab-salidas'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.remove('bg-blue-800/50');
+            });
 
             document.getElementById(`view-${tabId}`).classList.remove('hidden');
             document.getElementById(`tab-${tabId}`).classList.add('bg-blue-800/50');
-            
-            document.getElementById('headerTitle').textContent = tabId === 'solicitudes' ? `Solicitudes de ${programaCoordinador}` : 'Creación de Salidas Académicas';
+
+            const titles = { pendientes: `Solicitudes de ${programaCoordinador}`, historial: 'Historial (Aprobados/Rechazados)', salidas: 'Salidas Académicas' };
+            document.getElementById('headerTitle').textContent = titles[tabId] || `Solicitudes de ${programaCoordinador}`;
+
+            if (tabId === 'historial') filterHistorialTable();
         }
 
         // Helpers para actividades y escape
@@ -290,9 +361,25 @@
             filterTable();
         }
 
+        function toggleKebab(dropdownId) {
+            document.querySelectorAll('[id^="kebab-dd-"]').forEach(dd => {
+                if (dd.id !== dropdownId) dd.classList.add('hidden');
+            });
+            const dd = document.getElementById(dropdownId);
+            if (dd) dd.classList.toggle('hidden');
+        }
+        function closeKebab(dropdownId) {
+            const dd = document.getElementById(dropdownId);
+            if (dd) dd.classList.add('hidden');
+        }
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('[id^="kebab-dd-"]') && !e.target.closest('button[onclick*="toggleKebab"]')) {
+                document.querySelectorAll('[id^="kebab-dd-"]').forEach(dd => dd.classList.add('hidden'));
+            }
+        });
+
         function filterTable() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const statusFilter = document.getElementById('statusFilter').value;
             const tbody = document.getElementById('solicitudesTableBody');
             const emptyState = document.getElementById('emptyStateBandeja');
             
@@ -302,13 +389,9 @@
                 const matchesSearch = (req.applicantName && req.applicantName.toLowerCase().includes(searchTerm)) || 
                                       (req.email && req.email.toLowerCase().includes(searchTerm));
                 
-                let isPendiente = req.status === 'PENDIENTE_PAZ_SALVO';
-                let matchesStatus = true;
-                
-                if (statusFilter === 'PENDIENTE') matchesStatus = isPendiente;
-                if (statusFilter === 'APROBADA') matchesStatus = !isPendiente;
-
-                return matchesSearch && matchesStatus;
+                const status = req.status || '';
+                const isPendiente = status === 'PENDIENTE_PAZ_SALVO';
+                return matchesSearch && isPendiente;
             });
 
             if (filtered.length === 0) {
@@ -316,20 +399,49 @@
             } else {
                 emptyState.classList.add('hidden');
                 filtered.forEach(req => {
-                    const isPendiente = req.status === 'PENDIENTE_PAZ_SALVO';
-                    
-                    const statusBadge = isPendiente 
-                        ? `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Pendiente Aval</span>`
-                        : (req.status === 'RECHAZADA_PAZ_SALVO'
-                            ? `<span class="px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Rechazada</span>`
-                            : `<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Aprobada</span>`);
-                    
-                    const actionButton = isPendiente
-                        ? `<div class="flex flex-col gap-1 items-center">
-                                <button onclick="aprobarPazYSalvo(${req.id})" class="bg-[#00529C] text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-blue-800 transition shadow-sm w-full">Dar Aval (Aprobar)</button>
-                                <button onclick="rechazarPazYSalvo(${req.id})" class="border border-red-400 text-red-600 px-3 py-1.5 rounded text-xs font-bold hover:bg-red-50 transition shadow-sm w-full">Rechazar</button>
-                           </div>`
-                        : `<span class="text-xs text-gray-400 italic">Aval registrado</span>`;
+                    const status = req.status || '';
+                    const isPendiente = status === 'PENDIENTE_PAZ_SALVO';
+                    const isRechazada = status.startsWith('RECHAZADA');
+
+                    let statusBadgeHtml = '';
+                    if (isPendiente) {
+                        statusBadgeHtml = `<span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Pendiente Aval</span>`;
+                    } else if (isRechazada) {
+                        statusBadgeHtml = `<div class="flex flex-col items-start gap-1">
+                            <span class="px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Rechazada</span>
+                            ${req.motivoRechazo ? `<span class="text-xs text-red-700 font-semibold max-w-xs">Motivo: ${escapeHtml(req.motivoRechazo)}</span>` : ''}
+                        </div>`;
+                    } else {
+                        statusBadgeHtml = `<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Aprobada</span>`;
+                    }
+
+                    const statusBadge = statusBadgeHtml;
+
+                    const kebabId = 'kebab-' + req.id;
+                    const dropdownId = 'kebab-dd-' + req.id;
+                    const actionButton = `
+                        <div class="relative flex justify-center">
+                            <button onclick="toggleKebab('${dropdownId}')" class="p-2 rounded hover:bg-gray-100 transition" title="Menú">
+                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-600"></i>
+                            </button>
+                            <div id="${dropdownId}" class="hidden absolute right-0 mt-1 top-full z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[180px]">
+                                <button onclick="verDetallesSolicitud(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2">
+                                    <i data-lucide="eye" class="w-4 h-4"></i> Ver Expediente
+                                </button>
+                                <button onclick="abrirModalEstadoMovilidad(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2">
+                                    <i data-lucide="map-pin" class="w-4 h-4"></i> Ver Estado
+                                </button>
+                                ${isPendiente ? `
+                                <button onclick="aprobarPazYSalvo(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-green-50 text-green-700 flex items-center gap-2">
+                                    <i data-lucide="check" class="w-4 h-4"></i> Aprobar
+                                </button>
+                                <button onclick="rechazarPazYSalvo(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-red-50 text-red-700 flex items-center gap-2">
+                                    <i data-lucide="x" class="w-4 h-4"></i> Rechazar
+                                </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
 
                     const actividadesTexto = getActividadesRealizar(req);
                     const actividadesHtml = actividadesTexto
@@ -354,14 +466,96 @@
                     tbody.appendChild(tr);
                 });
             }
+            lucide.createIcons();
+        }
+
+        function filterHistorialTable() {
+            const searchTerm = (document.getElementById('searchInputHistorial')?.value || '').toLowerCase();
+            const statusFilter = document.getElementById('statusFilterHistorial')?.value || 'ALL';
+            const tbody = document.getElementById('historialTableBody');
+            const emptyState = document.getElementById('emptyStateHistorial');
+            if (!tbody) return;
+
+            const historialRequests = allRequests.filter(req => {
+                const status = req.status || '';
+                const isPendiente = status === 'PENDIENTE_PAZ_SALVO';
+                const isRechazada = status.startsWith('RECHAZADA');
+                return !isPendiente && (isRechazada || !isRechazada);
+            });
+
+            const filtered = historialRequests.filter(req => {
+                const matchesSearch = (req.applicantName && req.applicantName.toLowerCase().includes(searchTerm)) || 
+                                      (req.email && req.email.toLowerCase().includes(searchTerm));
+                const status = req.status || '';
+                const isRechazada = status.startsWith('RECHAZADA');
+                let matchesStatus = true;
+                if (statusFilter === 'APROBADA') matchesStatus = !isRechazada;
+                else if (statusFilter === 'RECHAZADA') matchesStatus = isRechazada;
+                return matchesSearch && matchesStatus;
+            });
+
+            tbody.innerHTML = '';
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filtered.forEach(req => {
+                    const status = req.status || '';
+                    const isRechazada = status.startsWith('RECHAZADA');
+                    let statusBadgeHtml = isRechazada
+                        ? `<div class="flex flex-col items-start gap-1">
+                            <span class="px-2 py-1 bg-red-100 text-red-700 text-[10px] font-bold rounded-full uppercase">Rechazada</span>
+                            ${req.motivoRechazo ? `<span class="text-xs text-red-700 max-w-xs">Motivo: ${escapeHtml(req.motivoRechazo)}</span>` : ''}
+                          </div>`
+                        : `<span class="px-2 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase">Aprobada</span>`;
+                    const actividadesTexto = getActividadesRealizar(req);
+                    const actividadesHtml = actividadesTexto
+                        ? `<p class="text-xs text-gray-700 max-w-xs line-clamp-3">${escapeHtml(actividadesTexto)}</p>`
+                        : '<span class="text-xs text-gray-400 italic">—</span>';
+                    const kebabId = 'kebab-h-' + req.id;
+                    const dropdownId = 'kebab-dd-h-' + req.id;
+                    const actionBtn = `
+                        <div class="relative flex justify-center">
+                            <button onclick="toggleKebab('${dropdownId}')" class="p-2 rounded hover:bg-gray-100"><i data-lucide="more-vertical" class="w-5 h-5 text-gray-600"></i></button>
+                            <div id="${dropdownId}" class="hidden absolute right-0 mt-1 top-full z-50 bg-white border rounded-lg shadow-lg py-1 min-w-[160px]">
+                                <button onclick="verDetallesSolicitud(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2"><i data-lucide="eye" class="w-4 h-4"></i> Ver Expediente</button>
+                                <button onclick="abrirModalEstadoMovilidad(${req.id}); closeKebab('${dropdownId}')" class="w-full px-4 py-2 text-left text-xs hover:bg-gray-50 flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4"></i> Ver Estado</button>
+                            </div>
+                        </div>
+                    `;
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="p-4"><p class="font-bold text-gray-800">${escapeHtml(req.applicantName)}</p><p class="text-xs text-gray-500">${escapeHtml(req.email)}</p></td>
+                        <td class="p-4"><p class="font-medium text-gray-700">${escapeHtml(req.destinyInst || 'Institución')}</p><p class="text-xs text-gray-500">${escapeHtml(req.type || 'Movilidad')}</p></td>
+                        <td class="p-4">${actividadesHtml}</td>
+                        <td class="p-4 text-xs text-gray-600">${req.dateStart} a ${req.dateEnd}</td>
+                        <td class="p-4">${statusBadgeHtml}</td>
+                        <td class="p-4 text-center">${actionBtn}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            lucide.createIcons();
         }
 
         function aprobarPazYSalvo(id) {
             let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')) || [];
             const index = requests.findIndex(r => r.id === id);
-            if(index !== -1) {
-                requests[index].status = 'REVISION_ANI';
+            if (index !== -1) {
+                const req = requests[index];
+                req.status = 'EN_REVISION_SECRETARIA_ANI';
+                requests[index] = req;
                 localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
+
+                const requiereTransporte = req.requiereTransporte === true || req.sstReviewFlag === true;
+                const destinatarios = ['ANI_SECRETARIA', 'ANI_DIRECCION'];
+                if (requiereTransporte) {
+                    destinatarios.push('SST');
+                }
+                const nombre = req.applicantName || req.userName || req.email || String(req.id || '');
+                const mensaje = `Coordinación Académica ha aprobado la movilidad de ${nombre} y la ha enviado a ANI para revisión documental.`;
+                pushCueNotification(destinatarios, mensaje);
+
                 mostrarAlerta('Solicitud aprobada académicamente. Enviada a revisión documental (ANI).', 'success');
                 loadSolicitudes();
             }
@@ -369,13 +563,28 @@
 
         function rechazarPazYSalvo(id) {
             if (!confirm('¿Confirmar que esta movilidad se rechaza desde Coordinación Académica?')) return;
+
+            const motivo = prompt('Indica el motivo de rechazo que verá el estudiante en su panel:');
+            if (!motivo || !motivo.trim()) {
+                alert('Debes especificar un motivo de rechazo para continuar.');
+                return;
+            }
+
             let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')) || [];
             const index = requests.findIndex(r => r.id === id);
             if(index !== -1) {
-                requests[index].status = 'RECHAZADA_PAZ_SALVO';
+                const req = requests[index];
+                req.status = 'RECHAZADA_PAZ_SALVO';
+                req.motivoRechazo = motivo.trim();
+                requests[index] = req;
                 localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
+
+                const nombre = req.applicantName || req.userName || req.email || String(req.id || '');
+                pushCueNotification(['ANI_SECRETARIA', 'ANI_DIRECCION'], `Coordinación Académica ha rechazado la movilidad de ${nombre}. Motivo: ${motivo.trim()}`);
+
                 mostrarAlerta('Movilidad rechazada académicamente. El solicitante podrá ver el estado actualizado en su panel.', 'error');
                 loadSolicitudes();
+                if (document.getElementById('view-historial') && !document.getElementById('view-historial').classList.contains('hidden')) filterHistorialTable();
             }
         }
 
@@ -451,9 +660,20 @@
                 return;
             }
 
+            const tienePoliza = estudiantePreSeleccionado.tienePoliza !== false;
+            const tieneCursoVial = estudiantePreSeleccionado.tieneCursoVial !== false;
+            const autorizado = tienePoliza && tieneCursoVial;
+
+            if (!autorizado) {
+                mostrarAlerta('Este estudiante no cumple con Póliza Estudiantil vigente y/o Curso de Seguridad Vial. Se marcará como NO AUTORIZADO.', 'error');
+            }
+
             listaEstudiantesSalida.push({
                 identificacion: estudiantePreSeleccionado.id,
-                nombre: estudiantePreSeleccionado.nombre
+                nombre: estudiantePreSeleccionado.nombre,
+                autorizado,
+                tienePoliza,
+                tieneCursoVial
             });
 
             // Limpiar buscador y estado
@@ -468,6 +688,7 @@
         function eliminarDeLaLista(index) {
             listaEstudiantesSalida.splice(index, 1);
             renderListaVisual();
+            updateGuardarSalidaButton();
         }
 
         function renderListaVisual() {
@@ -480,10 +701,19 @@
             } else {
                 msg.classList.add('hidden');
                 listaEstudiantesSalida.forEach((est, index) => {
+                    const badgeCurso = est.tieneCursoVial
+                        ? `<span class="inline-flex px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">✓</span>`
+                        : `<span class="inline-flex px-2 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">✗</span>`;
+                    const badgePoliza = est.tienePoliza
+                        ? `<span class="inline-flex px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">✓</span>`
+                        : `<span class="inline-flex px-2 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">✗</span>`;
+
                     tbody.innerHTML += `
                         <tr class="hover:bg-gray-50 transition-colors">
                             <td class="p-3 text-gray-600 font-mono text-xs">${est.identificacion}</td>
                             <td class="p-3 text-gray-800 font-medium">${est.nombre}</td>
+                            <td class="p-3">${badgeCurso}</td>
+                            <td class="p-3">${badgePoliza}</td>
                             <td class="p-3 text-center">
                                 <button type="button" onclick="eliminarDeLaLista(${index})" class="text-red-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50" title="Eliminar">
                                     <i data-lucide="x" class="w-5 h-5 mx-auto"></i>
@@ -493,7 +723,17 @@
                     `;
                 });
             }
+            updateGuardarSalidaButton();
             lucide.createIcons();
+        }
+
+        function updateGuardarSalidaButton() {
+            const btn = document.querySelector('#salidaForm button[type="submit"]');
+            if (!btn) return;
+            const hayRojos = listaEstudiantesSalida.some(e => !e.autorizado);
+            btn.disabled = hayRojos || listaEstudiantesSalida.length === 0;
+            btn.classList.toggle('opacity-50', btn.disabled);
+            btn.classList.toggle('cursor-not-allowed', btn.disabled);
         }
 
         // =========================================================================
@@ -506,9 +746,15 @@
                 mostrarAlerta('Debes buscar y agregar al menos un estudiante a la salida.', 'error');
                 return;
             }
+            const hayRojos = listaEstudiantesSalida.some(est => !est.autorizado);
+            if (hayRojos) {
+                mostrarAlerta('No se puede guardar: hay estudiantes sin Curso Vial o Póliza vigente.', 'error');
+                return;
+            }
 
             const requiereSST = document.querySelector('input[name="s_transporte"]:checked').value;
             const estadoInicial = requiereSST === 'SI' ? 'EN_REVISION_SST' : 'APROBADA_POR_COORD';
+            const profesorNombre = document.getElementById('s_profesor').value;
 
             const nuevaSalida = {
                 id: Date.now(),
@@ -518,10 +764,19 @@
                 direccion: document.getElementById('s_direccion').value,
                 fechaInicio: document.getElementById('s_fechaInicio').value,
                 fechaFin: document.getElementById('s_fechaFin').value,
-                profesor: document.getElementById('s_profesor').value,
+                profesor: profesorNombre,
+                profesorResponsable: { nombre: profesorNombre, email: currentUser.email || '' },
                 actividad: document.getElementById('s_actividad').value,
                 transporteUniversidad: requiereSST,
                 estudiantes: listaEstudiantesSalida,
+                participantes: listaEstudiantesSalida.map(est => ({
+                    nombre: est.nombre,
+                    email: est.identificacion,
+                    identificacion: est.identificacion,
+                    rol: 'ESTUDIANTE',
+                    tienePoliza: est.tienePoliza,
+                    tieneCursoVial: est.tieneCursoVial
+                })),
                 status: estadoInicial
             };
 
@@ -536,6 +791,173 @@
             listaEstudiantesSalida = [];
             renderListaVisual();
         });
+
+        function verDetallesSolicitud(id) {
+            const overlay = document.getElementById('detalleModal');
+            const body = document.getElementById('detalleModalBody');
+
+            let req = allRequests.find(r => r.id === id);
+            if (!req) {
+                const all = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS')) || [];
+                req = all.find(r => r.id === id);
+            }
+            if (!req) return;
+
+            const status = req.status || '';
+            const isPendiente = status === 'PENDIENTE_PAZ_SALVO';
+            const isRechazada = status.startsWith('RECHAZADA');
+
+            let statusLabel = '';
+            if (isPendiente) {
+                statusLabel = 'Pendiente de Aval Académico';
+            } else if (isRechazada) {
+                statusLabel = 'Rechazada desde Coordinación Académica';
+            } else {
+                statusLabel = 'En trámite / Aprobada';
+            }
+
+            const actividadesTexto = getActividadesRealizar(req);
+
+            body.innerHTML = `
+                <div class="px-6 pt-6 pb-4 border-b border-gray-200 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-[#03045e]">Detalle de Solicitud FO-IN-012</h3>
+                        <p class="text-xs text-gray-500 mt-1">ID Interno: ${escapeHtml(String(req.id || '—'))}</p>
+                    </div>
+                    <span class="inline-flex px-2 py-1 rounded-full bg-gray-100 text-gray-700 text-[10px] font-semibold uppercase tracking-wider">${escapeHtml(statusLabel)}</span>
+                </div>
+
+                <div class="p-6 space-y-5 text-sm text-gray-700">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Nombre del Estudiante</p>
+                            <p class="font-medium">${escapeHtml(req.applicantName || '—')}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Correo Institucional</p>
+                            <p class="font-medium">${escapeHtml(req.email || '—')}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Programa Académico</p>
+                            <p class="font-medium">${escapeHtml(req.program || '—')}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Tipo de Movilidad</p>
+                            <p class="font-medium">${escapeHtml(req.type || '—')}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Institución / Entidad Destino</p>
+                            <p class="font-medium">${escapeHtml(req.destinyInst || '—')}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Fechas de la Movilidad</p>
+                            <p class="font-medium">${escapeHtml(req.dateStart || '—')} a ${escapeHtml(req.dateEnd || '—')}</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-1">Actividades / Asignaturas a Realizar</p>
+                        <p class="text-sm">${actividadesTexto ? escapeHtml(actividadesTexto) : '—'}</p>
+                    </div>
+
+                    ${req.motivoRechazo ? `
+                        <div class="border border-red-200 bg-red-50 rounded-lg p-4">
+                            <p class="text-xs font-bold text-red-700 uppercase tracking-wider mb-1">Motivo de Rechazo Registrado</p>
+                            <p class="text-sm text-red-800">${escapeHtml(req.motivoRechazo)}</p>
+                        </div>
+                    ` : ''}
+
+                    ${req.expedienteData || req.externoFOIN012 ? `
+                        <div class="border border-gray-200 bg-gray-50 rounded-lg p-4">
+                            <p class="text-xs font-bold text-gray-600 uppercase tracking-wider mb-2">Otros datos del expediente (simulación FO-IN-012)</p>
+                            <pre class="text-[11px] text-gray-700 whitespace-pre-wrap break-words">${escapeHtml(JSON.stringify({ expedienteData: req.expedienteData || null, externoFOIN012: req.externoFOIN012 || null }, null, 2))}</pre>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            overlay.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function cerrarDetalleModal() {
+            const overlay = document.getElementById('detalleModal');
+            if (overlay) {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function abrirModalEstadoMovilidad(id) {
+            const overlay = document.getElementById('modalEstadoMovilidad');
+            const body = document.getElementById('estadoMovilidadBody');
+            const sub = document.getElementById('estadoMovilidadSub');
+            if (!overlay || !body) return;
+
+            const requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            let req = requests.find(r => String(r.id) === String(id));
+            if (!req && Array.isArray(allRequests) && allRequests.length) {
+                req = allRequests.find(r => String(r.id) === String(id)) || null;
+            }
+            if (!req) {
+                req = { id, status: '' };
+            }
+
+            const status = String(req.status || '').toUpperCase();
+            const tipo = req.type || 'Movilidad';
+            const dir = (req.dir || 'SALIENTE').toUpperCase();
+            const requiereTransporte = req.requiereTransporte === true || req.sstReviewFlag === true;
+
+            if (sub) {
+                const estadoLegible = status || 'SIN_ESTADO';
+                sub.textContent = `ID: ${escapeHtml(String(req.id || '—'))} · Tipo: ${escapeHtml(tipo)} · Dirección: ${dir === 'ENTRANTE' ? 'Entrante' : 'Saliente'} · Estado actual: ${escapeHtml(estadoLegible)}`;
+            }
+
+            const paso1Ok = true;
+            const paso2Ok = status !== 'PENDIENTE_PAZ_SALVO' && status !== '';
+            const mostrarPaso3 = requiereTransporte;
+            const sstAprobado = req.sstReviewFlag === true || (req.sstReview && req.sstReview.estado === 'APROBADO');
+            const paso3Ok = mostrarPaso3 && sstAprobado;
+            const estadosPaso4Ok = ['EN_REVISION_DIRECCION_ANI', 'PENDIENTE_MATRICULA', 'MOVILIDAD_ACTIVA', 'APROBADA_POSTULACION', 'EN_REVISION_TOTAL'];
+            const paso4Ok = estadosPaso4Ok.includes(status);
+            const estadosPaso5Ok = ['MOVILIDAD_ACTIVA', 'PENDIENTE_MATRICULA', 'APROBADA_FINAL'];
+            const paso5Ok = estadosPaso5Ok.includes(status);
+
+            const renderStep = (label, desc, done, noAplica) => {
+                const icon = noAplica ? 'minus-circle' : (done ? 'check-circle-2' : 'clock-3');
+                const iconColor = noAplica ? 'text-gray-400' : (done ? 'text-green-600' : 'text-gray-400');
+                const circle = noAplica ? 'bg-gray-100 border-gray-300' : (done ? 'bg-green-100 border-green-500' : 'bg-white border-gray-300');
+                const line = done ? 'border-green-200' : 'border-gray-200';
+                const descFinal = noAplica ? 'No aplica: esta movilidad no requiere transporte suministrado por la Universidad.' : desc;
+                return `
+                    <li class="relative pl-10 pb-6 last:pb-0">
+                        <div class="absolute left-1 top-1 w-6 h-6 rounded-full border-2 ${circle} flex items-center justify-center">
+                            <i data-lucide="${icon}" class="w-3.5 h-3.5 ${iconColor}"></i>
+                        </div>
+                        <div class="ml-4 border-l-2 ${line} h-full absolute left-4 top-6"></div>
+                        <div class="relative ml-4">
+                            <div class="inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${noAplica ? 'bg-gray-100 text-gray-500 border border-gray-200' : (done ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-600 border border-gray-200')}">${label}</div>
+                            <p class="mt-1 text-xs text-gray-600">${descFinal}</p>
+                        </div>
+                    </li>
+                `;
+            };
+
+            const steps = [];
+            steps.push(renderStep('Radicación', 'El estudiante radica la solicitud FO-IN-012 en el sistema de movilidad.', paso1Ok, false));
+            steps.push(renderStep('Aval Coordinación', 'Coordinación Académica revisa requisitos del programa y decide si la movilidad es viable.', paso2Ok, false));
+            steps.push(renderStep('Aval SST', 'SST verifica condiciones de transporte y seguridad cuando la movilidad requiere vehículo o transporte suministrado.', paso3Ok, !mostrarPaso3));
+            steps.push(renderStep('Revisión Secretaría ANI', 'Secretaría ANI valida la documentación y soportes requeridos para la movilidad.', paso4Ok, false));
+            steps.push(renderStep('Aprobación Final Dirección ANI', 'Dirección ANI emite la aprobación final de la movilidad (activa o pendiente de matrícula).', paso5Ok, false));
+
+            body.innerHTML = `<ol class="relative">${steps.join('')}</ol>`;
+            overlay.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function cerrarModalEstadoMovilidad() {
+            const overlay = document.getElementById('modalEstadoMovilidad');
+            if (overlay) overlay.classList.add('hidden');
+        }
 
         // 8. ALERTAS Y LOGOUT
         function mostrarAlerta(mensaje, tipo) {
@@ -578,7 +1000,42 @@
         // INICIALIZACIÓN
         loadSolicitudes();
         renderListaVisual();
+        if (typeof CUECore !== 'undefined') CUECore.initCueNotificationUI(currentRole);
 
     </script>
+
+    <!-- Modal Detalle Solicitud FO-IN-012 -->
+    <div id="detalleModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-30 hidden">
+        <div class="bg-white rounded-xl shadow-xl max-w-3xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                <h2 class="text-sm font-semibold text-gray-800">Detalle de Solicitud</h2>
+                <button onclick="cerrarDetalleModal()" class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="detalleModalBody" class="text-sm text-gray-700">
+                <!-- Contenido dinámico de la solicitud -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Estado de la Movilidad (Línea de Tiempo) -->
+    <div id="modalEstadoMovilidad" class="fixed inset-0 bg-black/40 flex items-center justify-center z-40 hidden px-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50">
+                <div>
+                    <h2 class="text-sm font-semibold text-[#03045e]">Estado de la Movilidad</h2>
+                    <p id="estadoMovilidadSub" class="text-[11px] text-gray-500 mt-0.5"></p>
+                </div>
+                <button onclick="cerrarModalEstadoMovilidad()" class="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="estadoMovilidadBody" class="p-5 text-sm">
+                <!-- Línea de tiempo dinámica -->
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>

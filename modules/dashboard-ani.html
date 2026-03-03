@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <script src="../assets/js/cue-core.js"></script>
 </head>
 
 <body class="bg-[#f0f4f8] font-['Inter'] flex h-screen overflow-hidden">
@@ -49,6 +50,11 @@
                 data-target="tab-tipos">
                 <i data-lucide="settings" class="w-4 h-4"></i> Tipos Movilidad
             </button>
+            <button id="tab-reportes-btn" onclick="switchTab('view-reportes')"
+                class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition hidden"
+                data-target="view-reportes">
+                <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Reportes y Estadísticas
+            </button>
         </nav>
 
         <div class="p-4 border-t border-white/10">
@@ -67,6 +73,20 @@
                 <span class="text-[#0077b6] font-bold border-l pl-3 ml-2 text-sm">Módulo Administrativo</span>
             </div>
             <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button id="notificationBell" class="relative flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 bg-white hover:bg-gray-50 hover:border-[#0077b6] transition">
+                        <i data-lucide="bell" class="w-4 h-4 text-gray-600"></i>
+                        <span id="notificationDot" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 hidden"></span>
+                    </button>
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg text-xs z-50">
+                        <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+                            <span class="font-semibold text-gray-700">Notificaciones</span>
+                        </div>
+                        <div id="notificationList" class="max-h-64 overflow-y-auto">
+                            <!-- Contenido dinámico -->
+                        </div>
+                    </div>
+                </div>
                 <div class="text-right">
                     <p id="userNameDisplay" class="text-sm font-bold text-[#03045e] leading-tight">Usuario</p>
                     <p id="userRoleDisplay" class="text-[10px] text-gray-500 uppercase font-bold">Rol</p>
@@ -276,6 +296,103 @@
                 </div>
             </div>
 
+            <div id="view-reportes" class="ani-content-section hidden animate-fade-in">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-[#03045e] flex items-center gap-2">
+                        <span>Reportes y Estadísticas</span>
+                        <span class="text-sm font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">Dirección ANI</span>
+                    </h2>
+                    <p class="text-gray-500 text-sm">Panel de indicadores para soporte a reportes CNA, SNIES, SIRE y seguimiento interno.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Movilidades Registradas</p>
+                        </div>
+                        <p id="kpiTotalMov" class="text-3xl font-black text-[#03045e]">0</p>
+                        <p class="text-[11px] text-gray-400 mt-1">Fuente: módulo FO-IN-012 (CUE_MY_REQUESTS).</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Entrantes vs Salientes</p>
+                        </div>
+                        <p id="kpiEntrantesSalientes" class="text-xl font-black text-[#03045e]">0 / 0</p>
+                        <p class="text-[11px] text-gray-400 mt-1">Dirección de la movilidad según FO-IN-012.</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-3">
+                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Programa con más movilidades</p>
+                        </div>
+                        <p id="kpiTopPrograma" class="text-base font-bold text-[#03045e]">—</p>
+                        <p class="text-[11px] text-gray-400 mt-1">Basado en la cantidad de registros por programa.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-8">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-[#03045e]">Generación de Reportes Oficiales</h3>
+                            <p class="text-xs text-gray-500">Descargue plantillas consolidadas para CNA, SIRE y reportes internos usando la data en tiempo real.</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onclick="generarReporteExcel('CNA')" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#03045e] text-white rounded-lg text-sm font-bold hover:bg-black transition shadow-sm">
+                            <span>Generar Reporte CNA</span>
+                        </button>
+                        <button onclick="generarReporteExcel('SIRE')" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#0077b6] text-white rounded-lg text-sm font-bold hover:bg-[#005b8f] transition shadow-sm">
+                            <span>Generar Reporte SIRE</span>
+                        </button>
+                        <button onclick="generarReporteExcel('GENERALES')" class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition shadowsm">
+                            <span>Generar Indicadores Generales</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-[#03045e]">Explorador de Movilidades (Datos Crudos)</h3>
+                            <p class="text-xs text-gray-500">Filtre y revise los registros antes de generar reportes oficiales.</p>
+                        </div>
+                        <div class="flex flex-wrap gap-3 text-xs">
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Programa</label>
+                                <select id="filtroPrograma" class="border border-gray-300 rounded px-2 py-1 text-xs min-w-[140px]" onchange="renderTablaCruda()">
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Tipo de Movilidad</label>
+                                <select id="filtroTipo" class="border border-gray-300 rounded px-2 py-1 text-xs min-w-[140px]" onchange="renderTablaCruda()">
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Año</label>
+                                <select id="filtroAnio" class="border border-gray-300 rounded px-2 py-1 text-xs min-w-[100px]" onchange="renderTablaCruda()">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-lg overflow-hidden max-h-[360px] overflow-y-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-gray-50 text-gray-600 border-b">
+                                <tr>
+                                    <th class="p-2">ID</th>
+                                    <th class="p-2">Programa</th>
+                                    <th class="p-2">Tipo</th>
+                                    <th class="p-2">Dirección</th>
+                                    <th class="p-2">Estado</th>
+                                    <th class="p-2">Fechas</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaCrudaBody" class="divide-y divide-gray-100">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -304,10 +421,31 @@
         </div>
     </div>
 
+    <div id="modalEstadoMovilidad" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50">
+                <div>
+                    <h3 class="text-sm font-bold text-[#03045e] flex items-center gap-2">
+                        <span>Estado de la Movilidad</span>
+                    </h3>
+                    <p id="estadoMovilidadSub" class="text-[11px] text-gray-500 mt-0.5"></p>
+                </div>
+                <button onclick="cerrarModalEstadoMovilidad()" class="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="estadoMovilidadBody" class="p-5 text-sm">
+                <!-- Línea de tiempo dinámica -->
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/auth.js"></script>
     <script>
         let currentRole = null;
         let currentRequestId = null;
+
+        const pushCueNotification = CUECore ? CUECore.pushCueNotification : () => {};
 
         document.addEventListener('DOMContentLoaded', () => {
             const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
@@ -319,8 +457,15 @@
             document.getElementById('userRoleDisplay').textContent = user.role.name;
             document.getElementById('aniTitle').textContent = user.role.code === 'ANI_SECRETARIA' ? 'Secretaría ANI' : 'Dirección ANI';
 
+            if (currentRole === 'ANI_DIRECCION') {
+                const btnReportes = document.getElementById('tab-reportes-btn');
+                if (btnReportes) btnReportes.classList.remove('hidden');
+                buildAniReportDashboard();
+            }
+
             loadTable();
             loadConveniosTable();
+            if (typeof CUECore !== 'undefined') CUECore.initCueNotificationUI(currentRole);
             lucide.createIcons();
         });
 
@@ -410,6 +555,10 @@
                 activeBtn.classList.remove('text-blue-200', 'font-semibold');
                 activeBtn.classList.add('bg-white/10', 'text-white', 'font-bold');
             }
+
+            if (targetId === 'view-reportes' && currentRole === 'ANI_DIRECCION') {
+                buildAniReportDashboard();
+            }
         }
 
         function loadTable() {
@@ -426,15 +575,15 @@
             localReqs.forEach(lr => { if (!allReqs.find(ar => ar.id === lr.id)) allReqs.push(lr); });
 
             const visibleReqs = allReqs.filter(req => {
-                if (currentRole === 'ANI_SECRETARIA') return req.status === 'EN_REVISION_SECRETARIA_ANI';
-                if (currentRole === 'ANI_DIRECCION') return req.status === 'EN_REVISION_DIRECCION_ANI' || req.status === 'EN_REVISION_TOTAL';
+                const st = String(req.status || '').toUpperCase();
+                if (currentRole === 'ANI_SECRETARIA') return st === 'EN_REVISION_SECRETARIA_ANI' || st === 'REVISION_ANI';
+                if (currentRole === 'ANI_DIRECCION') return st === 'EN_REVISION_DIRECCION_ANI' || st === 'EN_REVISION_TOTAL';
                 return false;
             });
 
             if (visibleReqs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-gray-500">
                     <div class="flex flex-col items-center gap-2">
-                        <span class="text-4xl opacity-50">📂</span>
                         <p class="font-medium">No hay expedientes pendientes de revisión</p>
                         <p class="text-xs">Las solicitudes radicadas aparecerán aquí según su rol (Secretaría o Dirección).</p>
                     </div>
@@ -450,7 +599,10 @@
                         <td class="p-4">${escapeHtml(req.userEmail)}</td>
                         <td class="p-4">${escapeHtml(req.type)}</td>
                         <td class="p-4 text-center">
-                            <button onclick="openReviewById('${safeId}')" class="border border-[#0077b6] text-[#0077b6] px-4 py-1.5 rounded text-xs font-bold hover:bg-blue-50 transition">Evaluar Expediente</button>
+                            <div class="flex flex-col gap-2 items-center">
+                                <button onclick="openReviewById('${safeId}')" class="border border-[#0077b6] text-[#0077b6] px-4 py-1.5 rounded text-xs font-bold hover:bg-blue-50 transition w-full">Evaluar Expediente</button>
+                                <button onclick="openEstadoMovilidad('${safeId}')" class="border border-gray-300 text-gray-700 px-4 py-1.5 rounded text-xs font-semibold hover:bg-gray-50 transition w-full">Ver Estado</button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -461,6 +613,84 @@
             const allReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             const req = allReqs.find(r => r.id === id);
             openReview(req || { id: id, userEmail: id, type: '', dir: 'SALIENTE' });
+        }
+
+        function openEstadoMovilidad(id) {
+            const allReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            let req = allReqs.find(r => String(r.id) === String(id));
+            if (!req) {
+                // incluir también mockRequests de la bandeja ANI
+                const mockFallback = [
+                    { id: 'REQ-1082', type: 'Práctica Empresarial', status: 'EN_REVISION_SECRETARIA_ANI', userEmail: 'estudiante@cue.edu.co', dir: 'SALIENTE' },
+                    { id: 'REQ-2005', type: 'Intercambio Académico', status: 'EN_REVISION_TOTAL', userEmail: 'externo@unam.mx', dir: 'ENTRANTE' }
+                ];
+                req = mockFallback.find(r => String(r.id) === String(id)) || { id, status: '', userEmail: '' };
+            }
+
+            const status = String(req.status || '').toUpperCase();
+            const tipo = req.type || 'Movilidad';
+            const dir = (req.dir || 'SALIENTE').toUpperCase();
+            const requiereTransporte = req.requiereTransporte === true || req.sstReviewFlag === true;
+
+            const estadoLegible = status || 'SIN_ESTADO';
+            const subText = `ID: ${escapeHtml(String(req.id || '—'))} · Tipo: ${escapeHtml(tipo)} · Dirección: ${dir === 'ENTRANTE' ? 'Entrante' : 'Saliente'} · Estado actual: ${escapeHtml(estadoLegible)}`;
+            const subEl = document.getElementById('estadoMovilidadSub');
+            if (subEl) subEl.textContent = subText;
+
+            const body = document.getElementById('estadoMovilidadBody');
+            if (!body) return;
+
+            const paso1Ok = true;
+            const paso2Ok = status !== 'PENDIENTE_PAZ_SALVO' && status !== '';
+            const mostrarPaso3 = requiereTransporte;
+            const sstAprobado = req.sstReviewFlag === true || (req.sstReview && req.sstReview.estado === 'APROBADO');
+            const paso3Ok = mostrarPaso3 && sstAprobado;
+            const estadosPaso4Ok = ['EN_REVISION_DIRECCION_ANI', 'PENDIENTE_MATRICULA', 'MOVILIDAD_ACTIVA', 'APROBADA_POSTULACION', 'EN_REVISION_TOTAL'];
+            const paso4Ok = estadosPaso4Ok.includes(status);
+            const estadosPaso5Ok = ['MOVILIDAD_ACTIVA', 'PENDIENTE_MATRICULA', 'APROBADA_FINAL'];
+            const paso5Ok = estadosPaso5Ok.includes(status);
+
+            const renderStep = (label, desc, done, noAplica) => {
+                const icon = noAplica ? 'minus-circle' : (done ? 'check-circle-2' : 'clock-3');
+                const iconColor = noAplica ? 'text-gray-400' : (done ? 'text-green-600' : 'text-gray-400');
+                const circle = noAplica ? 'bg-gray-100 border-gray-300' : (done ? 'bg-green-100 border-green-500' : 'bg-white border-gray-300');
+                const line = done ? 'border-green-200' : 'border-gray-200';
+                const descFinal = noAplica ? 'No aplica: esta movilidad no requiere transporte suministrado por la Universidad.' : desc;
+                return `
+                    <li class="relative pl-10 pb-6 last:pb-0">
+                        <div class="absolute left-1 top-1 w-6 h-6 rounded-full border-2 ${circle} flex items-center justify-center">
+                            <i data-lucide="${icon}" class="w-3.5 h-3.5 ${iconColor}"></i>
+                        </div>
+                        <div class="ml-4 border-l-2 ${line} h-full absolute left-4 top-6"></div>
+                        <div class="relative ml-4">
+                            <div class="inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${noAplica ? 'bg-gray-100 text-gray-500 border border-gray-200' : (done ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-600 border border-gray-200')}">${label}</div>
+                            <p class="mt-1 text-xs text-gray-600">${descFinal}</p>
+                        </div>
+                    </li>
+                `;
+            };
+
+            const steps = [];
+            steps.push(renderStep('Radicación', 'El estudiante radica la solicitud FO-IN-012 en el sistema de movilidad.', paso1Ok, false));
+            steps.push(renderStep('Aval Coordinación', 'Coordinación Académica revisa requisitos del programa y decide si la movilidad es viable.', paso2Ok, false));
+            steps.push(renderStep('Aval SST', 'SST verifica condiciones de transporte y seguridad cuando la movilidad requiere vehículo o transporte suministrado.', paso3Ok, !mostrarPaso3));
+            steps.push(renderStep('Revisión Secretaría ANI', 'Secretaría ANI valida la documentación y soportes requeridos para la movilidad.', paso4Ok, false));
+            steps.push(renderStep('Aprobación Final Dirección ANI', 'Dirección ANI emite la aprobación final de la movilidad (activa o pendiente de matrícula).', paso5Ok, false));
+
+            body.innerHTML = `<ol class="relative">${steps.join('')}</ol>`;
+
+            const modal = document.getElementById('modalEstadoMovilidad');
+            if (modal) {
+                modal.classList.remove('hidden');
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        function cerrarModalEstadoMovilidad() {
+            const modal = document.getElementById('modalEstadoMovilidad');
+            if (modal) modal.classList.add('hidden');
         }
 
         function buildExpedienteHtml(req) {
@@ -625,10 +855,30 @@
 
         function processRequest(newStatus) {
             let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
-            let updated = false;
-            reqs = reqs.map(req => { if (req.id === currentRequestId) { req.status = newStatus; updated = true; } return req; });
-            if (!updated) reqs.push({ id: currentRequestId, status: newStatus, userEmail: document.getElementById('modalUser').textContent });
+            let found = null;
+            reqs = reqs.map(req => {
+                if (req.id === currentRequestId) {
+                    const updatedReq = { ...req, status: newStatus };
+                    found = updatedReq;
+                    return updatedReq;
+                }
+                return req;
+            });
+            if (!found) {
+                found = { id: currentRequestId, status: newStatus, userEmail: document.getElementById('modalUser').textContent };
+                reqs.push(found);
+            }
             localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+
+            if (currentRole === 'ANI_DIRECCION') {
+                const finalStatuses = ['MOVILIDAD_ACTIVA', 'APROBADA_FINAL', 'PENDIENTE_MATRICULA'];
+                if (finalStatuses.includes(String(newStatus).toUpperCase())) {
+                    const nombre = found.applicantName || found.userName || found.userEmail || String(found.id || '');
+                    const mensaje = `Dirección ANI ha aprobado la movilidad de ${nombre}.`;
+                    pushCueNotification(['COORD_ACAD'], mensaje);
+                }
+            }
+
             document.getElementById('reviewModal').classList.add('hidden');
             loadTable();
         }
@@ -662,7 +912,7 @@
                 v(ext.pais), v(ext.departamento), v(ext.municipio)
             ];
             const dataInscripcion = [];
-            for (let i = 0; i < 6; i++) dataInscripcion.push([]);
+            for (let i = 0; i < 7; i++) dataInscripcion.push([]);
             dataInscripcion.push(headersInscripcion);
             dataInscripcion.push(rowInscripcion);
 
@@ -676,7 +926,7 @@
             const fechaMat = new Date().toISOString().slice(0, 10);
             const rowMatricula = rowInscripcion.concat([codigoMat, fechaMat, 'Sí', 'Movilidad entrante']);
             const dataMatricula = [];
-            for (let i = 0; i < 6; i++) dataMatricula.push([]);
+            for (let i = 0; i < 7; i++) dataMatricula.push([]);
             dataMatricula.push(headersMatricula);
             dataMatricula.push(rowMatricula);
 
@@ -685,7 +935,7 @@
             XLSX.utils.book_append_sheet(wbMat, wsMat, 'Matricula');
             XLSX.writeFile(wbMat, 'Matricula_Q10.xlsx');
 
-            alert('Aprobado exitosamente. Se han generado las plantillas Q10 y se ha simulado el envío automático con los adjuntos al correo: xiomaraocampoh@gmail.com (Control y Registro).');
+            alert('Aprobado exitosamente. Estado actualizado a MOVILIDAD_ACTIVA. Se han generado y descargado las plantillas Inscripcion_Q10.xlsx y Matricula_Q10.xlsx. Envío simulado al correo de Control y Registro.');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -822,6 +1072,165 @@
                 localStorage.setItem('CUE_TIPOS_MOVILIDAD', JSON.stringify(tipos));
                 cargarTiposMovilidad();
             }
+        }
+
+        // ==========================================
+        // Reportes y Estadísticas (Dirección ANI)
+        // ==========================================
+        let aniReportData = [];
+
+        function buildAniReportDashboard() {
+            const raw = localStorage.getItem('CUE_MY_REQUESTS');
+            try {
+                aniReportData = raw ? JSON.parse(raw) : [];
+                if (!Array.isArray(aniReportData)) aniReportData = [];
+            } catch {
+                aniReportData = [];
+            }
+
+            const total = aniReportData.length;
+            let entrantes = 0;
+            let salientes = 0;
+            const programasMap = {};
+
+            aniReportData.forEach(req => {
+                const dir = String(req.dir || '').toUpperCase();
+                if (dir === 'ENTRANTE') entrantes++;
+                else salientes++;
+
+                const prog = (req.program || '').toUpperCase();
+                if (prog) programasMap[prog] = (programasMap[prog] || 0) + 1;
+            });
+
+            const kpiTotal = document.getElementById('kpiTotalMov');
+            const kpiES = document.getElementById('kpiEntrantesSalientes');
+            const kpiTop = document.getElementById('kpiTopPrograma');
+            if (kpiTotal) kpiTotal.textContent = String(total);
+            if (kpiES) kpiES.textContent = `${entrantes} entrantes / ${salientes} salientes`;
+
+            let topProg = '—';
+            let maxCount = 0;
+            Object.keys(programasMap).forEach(p => {
+                if (programasMap[p] > maxCount) {
+                    maxCount = programasMap[p];
+                    topProg = `${p} (${programasMap[p]} movilidades)`;
+                }
+            });
+            if (kpiTop) kpiTop.textContent = topProg;
+
+            buildReportFilters();
+            renderTablaCruda();
+        }
+
+        function buildReportFilters() {
+            const selProg = document.getElementById('filtroPrograma');
+            const selTipo = document.getElementById('filtroTipo');
+            const selAnio = document.getElementById('filtroAnio');
+            if (!selProg || !selTipo || !selAnio) return;
+
+            const programas = new Set();
+            const tipos = new Set();
+            const anios = new Set();
+
+            aniReportData.forEach(req => {
+                if (req.program) programas.add(String(req.program));
+                if (req.type) tipos.add(String(req.type));
+
+                const fecha = req.dateStart || req.fechaInicio || '';
+                const anio = /^\d{4}/.test(fecha) ? fecha.slice(0, 4) : '';
+                if (anio) anios.add(anio);
+            });
+
+            const buildOptions = (set, label) => {
+                const values = Array.from(set).sort();
+                let html = `<option value="ALL">${label}</option>`;
+                values.forEach(v => {
+                    html += `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`;
+                });
+                return html;
+            };
+
+            selProg.innerHTML = buildOptions(programas, 'Todos los programas');
+            selTipo.innerHTML = buildOptions(tipos, 'Todos los tipos');
+
+            let htmlAnio = '<option value="ALL">Todos los años</option>';
+            Array.from(anios).sort().forEach(a => {
+                htmlAnio += `<option value="${a}">${a}</option>`;
+            });
+            selAnio.innerHTML = htmlAnio;
+        }
+
+        function renderTablaCruda() {
+            const tbody = document.getElementById('tablaCrudaBody');
+            if (!tbody) return;
+
+            const progSel = document.getElementById('filtroPrograma')?.value || 'ALL';
+            const tipoSel = document.getElementById('filtroTipo')?.value || 'ALL';
+            const anioSel = document.getElementById('filtroAnio')?.value || 'ALL';
+
+            const rows = aniReportData.filter(req => {
+                const progOk = progSel === 'ALL' || String(req.program || '') === progSel;
+                const tipoOk = tipoSel === 'ALL' || String(req.type || '') === tipoSel;
+                const fecha = req.dateStart || req.fechaInicio || '';
+                const anio = /^\d{4}/.test(fecha) ? fecha.slice(0, 4) : '';
+                const anioOk = anioSel === 'ALL' || anio === anioSel;
+                return progOk && tipoOk && anioOk;
+            });
+
+            if (!rows.length) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-400 italic">No se encontraron movilidades con estos filtros.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = rows.map(req => {
+                const dir = String(req.dir || 'SALIENTE').toUpperCase();
+                const estado = req.status || '—';
+                const fechaIni = req.dateStart || req.fechaInicio || '—';
+                const fechaFin = req.dateEnd || req.fechaFin || '—';
+                return `
+                    <tr class="hover:bg-gray-50">
+                        <td class="p-2 font-mono text-[11px] text-[#03045e] font-bold">${escapeHtml(String(req.id || '—'))}</td>
+                        <td class="p-2 text-[11px]">${escapeHtml(req.program || '—')}</td>
+                        <td class="p-2 text-[11px]">${escapeHtml(req.type || '—')}</td>
+                        <td class="p-2 text-[11px]">${dir === 'ENTRANTE' ? 'Entrante' : 'Saliente'}</td>
+                        <td class="p-2 text-[11px]">${escapeHtml(estado)}</td>
+                        <td class="p-2 text-[11px]">${escapeHtml(fechaIni)} – ${escapeHtml(fechaFin)}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function generarReporteExcel(tipo) {
+            if (typeof XLSX === 'undefined') {
+                alert('Librería SheetJS no disponible. Se simula la generación del reporte ' + tipo + '.');
+                return;
+            }
+            if (!aniReportData || !aniReportData.length) {
+                alert('No hay datos en CUE_MY_REQUESTS para generar el reporte.');
+                return;
+            }
+
+            const headers = ['ID', 'Programa', 'Tipo', 'Dirección', 'Estado', 'Fecha inicio', 'Fecha fin'];
+            const data = aniReportData.map(req => {
+                const dir = String(req.dir || 'SALIENTE').toUpperCase();
+                return [
+                    String(req.id || ''),
+                    String(req.program || ''),
+                    String(req.type || ''),
+                    dir,
+                    String(req.status || ''),
+                    String(req.dateStart || req.fechaInicio || ''),
+                    String(req.dateEnd || req.fechaFin || '')
+                ];
+            });
+
+            const aoa = [headers, ...data];
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(aoa);
+            XLSX.utils.book_append_sheet(wb, ws, 'Movilidades');
+            const fileName = `Reporte_${tipo}_Movilidades.xlsx`;
+            XLSX.writeFile(wb, fileName);
+            alert('Reporte ' + tipo + ' generado y descargado como ' + fileName + '.');
         }
     </script>
 </body>

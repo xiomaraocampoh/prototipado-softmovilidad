@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="../assets/js/cue-core.js"></script>
 </head>
 <body class="bg-[#f0f4f8] font-['Inter']">
 
@@ -18,6 +19,20 @@
                 <h1 class="font-bold text-red-700 border-l pl-4 ml-2">Seguridad y Salud en el Trabajo (SST)</h1>
             </div>
             <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button id="notificationBell" class="relative flex items-center justify-center w-9 h-9 rounded-full border border-gray-200 bg-white hover:bg-gray-50 hover:border-red-700 transition">
+                        <i data-lucide="bell" class="w-4 h-4 text-gray-600"></i>
+                        <span id="notificationDot" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 hidden"></span>
+                    </button>
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-lg text-xs z-50">
+                        <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
+                            <span class="font-semibold text-gray-700">Notificaciones</span>
+                        </div>
+                        <div id="notificationList" class="max-h-64 overflow-y-auto">
+                            <!-- Contenido dinámico -->
+                        </div>
+                    </div>
+                </div>
                 <div class="text-right hidden md:block">
                     <p id="userNameDisplay" class="text-sm font-bold text-[#03045e] leading-tight">Usuario</p>
                     <p id="userRoleDisplay" class="text-[10px] text-gray-500 uppercase font-bold">Rol</p>
@@ -174,10 +189,29 @@
         </div>
     </div>
 
+    <div id="modalEstadoMovilidad" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50">
+                <div>
+                    <h3 class="text-sm font-bold text-[#03045e]">Estado de la Movilidad / Salida Académica</h3>
+                    <p id="estadoMovilidadSub" class="text-[11px] text-gray-500 mt-0.5"></p>
+                </div>
+                <button onclick="closeEstadoSalida()" class="text-gray-400 hover:text-gray-700 p-1 rounded-full hover:bg-gray-100 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div id="estadoMovilidadBody" class="p-5 text-sm">
+                <!-- Línea de tiempo dinámica -->
+            </div>
+        </div>
+    </div>
+
     <script src="../assets/js/auth.js"></script>
     <script>
         let currentSstId = null;
+        let currentRole = null;
         const LS_SALIDAS = 'CUE_SALIDAS_ACADEMICAS';
+        const pushCueNotification = CUECore ? CUECore.pushCueNotification : () => {};
 
         document.addEventListener('DOMContentLoaded', () => {
             const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
@@ -187,10 +221,12 @@
                 return;
             }
             
+            currentRole = user.role.code;
             document.getElementById('userNameDisplay').textContent = user.name;
             document.getElementById('userRoleDisplay').textContent = user.role.name;
 
             loadSSTTable();
+            if (typeof CUECore !== 'undefined') CUECore.initCueNotificationUI(currentRole);
             lucide.createIcons();
         });
 
@@ -214,13 +250,18 @@
 
             salidas.forEach(salida => {
                 const statusBadge = `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-bold border border-orange-200">En revisión SST</span>`;
-                const actionButton = `<button onclick="openSSTModal('${salida.id}')" class="bg-red-700 text-white px-4 py-1 rounded text-xs font-bold hover:bg-red-800 transition shadow-sm">Revisar Vehículo</button>`;
+                const actionButtons = `
+                    <div class="flex flex-col gap-2 items-stretch">
+                        <button onclick="openSSTModal('${salida.id}')" class="bg-red-700 text-white px-4 py-1 rounded text-xs font-bold hover:bg-red-800 transition shadow-sm w-full">Revisar Vehículo</button>
+                        <button onclick="openEstadoSalida('${salida.id}')" class="border border-gray-300 text-gray-700 px-4 py-1 rounded text-xs font-semibold hover:bg-gray-50 transition w-full">Ver Estado</button>
+                    </div>
+                `;
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 transition border-b">
                         <td class="p-4 font-mono font-bold text-[#03045e]">${salida.id}</td>
                         <td class="p-4 text-gray-700">
-                            <div class="font-bold text-gray-800">${escapeHtml(salida.profesorResponsable?.nombre || 'Profesor')}</div>
+                            <div class="font-bold text-gray-800">${escapeHtml(salida.profesorResponsable?.nombre || salida.profesor || 'Profesor')}</div>
                             <div class="text-[10px] text-gray-500">${escapeHtml(salida.profesorResponsable?.email || '')}</div>
                         </td>
                         <td class="p-4 text-gray-600 text-xs">
@@ -228,7 +269,7 @@
                             <strong>Inicio:</strong> ${escapeHtml(salida.fechaInicio || 'N/A')} | <strong>Fin:</strong> ${escapeHtml(salida.fechaFin || 'N/A')}
                         </td>
                         <td class="p-4">${statusBadge}</td>
-                        <td class="p-4 text-center">${actionButton}</td>
+                        <td class="p-4 text-center">${actionButtons}</td>
                     </tr>
                 `;
             });
@@ -248,7 +289,7 @@
             document.getElementById('modalSstId').textContent = id;
             document.getElementById('modalSstDestino').textContent = salida.destino || '—';
             document.getElementById('modalSstDireccion').textContent = salida.direccion || '—';
-            document.getElementById('modalSstUser').textContent = `${salida.profesorResponsable?.nombre || 'Profesor'} (${salida.profesorResponsable?.email || 'N/A'})`;
+            document.getElementById('modalSstUser').textContent = `${salida.profesorResponsable?.nombre || salida.profesor || 'Profesor'} (${salida.profesorResponsable?.email || 'N/A'})`;
             document.getElementById('modalSstDates').textContent = `${salida.fechaInicio || 'N/A'} – ${salida.fechaFin || 'N/A'}`;
             document.getElementById('modalSstActividad').textContent = salida.actividad || '—';
             
@@ -269,7 +310,7 @@
             document.getElementById('mainActionButtons').classList.remove('hidden');
             document.getElementById('rejectReason').value = '';
 
-            const participants = Array.isArray(salida.participantes) ? salida.participantes : [];
+            const participants = Array.isArray(salida.participantes) ? salida.participantes : (Array.isArray(salida.estudiantes) ? salida.estudiantes.map(e => ({ nombre: e.nombre, email: e.identificacion, rol: 'ESTUDIANTE' })) : []);
             const students = participants
                 .filter(p => (p.rol || 'ESTUDIANTE') === 'ESTUDIANTE')
                 .map((p, i) => ({
@@ -336,7 +377,15 @@
                 return;
             }
 
+            const salidas = safeParseArray(LS_SALIDAS);
+            const salida = salidas.find(s => s.id === currentSstId);
+            const destino = salida?.destino || 'la salida académica';
+
             updateSalidaSst('APROBADO', 'Validación exitosa.');
+
+            const mensaje = `SST ha aprobado el vehículo para la salida a ${destino}.`;
+            pushCueNotification(['COORD_ACAD', 'ANI_SECRETARIA', 'ANI_DIRECCION'], mensaje);
+
             alert("Aprobación registrada. La salida académica cuenta con el aval de SST.");
         }
 
@@ -356,6 +405,85 @@
             }
             updateSalidaSst('RECHAZADO', reason);
             alert(`Salida Rechazada.\nMotivo registrado: "${reason}"\nSe ha notificado al profesor responsable.`);
+        }
+
+        function openEstadoSalida(id) {
+            const salidas = safeParseArray(LS_SALIDAS);
+            const salida = salidas.find(s => s.id === id);
+            if (!salida) {
+                alert('No se encontró la salida académica en el sistema.');
+                return;
+            }
+
+            const estado = String(salida.status || salida.estadoAcad || '').toUpperCase();
+            const requiereSst = salida.requiereSST === true
+                || String(salida.transporte || '').toUpperCase() === 'UNIVERSIDAD'
+                || String(salida.transporteUniversidad || '').toUpperCase() === 'SI';
+
+            const sub = document.getElementById('estadoMovilidadSub');
+            if (sub) {
+                const transporteLabel = requiereSst ? 'Transporte Universidad (requiere SST)' : 'Transporte propio (sin SST)';
+                sub.textContent = `ID: ${escapeHtml(String(salida.id || '—'))} · Salida Académica · ${escapeHtml(transporteLabel)} · Estado actual: ${escapeHtml(estado || 'SIN_ESTADO')}`;
+            }
+
+            const body = document.getElementById('estadoMovilidadBody');
+            if (!body) return;
+
+            const paso1Ok = true;
+            const paso2Ok = true; // Creación y aval de coordinación son simultáneos en este módulo
+
+            const sstAprobado = (salida.sstReview && salida.sstReview.estado === 'APROBADO') || estado === 'APROBADA_FINAL';
+            const mostrarPaso3 = true;
+            let paso3Ok;
+            let descPaso3;
+
+            if (!requiereSst) {
+                paso3Ok = true;
+                descPaso3 = 'Esta salida no requiere revisión de SST porque el transporte es por medios propios.';
+            } else {
+                paso3Ok = sstAprobado;
+                descPaso3 = 'SST verifica vehículo, pólizas y póliza individual de los estudiantes antes de autorizar la salida.';
+            }
+
+            const renderStep = (label, desc, done, noAplica) => {
+                const icon = noAplica ? 'minus-circle' : (done ? 'check-circle-2' : 'clock-3');
+                const iconColor = noAplica ? 'text-gray-400' : (done ? 'text-green-600' : 'text-gray-400');
+                const circle = noAplica ? 'bg-gray-100 border-gray-300' : (done ? 'bg-green-100 border-green-500' : 'bg-white border-gray-300');
+                const line = done ? 'border-green-200' : 'border-gray-200';
+                const descFinal = noAplica ? 'No aplica: esta salida no requiere transporte suministrado por la Universidad.' : desc;
+                return `
+                    <li class="relative pl-10 pb-6 last:pb-0">
+                        <div class="absolute left-1 top-1 w-6 h-6 rounded-full border-2 ${circle} flex items-center justify-center">
+                            <i data-lucide="${icon}" class="w-3.5 h-3.5 ${iconColor}"></i>
+                        </div>
+                        <div class="ml-4 border-l-2 ${line} h-full absolute left-4 top-6"></div>
+                        <div class="relative ml-4">
+                            <div class="inline-flex px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${noAplica ? 'bg-gray-100 text-gray-500 border border-gray-200' : (done ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-600 border border-gray-200')}">${label}</div>
+                            <p class="mt-1 text-xs text-gray-600">${descFinal}</p>
+                        </div>
+                    </li>
+                `;
+            };
+
+            const steps = [];
+            steps.push(renderStep('Radicación', 'Coordinación Académica registra la salida académica en el sistema.', paso1Ok, false));
+            steps.push(renderStep('Aval Coordinación', 'Coordinación Académica valida la salida, participantes y objetivos académicos.', paso2Ok, false));
+            steps.push(renderStep('Aval SST', descPaso3, paso3Ok, !requiereSst));
+            steps.push(renderStep('Revisión Secretaría ANI', 'Secretaría ANI valida documentación cuando aplica.', false, true));
+            steps.push(renderStep('Aprobación Final Dirección ANI', 'Dirección ANI emite la aprobación final.', estado === 'APROBADA_FINAL', false));
+
+            body.innerHTML = `<ol class="relative">${steps.join('')}</ol>`;
+
+            const modal = document.getElementById('modalEstadoMovilidad');
+            if (modal) {
+                modal.classList.remove('hidden');
+                lucide.createIcons();
+            }
+        }
+
+        function closeEstadoSalida() {
+            const modal = document.getElementById('modalEstadoMovilidad');
+            if (modal) modal.classList.add('hidden');
         }
 
         // Helper para actualizar la BD local

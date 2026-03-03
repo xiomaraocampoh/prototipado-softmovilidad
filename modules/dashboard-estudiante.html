@@ -52,6 +52,11 @@
             <h3 class="font-bold text-[#03045e] text-sm mb-2 flex items-center gap-2"><i data-lucide="award" class="w-4 h-4 text-[#0077b6]"></i> Certificados académicos</h3>
             <p class="text-xs text-gray-600">Si su movilidad está activa, puede solicitar certificados (notas, estudio, buena conducta, etc.) desde el botón &quot;Pedir Certificado&quot; en cada trámite.</p>
         </div>
+        <div id="section-salidas-pendientes" class="hidden bg-white rounded shadow-sm border border-gray-200 overflow-hidden mb-6 p-4">
+            <h3 class="font-bold text-[#03045e] text-sm mb-3 flex items-center gap-2"><i data-lucide="bus" class="w-4 h-4 text-[#0077b6]"></i> Salidas Académicas Pendientes</h3>
+            <p class="text-xs text-gray-600 mb-4">Ha sido agregado a las siguientes salidas grupales. Suba su consentimiento informado para completar el trámite.</p>
+            <div id="salidasPendientesList" class="space-y-3"></div>
+        </div>
         <div class="bg-white rounded shadow-sm border border-gray-200 overflow-hidden">
             <table class="w-full text-left border-collapse">
                 <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
@@ -257,6 +262,8 @@
             if (currentUser.role && currentUser.role.code === 'EXTERNO') {
                 const cardCert = document.getElementById('card-certificados');
                 if (cardCert) cardCert.style.display = 'none';
+            } else {
+                loadSalidasPendientes(currentUser);
             }
 
             const tbody = document.getElementById('requestsTableBody');
@@ -300,6 +307,74 @@
             }
             lucide.createIcons();
         });
+
+        function getDocForStudent(user) {
+            try {
+                const profile = JSON.parse(localStorage.getItem('CUE_USER_PROFILE') || '{}');
+                if (profile.docNumber) return profile.docNumber;
+            } catch {}
+            const defaults = { 'estudiante@cue.edu.co': '10924570982', 'xiomaraocampoh@gmail.com': '10924570982' };
+            return defaults[user.email] || '';
+        }
+
+        function loadSalidasPendientes(currentUser) {
+            const section = document.getElementById('section-salidas-pendientes');
+            const list = document.getElementById('salidasPendientesList');
+            if (!section || !list) return;
+
+            const docNum = getDocForStudent(currentUser);
+            if (!docNum) { section.classList.add('hidden'); return; }
+
+            const salidas = JSON.parse(localStorage.getItem('CUE_SALIDAS_ACADEMICAS') || '[]');
+            const pendientes = salidas.filter(s => {
+                const status = String(s.status || '').toUpperCase();
+                if (status !== 'EN_REVISION_SST') return false;
+                const parts = s.participantes || s.estudiantes || [];
+                return parts.some(p => String(p.identificacion || p.email || '') === docNum);
+            });
+
+            if (pendientes.length === 0) {
+                section.classList.add('hidden');
+                return;
+            }
+
+            section.classList.remove('hidden');
+            const esc = (x) => (x == null ? '' : String(x).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+            list.innerHTML = pendientes.map(s => `
+                <div class="flex items-center justify-between p-3 border border-gray-200 rounded-lg bg-gray-50">
+                    <div>
+                        <p class="font-bold text-gray-800 text-sm">${esc(s.destino || 'Salida')} - ${esc(s.actividad || 'Actividad')}</p>
+                        <p class="text-xs text-gray-500">${esc(s.fechaInicio || '')} a ${esc(s.fechaFin || '')} · Prof. ${esc(s.profesor || s.profesorResponsable?.nombre || '—')}</p>
+                    </div>
+                    <button onclick="subirConsentimiento(${s.id})" class="bg-[#0077b6] text-white px-4 py-2 rounded text-xs font-bold hover:bg-[#03045e] transition flex items-center gap-1">
+                        <i data-lucide="upload" class="w-4 h-4"></i> Subir Consentimiento Informado
+                    </button>
+                </div>
+            `).join('');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function subirConsentimiento(salidaId) {
+            const salidas = JSON.parse(localStorage.getItem('CUE_SALIDAS_ACADEMICAS') || '[]');
+            const salida = salidas.find(s => s.id === salidaId);
+            if (!salida) return;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.pdf,.doc,.docx';
+            input.onchange = () => {
+                const file = input.files[0];
+                if (file) {
+                    if (!salida.consentimientosSubidos) salida.consentimientosSubidos = {};
+                    salida.consentimientosSubidos[getDocForStudent(AuthService.checkAuth())] = { fecha: new Date().toISOString(), nombre: file.name };
+                    const idx = salidas.findIndex(s => s.id === salidaId);
+                    if (idx !== -1) salidas[idx] = salida;
+                    localStorage.setItem('CUE_SALIDAS_ACADEMICAS', JSON.stringify(salidas));
+                    alert('Consentimiento Informado subido correctamente.');
+                    loadSalidasPendientes(AuthService.checkAuth());
+                }
+            };
+            input.click();
+        }
 
         function getStatusConfig(status, id, currentUser) {
             const isExterno = currentUser && currentUser.role && currentUser.role.code === 'EXTERNO';
