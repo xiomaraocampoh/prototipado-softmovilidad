@@ -36,6 +36,9 @@
             <button onclick="switchTab('salidas')" id="tab-salidas" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-800/50 rounded-lg text-sm font-medium transition-colors">
                 <i data-lucide="bus" class="w-5 h-5"></i> Salidas Académicas
             </button>
+            <button id="tab-estadisticas" onclick="switchTab('estadisticas')" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-blue-800/50 rounded-lg text-sm font-medium transition-colors">
+                <i data-lucide="bar-chart-2" class="w-5 h-5"></i> Estadísticas del Programa
+            </button>
         </nav>
         <div class="p-4 border-t border-blue-800">
             <button onclick="logout()" class="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-sm font-medium transition-colors">
@@ -144,6 +147,64 @@
                         <i data-lucide="inbox" class="w-12 h-12 text-gray-300 mb-3"></i>
                         <p class="text-gray-500 font-medium">No hay registros en el historial.</p>
                     </div>
+                </div>
+            </div>
+
+            <div id="view-estadisticas" class="hidden space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-[#03045e]">Estadísticas del Programa</h2>
+                        <p class="text-sm text-gray-500">Resumen visual de movilidades y salidas asociadas al programa del coordinador.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Movilidades del Programa</p>
+                            <i data-lucide="layers" class="w-4 h-4 text-[#0077b6]"></i>
+                        </div>
+                        <p id="kpiTotalMovProg" class="text-3xl font-black text-[#03045e]">0</p>
+                        <p class="text-[11px] text-gray-400 mt-1">Histórico de solicitudes FO-IN-012 asociadas al programa.</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Pendientes de Aval</p>
+                            <i data-lucide="alert-circle" class="w-4 h-4 text-yellow-500"></i>
+                        </div>
+                        <p id="kpiPendientesAval" class="text-3xl font-black text-[#03045e]">0</p>
+                        <p class="text-[11px] text-gray-400 mt-1">Solicitudes en estado PENDIENTE_PAZ_SALVO que requieren revisión.</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Total Salidas Académicas</p>
+                            <i data-lucide="bus" class="w-4 h-4 text-green-600"></i>
+                        </div>
+                        <p id="kpiTotalSalidas" class="text-3xl font-black text-[#03045e]">0</p>
+                        <p class="text-[11px] text-gray-400 mt-1">Salidas grupales creadas desde este panel para el programa.</p>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 flex flex-col justify-between">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Movilidades Activas</p>
+                            <i data-lucide="globe-2" class="w-4 h-4 text-indigo-600"></i>
+                        </div>
+                        <p id="kpiMovilidadesActivas" class="text-3xl font-black text-[#03045e]">0</p>
+                        <p class="text-[11px] text-gray-400 mt-1">Estudiantes actualmente en movilidad con estado MOVILIDAD_ACTIVA.</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="text-sm font-bold text-[#03045e]">Top 3 de Instituciones de Destino</h3>
+                            <p class="text-xs text-gray-500">Instituciones más frecuentes entre las movilidades del programa.</p>
+                        </div>
+                    </div>
+                    <ul id="topInstitucionesList" class="space-y-2 text-sm text-gray-700">
+                    </ul>
                 </div>
             </div>
 
@@ -316,22 +377,106 @@
 
         // 4. NAVEGACIÓN ENTRE PESTAÑAS
         function switchTab(tabId) {
-            ['view-pendientes', 'view-historial', 'view-salidas'].forEach(id => {
+            ['view-pendientes', 'view-historial', 'view-salidas', 'view-estadisticas'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
-            ['tab-pendientes', 'tab-historial', 'tab-salidas'].forEach(id => {
+            ['tab-pendientes', 'tab-historial', 'tab-salidas', 'tab-estadisticas'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.remove('bg-blue-800/50');
             });
 
-            document.getElementById(`view-${tabId}`).classList.remove('hidden');
-            document.getElementById(`tab-${tabId}`).classList.add('bg-blue-800/50');
+            const view = document.getElementById(`view-${tabId}`);
+            const tab = document.getElementById(`tab-${tabId}`);
+            if (view) view.classList.remove('hidden');
+            if (tab) tab.classList.add('bg-blue-800/50');
 
-            const titles = { pendientes: `Solicitudes de ${programaCoordinador}`, historial: 'Historial (Aprobados/Rechazados)', salidas: 'Salidas Académicas' };
+            const titles = {
+                pendientes: `Solicitudes de ${programaCoordinador}`,
+                historial: 'Historial (Aprobados/Rechazados)',
+                salidas: 'Salidas Académicas',
+                estadisticas: 'Estadísticas del Programa'
+            };
             document.getElementById('headerTitle').textContent = titles[tabId] || `Solicitudes de ${programaCoordinador}`;
 
             if (tabId === 'historial') filterHistorialTable();
+            if (tabId === 'estadisticas') loadEstadisticasPrograma();
+        }
+
+        // 4.b ESTADÍSTICAS DEL PROGRAMA (Vista solo visual)
+        function loadEstadisticasPrograma() {
+            const totalMovEl = document.getElementById('kpiTotalMovProg');
+            const pendAvalEl = document.getElementById('kpiPendientesAval');
+            const totalSalidasEl = document.getElementById('kpiTotalSalidas');
+            const movActivasEl = document.getElementById('kpiMovilidadesActivas');
+            const topListEl = document.getElementById('topInstitucionesList');
+
+            if (!totalMovEl || !pendAvalEl || !totalSalidasEl || !movActivasEl || !topListEl) {
+                return;
+            }
+
+            let requests = [];
+            try {
+                const raw = localStorage.getItem('CUE_MY_REQUESTS');
+                requests = raw ? JSON.parse(raw) : [];
+                if (!Array.isArray(requests)) requests = [];
+            } catch {
+                requests = [];
+            }
+
+            const solicitudesPrograma = requests.filter(req => {
+                const prog = req.program ? String(req.program).toUpperCase() : '';
+                return prog === programaCoordinador;
+            });
+
+            const totalMovilidades = solicitudesPrograma.length;
+            const pendientesAval = solicitudesPrograma.filter(req => (req.status || '') === 'PENDIENTE_PAZ_SALVO').length;
+            const movilidadesActivas = solicitudesPrograma.filter(req => String(req.status || '').toUpperCase() === 'MOVILIDAD_ACTIVA').length;
+
+            let salidas = [];
+            try {
+                const rawSal = localStorage.getItem('CUE_SALIDAS_ACADEMICAS');
+                salidas = rawSal ? JSON.parse(rawSal) : [];
+                if (!Array.isArray(salidas)) salidas = [];
+            } catch {
+                salidas = [];
+            }
+            const totalSalidas = salidas.filter(s => {
+                const prog = s.programa ? String(s.programa).toUpperCase() : '';
+                return prog === programaCoordinador;
+            }).length;
+
+            totalMovEl.textContent = String(totalMovilidades);
+            pendAvalEl.textContent = String(pendientesAval);
+            totalSalidasEl.textContent = String(totalSalidas);
+            movActivasEl.textContent = String(movilidadesActivas);
+
+            const conteoInstituciones = {};
+            solicitudesPrograma.forEach(req => {
+                const ed = req.expedienteData || {};
+                let inst = req.destinyInst || ed.institucionDestino || ed.otraEntidad || '';
+                inst = String(inst || '').trim();
+                if (!inst) return;
+                const key = inst.toUpperCase();
+                conteoInstituciones[key] = (conteoInstituciones[key] || 0) + 1;
+            });
+
+            const entries = Object.entries(conteoInstituciones)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 3);
+
+            if (!entries.length) {
+                topListEl.innerHTML = '<li class="text-sm text-gray-500">No hay registros suficientes para calcular el top de instituciones.</li>';
+            } else {
+                topListEl.innerHTML = entries.map(([inst, count]) => `
+                    <li class="flex items-center justify-between text-sm">
+                        <span class="text-gray-700">${escapeHtml(inst)}</span>
+                        <span class="font-semibold text-[#03045e]">${count} movilidad(es)</span>
+                    </li>
+                `).join('');
+            }
+
+            lucide.createIcons();
         }
 
         // Helpers para actividades y escape
@@ -1143,6 +1288,7 @@
         // INICIALIZACIÓN
         loadSolicitudes();
         renderListaVisual();
+        loadEstadisticasPrograma();
         if (typeof CUECore !== 'undefined') CUECore.initCueNotificationUI(currentRole);
 
     </script>

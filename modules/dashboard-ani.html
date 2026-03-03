@@ -337,13 +337,13 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <button onclick="generarReporteExcel('CNA')" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#03045e] text-white rounded-lg text-sm font-bold hover:bg-black transition shadow-sm">
+                        <button onclick="descargarReporteCNA()" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#03045e] text-white rounded-lg text-sm font-bold hover:bg-black transition shadow-sm">
                             <span>Generar Reporte CNA</span>
                         </button>
-                        <button onclick="generarReporteExcel('SIRE')" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#0077b6] text-white rounded-lg text-sm font-bold hover:bg-[#005b8f] transition shadow-sm">
+                        <button onclick="descargarReporteSIRE()" class="flex items-center justify-center gap-2 px-4 py-3 bg-[#0077b6] text-white rounded-lg text-sm font-bold hover:bg-[#005b8f] transition shadow-sm">
                             <span>Generar Reporte SIRE</span>
                         </button>
-                        <button onclick="generarReporteExcel('GENERALES')" class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition shadowsm">
+                        <button onclick="descargarReporteIndicadores()" class="flex items-center justify-center gap-2 px-4 py-3 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700 transition shadowsm">
                             <span>Generar Indicadores Generales</span>
                         </button>
                     </div>
@@ -1359,37 +1359,495 @@
             }).join('');
         }
 
-        function generarReporteExcel(tipo) {
-            if (typeof XLSX === 'undefined') {
-                alert('Librería SheetJS no disponible. Se simula la generación del reporte ' + tipo + '.');
-                return;
+        // ==========================================
+        // Reportes oficiales en Excel (CNA, Indicadores, SIRE)
+        // ==========================================
+
+        const LS_REQUESTS = 'CUE_MY_REQUESTS';
+
+        function obtenerSolicitudesParaReportes() {
+            let data = [];
+            try {
+                const raw = localStorage.getItem(LS_REQUESTS);
+                data = raw ? JSON.parse(raw) : [];
+                if (!Array.isArray(data)) data = [];
+            } catch {
+                data = [];
             }
-            if (!aniReportData || !aniReportData.length) {
-                alert('No hay datos en CUE_MY_REQUESTS para generar el reporte.');
+            const estadosValidos = new Set(['MOVILIDAD_ACTIVA', 'APROBADA_FINAL', 'APROBADA_POSTULACION']);
+            return data.filter(req => estadosValidos.has(String(req.status || '').toUpperCase()));
+        }
+
+        function normalizarRolSolicitante(req) {
+            const r = String(req.applicantRole || '').toUpperCase();
+            if (r) return r;
+            if (req.externoFOIN012) return 'EXTERNO';
+            return 'ESTUDIANTE';
+        }
+
+        function obtenerExpediente(req) {
+            return req.expedienteData || {};
+        }
+
+        function obtenerPaisDestino(req) {
+            const exp = obtenerExpediente(req);
+            const pais = exp.pais || req.TargetCountry || req.country || '';
+            return String(pais || '').trim();
+        }
+
+        function esPaisColombia(pais) {
+            const p = String(pais || '').toLowerCase();
+            return p === 'colombia' || p === 'república de colombia';
+        }
+
+        function obtenerInstitucion(req) {
+            const exp = obtenerExpediente(req);
+            return exp.institucionDestino || exp.otraEntidad || req.destinyInst || req.dest || '';
+        }
+
+        function obtenerFechas(req) {
+            const exp = obtenerExpediente(req);
+            const inicio = exp.fechaInicio || req.dateStart || req.fechaInicio || '';
+            const fin = exp.fechaFin || req.dateEnd || req.fechaFin || '';
+            return { inicio, fin };
+        }
+
+        function calcularDiasEntreFechas(inicioStr, finStr) {
+            if (!inicioStr || !finStr) return '';
+            const inicio = new Date(inicioStr);
+            const fin = new Date(finStr);
+            if (isNaN(inicio.getTime()) || isNaN(fin.getTime()) || fin < inicio) return '';
+            const diffMs = fin.getTime() - inicio.getTime();
+            const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
+            return diffDays;
+        }
+
+        function obtenerNombreCompletoInterno(req) {
+            const nombre = req.applicantName || req.userName || req.userEmail || '';
+            return String(nombre || '').trim();
+        }
+
+        function obtenerNombreCompletoExterno(externo) {
+            const partes = [
+                externo.primerNombre,
+                externo.segundoNombre,
+                externo.primerApellido,
+                externo.segundoApellido
+            ].filter(Boolean);
+            return partes.join(' ').trim();
+        }
+
+        function partirNombreSimple(nombreCompleto) {
+            const limpio = String(nombreCompleto || '').trim();
+            if (!limpio) return { nombres: '', apellidos: '' };
+            const partes = limpio.split(/\s+/);
+            if (partes.length === 1) return { nombres: partes[0], apellidos: '' };
+            return {
+                nombres: partes[0],
+                apellidos: partes.slice(1).join(' ')
+            };
+        }
+
+        function obtenerProgramaCue(req) {
+            const exp = obtenerExpediente(req);
+            return exp.programa || req.program || '';
+        }
+
+        function obtenerModalidad(req) {
+            const exp = obtenerExpediente(req);
+            return exp.modalidad || req.modalidad || '';
+        }
+
+        function obtenerAnioSemestreDesdeFecha(inicioStr) {
+            if (!inicioStr) return '';
+            const d = new Date(inicioStr);
+            if (isNaN(d.getTime())) return '';
+            const year = d.getFullYear();
+            const month = d.getMonth() + 1;
+            const semestre = month <= 6 ? 1 : 2;
+            return `${year}-${semestre}`;
+        }
+
+        function asegurarXlsxDisponible() {
+            if (typeof XLSX === 'undefined') {
+                alert('No se pudo cargar la librería SheetJS (XLSX).');
+                return false;
+            }
+            return true;
+        }
+
+        // TAREA 1: REPORTE CNA
+        function descargarReporteCNA() {
+            if (!asegurarXlsxDisponible()) return;
+            const solicitudes = obtenerSolicitudesParaReportes();
+            if (!solicitudes.length) {
+                alert('No hay movilidades en estado MOVILIDAD_ACTIVA, APROBADA_FINAL o APROBADA_POSTULACION para generar el reporte CNA.');
                 return;
             }
 
-            const headers = ['ID', 'Programa', 'Tipo', 'Dirección', 'Estado', 'Fecha inicio', 'Fecha fin'];
-            const data = aniReportData.map(req => {
-                const dir = String(req.dir || 'SALIENTE').toUpperCase();
-                return [
-                    String(req.id || ''),
-                    String(req.program || ''),
-                    String(req.type || ''),
-                    dir,
-                    String(req.status || ''),
-                    String(req.dateStart || req.fechaInicio || ''),
-                    String(req.dateEnd || req.fechaFin || '')
-                ];
+            const wb = XLSX.utils.book_new();
+
+            // Hoja Estudiantes
+            const filasEstudiantes = [];
+            // Fila 1 vacía para permitir insertar el logo del CNA
+            filasEstudiantes.push([]);
+            filasEstudiantes.push(['CONSEJO NACIONAL DE ACREDITACIÓN']);
+            filasEstudiantes.push(['PROCESO DE ACREDITACIÓN DE PROGRAMAS ACADÉMICOS CON DOCENCIA SERVICIO']);
+            filasEstudiantes.push(['CUADRO No. 10. MOVILIDAD DE ESTUDIANTES DEL PROGRAMA ACADÉMICO']);
+            filasEstudiantes.push([]);
+            filasEstudiantes.push(['MOVILIDAD DE ESTUDIANTES EN EL PROGRAMA']);
+            filasEstudiantes.push([]);
+            filasEstudiantes.push([
+                'No.',
+                'ID (documento)',
+                'Nombre completo',
+                'Entidad de origen/destino',
+                'País',
+                'Objeto',
+                'Resultados',
+                'Tipo - Presencial/ Virtual',
+                'MOVILIDAD ENTRANTE',
+                '',
+                'MOVILIDAD SALIENTE',
+                '',
+                'Fecha Inicio (dd/mm/aaaa)',
+                'Fecha Final (dd/mm/aaaa)',
+                'Duración Tiempo Estadía (días)',
+                'Lugar de Desarrollo...',
+                'Modalidad...'
+            ]);
+            filasEstudiantes.push([
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                'Nacional',
+                'Extranjero',
+                'Nacional',
+                'Extranjero',
+                '',
+                '',
+                '',
+                '',
+                ''
+            ]);
+
+            let contadorEst = 1;
+            solicitudes.forEach(req => {
+                const rol = normalizarRolSolicitante(req);
+                if (rol !== 'ESTUDIANTE' && rol !== 'EXTERNO') return;
+
+                const exp = obtenerExpediente(req);
+                const externo = req.externoFOIN012 || null;
+                const dir = String(req.dir || req.direction || '').toUpperCase() || 'SALIENTE';
+                const pais = obtenerPaisDestino(req);
+                const esNal = esPaisColombia(pais);
+                const { inicio, fin } = obtenerFechas(req);
+                const dias = calcularDiasEntreFechas(inicio, fin);
+                const modalidad = obtenerModalidad(req) || 'PRESENCIAL';
+                const institucion = obtenerInstitucion(req);
+                const objeto = externo ? (externo.actividadesMaterias || '') : (exp.actividadesDesc || req.actividadesRealizar || '');
+                const resultados = '';
+                const lugarDesarrollo = exp.ciudad ? `${exp.ciudad} - ${pais || ''}`.trim() : (pais || '');
+
+                const colEntranteNal = dir === 'ENTRANTE' && esNal ? 'X' : '';
+                const colEntranteExt = dir === 'ENTRANTE' && !esNal ? 'X' : '';
+                const colSalienteNal = dir === 'SALIENTE' && esNal ? 'X' : '';
+                const colSalienteExt = dir === 'SALIENTE' && !esNal ? 'X' : '';
+
+                const fechaInicioOut = inicio ? new Date(inicio).toLocaleDateString('es-CO') : '';
+                const fechaFinOut = fin ? new Date(fin).toLocaleDateString('es-CO') : '';
+
+                let nombreCompleto = externo ? obtenerNombreCompletoExterno(externo) : obtenerNombreCompletoInterno(req);
+                const documento = externo ? (externo.numDoc || '') : (exp.documento || '');
+
+                filasEstudiantes.push([
+                    contadorEst,
+                    documento,
+                    nombreCompleto,
+                    institucion,
+                    pais,
+                    objeto,
+                    resultados,
+                    modalidad,
+                    colEntranteNal,
+                    colEntranteExt,
+                    colSalienteNal,
+                    colSalienteExt,
+                    fechaInicioOut,
+                    fechaFinOut,
+                    dias,
+                    lugarDesarrollo,
+                    modalidad
+                ]);
+                contadorEst++;
             });
 
-            const aoa = [headers, ...data];
+            const wsEst = XLSX.utils.aoa_to_sheet(filasEstudiantes);
+            XLSX.utils.book_append_sheet(wb, wsEst, 'Estudiantes');
+
+            // Hoja Profesores
+            const filasProfes = [];
+            // Fila 1 vacía para permitir insertar el logo del CNA
+            filasProfes.push([]);
+            filasProfes.push(['CONSEJO NACIONAL DE ACREDITACIÓN']);
+            filasProfes.push(['PROCESO DE ACREDITACIÓN DE PROGRAMAS ACADÉMICOS CON DOCENCIA SERVICIO']);
+            filasProfes.push(['CUADRO No. 08. MOVILIDAD DE PROFESORES']);
+            filasProfes.push([]);
+            filasProfes.push([
+                'No.',
+                'ID (documento)',
+                'Nombre completo',
+                'Entidad de origen/destino',
+                'País',
+                'Objeto',
+                'Resultados',
+                'Tipo - Presencial/ Virtual',
+                'MOVILIDAD ENTRANTE',
+                '',
+                'MOVILIDAD SALIENTE',
+                '',
+                'Fecha Inicio (dd/mm/aaaa)',
+                'Fecha Final (dd/mm/aaaa)',
+                'Duración Tiempo Estadía (días)'
+            ]);
+            filasProfes.push([
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                '',
+                'Nacional',
+                'Extranjero',
+                'Nacional',
+                'Extranjero',
+                '',
+                '',
+                ''
+            ]);
+
+            let contadorProf = 1;
+            solicitudes.forEach(req => {
+                const rol = normalizarRolSolicitante(req);
+                if (rol !== 'PROFESOR') return;
+
+                const exp = obtenerExpediente(req);
+                const dir = String(req.dir || req.direction || '').toUpperCase() || 'SALIENTE';
+                const pais = obtenerPaisDestino(req);
+                const esNal = esPaisColombia(pais);
+                const { inicio, fin } = obtenerFechas(req);
+                const dias = calcularDiasEntreFechas(inicio, fin);
+                const modalidad = obtenerModalidad(req) || 'PRESENCIAL';
+                const institucion = obtenerInstitucion(req);
+                const objeto = exp.actividadesDesc || req.actividadesRealizar || '';
+                const resultados = '';
+
+                const colEntranteNal = dir === 'ENTRANTE' && esNal ? 'X' : '';
+                const colEntranteExt = dir === 'ENTRANTE' && !esNal ? 'X' : '';
+                const colSalienteNal = dir === 'SALIENTE' && esNal ? 'X' : '';
+                const colSalienteExt = dir === 'SALIENTE' && !esNal ? 'X' : '';
+
+                const fechaInicioOut = inicio ? new Date(inicio).toLocaleDateString('es-CO') : '';
+                const fechaFinOut = fin ? new Date(fin).toLocaleDateString('es-CO') : '';
+
+                const nombreCompleto = obtenerNombreCompletoInterno(req);
+                const documento = exp.documento || '';
+
+                filasProfes.push([
+                    contadorProf,
+                    documento,
+                    nombreCompleto,
+                    institucion,
+                    pais,
+                    objeto,
+                    resultados,
+                    modalidad,
+                    colEntranteNal,
+                    colEntranteExt,
+                    colSalienteNal,
+                    colSalienteExt,
+                    fechaInicioOut,
+                    fechaFinOut,
+                    dias
+                ]);
+                contadorProf++;
+            });
+
+            const wsProf = XLSX.utils.aoa_to_sheet(filasProfes);
+            XLSX.utils.book_append_sheet(wb, wsProf, 'Profesores');
+
+            XLSX.writeFile(wb, 'Reporte_CNA_Movilidad.xlsx');
+            alert('Reporte CNA generado y descargado como "Reporte_CNA_Movilidad.xlsx".');
+        }
+
+        // TAREA 2: REPORTE INDICADORES DE ÁREA
+        function descargarReporteIndicadores() {
+            if (!asegurarXlsxDisponible()) return;
+            const solicitudes = obtenerSolicitudesParaReportes();
+            if (!solicitudes.length) {
+                alert('No hay movilidades en estado MOVILIDAD_ACTIVA, APROBADA_FINAL o APROBADA_POSTULACION para generar indicadores.');
+                return;
+            }
+
+            const filas = [];
+            filas.push([]);
+            filas.push([
+                'AÑO',
+                'NAL/INTERNAL',
+                'PAÍS',
+                'UNIVERSIDAD/ INSTITUCIÓN DE ORIGEN',
+                'NOMBRE COMPLETO',
+                'ROL',
+                'MODALIDAD',
+                'PROGRAMA UvonHUMBOLDT',
+                'TIPO MOVILIDAD',
+                'ACTIVIDAD',
+                'OBSERVACIONES'
+            ]);
+
+            solicitudes.forEach(req => {
+                const exp = obtenerExpediente(req);
+                const externo = req.externoFOIN012 || null;
+                const dir = String(req.dir || req.direction || '').toUpperCase() || 'SALIENTE';
+                const pais = obtenerPaisDestino(req);
+                const nalInternal = esPaisColombia(pais) ? 'NACIONAL' : 'INTERNACIONAL';
+                const { inicio } = obtenerFechas(req);
+                const anioSem = obtenerAnioSemestreDesdeFecha(inicio || req.date || '');
+                const rol = normalizarRolSolicitante(req);
+                const modalidad = obtenerModalidad(req) || 'PRESENCIAL';
+                const programa = obtenerProgramaCue(req);
+                const tipoMov = dir === 'ENTRANTE' ? 'ENTRANTE' : 'SALIENTE';
+                const actividad = req.type || exp.tipo || '';
+                const observaciones = req.status || '';
+
+                const institucionOrigen = dir === 'SALIENTE'
+                    ? 'Universidad von Humboldt'
+                    : (obtenerInstitucion(req) || 'Institución de origen no registrada');
+
+                const nombreCompleto = externo
+                    ? obtenerNombreCompletoExterno(externo)
+                    : obtenerNombreCompletoInterno(req);
+
+                filas.push([
+                    anioSem,
+                    nalInternal,
+                    pais,
+                    institucionOrigen,
+                    nombreCompleto,
+                    rol,
+                    modalidad,
+                    programa,
+                    tipoMov,
+                    actividad,
+                    observaciones
+                ]);
+            });
+
             const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.aoa_to_sheet(aoa);
-            XLSX.utils.book_append_sheet(wb, ws, 'Movilidades');
-            const fileName = `Reporte_${tipo}_Movilidades.xlsx`;
-            XLSX.writeFile(wb, fileName);
-            alert('Reporte ' + tipo + ' generado y descargado como ' + fileName + '.');
+            const ws = XLSX.utils.aoa_to_sheet(filas);
+            XLSX.utils.book_append_sheet(wb, ws, 'Indicadores');
+            XLSX.writeFile(wb, 'Indicadores_Area_Movilidad.xlsx');
+            alert('Reporte de Indicadores generado y descargado como "Indicadores_Area_Movilidad.xlsx".');
+        }
+
+        // TAREA 3: REPORTE SIRE MINEDUCACIÓN
+        function descargarReporteSIRE() {
+            if (!asegurarXlsxDisponible()) return;
+            const solicitudes = obtenerSolicitudesParaReportes();
+            if (!solicitudes.length) {
+                alert('No hay movilidades en estado MOVILIDAD_ACTIVA, APROBADA_FINAL o APROBADA_POSTULACION para generar el reporte SIRE.');
+                return;
+            }
+
+            const filas = [];
+            filas.push([
+                'TIPO_DOCUMENTO',
+                'NUMERO_DOCUMENTO',
+                'NOMBRES',
+                'APELLIDOS',
+                'SEXO',
+                'CODIGO_SNIES_PROGRAMA',
+                'NOMBRE_PROGRAMA',
+                'NIVEL_FORMACION',
+                'PAIS_DESTINO_ORIGEN',
+                'IES_DESTINO_ORIGEN',
+                'TIPO_MOVILIDAD',
+                'FECHA_INICIO',
+                'FECHA_FIN',
+                'RECONOCIMIENTO_ACADEMICO',
+                'FUENTE_FINANCIACION'
+            ]);
+
+            solicitudes.forEach(req => {
+                const exp = obtenerExpediente(req);
+                const externo = req.externoFOIN012 || null;
+                const dir = String(req.dir || req.direction || '').toUpperCase() || 'SALIENTE';
+                const pais = obtenerPaisDestino(req);
+                const { inicio, fin } = obtenerFechas(req);
+                const programa = obtenerProgramaCue(req);
+                const ies = dir === 'SALIENTE'
+                    ? (obtenerInstitucion(req) || 'IES DESTINO NO REGISTRADA')
+                    : 'Universidad von Humboldt';
+
+                let tipoDoc = '';
+                let numDoc = '';
+                let nombres = '';
+                let apellidos = '';
+                let sexo = '';
+
+                if (externo) {
+                    tipoDoc = externo.tipoDoc || '';
+                    numDoc = externo.numDoc || '';
+                    nombres = [externo.primerNombre, externo.segundoNombre].filter(Boolean).join(' ');
+                    apellidos = [externo.primerApellido, externo.segundoApellido].filter(Boolean).join(' ');
+                    sexo = externo.sexo || '';
+                } else {
+                    const nombreCompleto = obtenerNombreCompletoInterno(req);
+                    const partes = partirNombreSimple(nombreCompleto);
+                    nombres = partes.nombres;
+                    apellidos = partes.apellidos;
+                    tipoDoc = exp.tipoDoc || '';
+                    numDoc = exp.documento || '';
+                    sexo = '';
+                }
+
+                const fechaInicioOut = inicio || '';
+                const fechaFinOut = fin || '';
+
+                const reconocimientoAcademico = '';
+                const fuenteFinanciacion = exp.hasBeca === 'SI' ? 'BECA' : '';
+
+                filas.push([
+                    tipoDoc,
+                    numDoc,
+                    nombres,
+                    apellidos,
+                    sexo,
+                    '',
+                    programa,
+                    '',
+                    pais,
+                    ies,
+                    dir === 'ENTRANTE' ? 'ENTRANTE' : 'SALIENTE',
+                    fechaInicioOut,
+                    fechaFinOut,
+                    reconocimientoAcademico,
+                    fuenteFinanciacion
+                ]);
+            });
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(filas);
+            XLSX.utils.book_append_sheet(wb, ws, 'SIRE');
+            XLSX.writeFile(wb, 'Reporte_SIRE_Mineducacion.xlsx');
+            alert('Reporte SIRE generado y descargado como "Reporte_SIRE_Mineducacion.xlsx".');
         }
     </script>
 </body>
