@@ -250,13 +250,40 @@
                             </label>
                             <div class="flex gap-6">
                                 <label class="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input type="radio" name="s_transporte" value="SI" required class="w-4 h-4 accent-[#0077b6]">
+                                    <input type="radio" name="s_transporte" value="SI" required class="w-4 h-4 accent-[#0077b6]" onchange="toggleSoportesVehiculo()">
                                     SÍ (Pasará a revisión de SST)
                                 </label>
                                 <label class="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input type="radio" name="s_transporte" value="NO" class="w-4 h-4 accent-[#0077b6]">
+                                    <input type="radio" name="s_transporte" value="NO" class="w-4 h-4 accent-[#0077b6]" onchange="toggleSoportesVehiculo()">
                                     NO (Aprobación directa a ANI)
                                 </label>
+                            </div>
+                        </div>
+
+                        <div id="seccionSoportesVehiculo" class="hidden border border-gray-200 rounded-lg p-5 bg-gray-50">
+                            <h3 class="text-sm font-bold text-[#03045e] mb-4 flex items-center gap-2">
+                                <i data-lucide="file-check" class="w-4 h-4 text-[#0077b6]"></i>
+                                Soportes del Vehículo Contratado
+                            </h3>
+                            <p class="text-xs text-gray-500 mb-4">Coordinación Académica debe adjuntar los documentos del vehículo contratado. SST auditará su vigencia.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Placa del Vehículo *</label>
+                                    <input type="text" id="veh_placa" class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none text-sm" placeholder="Ej: ABC123">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Documento SOAT *</label>
+                                    <input type="file" id="veh_soat" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Revisión Tecnomecánica *</label>
+                                    <input type="file" id="veh_tecnomecanica" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Licencia del Conductor *</label>
+                                    <input type="file" id="veh_licencia" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+
                             </div>
                         </div>
 
@@ -881,8 +908,17 @@
             btn.classList.toggle('cursor-not-allowed', btn.disabled);
         }
 
+        function toggleSoportesVehiculo() {
+            const radioSI = document.querySelector('input[name="s_transporte"][value="SI"]');
+            const seccion = document.getElementById('seccionSoportesVehiculo');
+            if (seccion) {
+                seccion.classList.toggle('hidden', !radioSI || !radioSI.checked);
+            }
+            lucide.createIcons();
+        }
+
         // =========================================================================
-        // 7. GUARDAR SALIDA (Con Bypass SST)
+        // 7. GUARDAR SALIDA (Con Bypass SST y soportes vehículo si aplica)
         // =========================================================================
         document.getElementById('salidaForm').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -898,6 +934,35 @@
             }
 
             const requiereSST = document.querySelector('input[name="s_transporte"]:checked').value;
+            let vehiculo = null;
+
+            if (requiereSST === 'SI') {
+                const placa = (document.getElementById('veh_placa')?.value || '').trim();
+                const soatFile = document.getElementById('veh_soat')?.files?.[0];
+                const tecnoFile = document.getElementById('veh_tecnomecanica')?.files?.[0];
+                const licenciaFile = document.getElementById('veh_licencia')?.files?.[0];
+                const tarjetaFile = document.getElementById('veh_tarjeta_propiedad')?.files?.[0];
+                const polizaRcFile = document.getElementById('veh_poliza_rc')?.files?.[0];
+
+                if (!placa) {
+                    mostrarAlerta('Cuando requiere transporte contratado debe indicar la placa del vehículo.', 'error');
+                    return;
+                }
+                if (!soatFile || !tecnoFile || !licenciaFile || !tarjetaFile || !polizaRcFile) {
+                    mostrarAlerta('Cuando requiere transporte contratado debe adjuntar los 5 documentos: SOAT, Revisión Tecnomecánica, Licencia del Conductor, Tarjeta de Propiedad y Póliza de Responsabilidad Civil.', 'error');
+                    return;
+                }
+
+                vehiculo = {
+                    placa,
+                    soatDoc: soatFile.name,
+                    revisionTecnomecanicaDoc: tecnoFile.name,
+                    licenciaConductorDoc: licenciaFile.name,
+                    tarjetaPropiedadDoc: tarjetaFile.name,
+                    polizaRcDoc: polizaRcFile.name
+                };
+            }
+
             const estadoInicial = requiereSST === 'SI' ? 'EN_REVISION_SST' : 'APROBADA_POR_COORD';
             const profesorNombre = document.getElementById('s_profesor').value;
 
@@ -913,6 +978,7 @@
                 profesorResponsable: { nombre: profesorNombre, email: currentUser.email || '' },
                 actividad: document.getElementById('s_actividad').value,
                 transporteUniversidad: requiereSST,
+                requiereSST: requiereSST === 'SI',
                 estudiantes: listaEstudiantesSalida,
                 participantes: listaEstudiantesSalida.map(est => ({
                     nombre: est.nombre,
@@ -922,19 +988,26 @@
                     tienePoliza: est.tienePoliza,
                     tieneCursoVial: est.tieneCursoVial
                 })),
-                status: estadoInicial
+                status: estadoInicial,
+                estadoAcad: estadoInicial
             };
 
+            if (vehiculo) {
+                nuevaSalida.vehiculo = vehiculo;
+            }
+
             let salidasDB = JSON.parse(localStorage.getItem('CUE_SALIDAS_ACADEMICAS')) || [];
+            if (!Array.isArray(salidasDB)) salidasDB = [];
             salidasDB.push(nuevaSalida);
             localStorage.setItem('CUE_SALIDAS_ACADEMICAS', JSON.stringify(salidasDB));
 
-            mostrarAlerta(requiereSST === 'SI' ? 'Salida Guardada. Enviada a SST para revisión de vehículo.' : 'Salida Guardada y Aprobada Exitosamente (Bypass SST).', 'success');
+            mostrarAlerta(requiereSST === 'SI' ? 'Salida Guardada. Enviada a SST para auditoría de documentos del vehículo y participantes.' : 'Salida Guardada y Aprobada Exitosamente (Bypass SST).', 'success');
             
-            // Limpiar formulario y reiniciar
             e.target.reset();
             listaEstudiantesSalida = [];
             renderListaVisual();
+            document.getElementById('seccionSoportesVehiculo').classList.add('hidden');
+            toggleSoportesVehiculo();
         });
 
         function buildExpedienteHtmlCoord(req) {
