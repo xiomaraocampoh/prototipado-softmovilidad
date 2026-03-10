@@ -339,27 +339,27 @@
                     </div>
                     <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos personales (desagregados para registro Q10)</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div><label class="form-label">Primer Nombre <span class="text-red-600">*</span></label><input type="text" id="extPrimerNombre" class="form-input" required></div>
+                        <div><label class="form-label">Primer Nombre <span class="text-red-600">*</span></label><input type="text" id="extPrimerNombre" class="form-input"></div>
                         <div><label class="form-label">Segundo Nombre</label><input type="text" id="extSegundoNombre" class="form-input"></div>
-                        <div><label class="form-label">Primer Apellido <span class="text-red-600">*</span></label><input type="text" id="extPrimerApellido" class="form-input" required></div>
+                        <div><label class="form-label">Primer Apellido <span class="text-red-600">*</span></label><input type="text" id="extPrimerApellido" class="form-input"></div>
                         <div><label class="form-label">Segundo Apellido</label><input type="text" id="extSegundoApellido" class="form-input"></div>
                         <div><label class="form-label">Sexo <span class="text-red-600">*</span></label>
-                            <select id="extSexo" class="form-input" required>
+                            <select id="extSexo" class="form-input">
                                 <option value="">Seleccione...</option>
                                 <option value="M">Masculino</option>
                                 <option value="F">Femenino</option>
                                 <option value="OTRO">Otro</option>
                             </select>
                         </div>
-                        <div class="md:col-span-2"><label class="form-label">Dirección <span class="text-red-600">*</span></label><input type="text" id="extDireccion" class="form-input" required></div>
-                        <div><label class="form-label">País <span class="text-red-600">*</span></label><input type="text" id="extPais" class="form-input" required placeholder="Ej: Colombia"></div>
-                        <div><label class="form-label">Departamento <span class="text-red-600">*</span></label><input type="text" id="extDepartamento" class="form-input" required></div>
-                        <div><label class="form-label">Municipio <span class="text-red-600">*</span></label><input type="text" id="extMunicipio" class="form-input" required></div>
+                        <div class="md:col-span-2"><label class="form-label">Dirección <span class="text-red-600">*</span></label><input type="text" id="extDireccion" class="form-input"></div>
+                        <div><label class="form-label">País <span class="text-red-600">*</span></label><input type="text" id="extPais" class="form-input" placeholder="Ej: Colombia"></div>
+                        <div><label class="form-label">Departamento <span class="text-red-600">*</span></label><input type="text" id="extDepartamento" class="form-input"></div>
+                        <div><label class="form-label">Municipio <span class="text-red-600">*</span></label><input type="text" id="extMunicipio" class="form-input"></div>
                     </div>
                     <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos documento e identificación (FO-IN-012)</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <div><label class="form-label">Tipo de documento <span class="text-red-600">*</span></label>
-                            <select id="extTipoDoc" class="form-input" required>
+                            <select id="extTipoDoc" class="form-input">
                                 <option value="">Seleccione...</option>
                                 <option value="CC">Cédula de Ciudadanía</option>
                                 <option value="TI">Tarjeta de Identidad</option>
@@ -367,12 +367,12 @@
                                 <option value="PA">Pasaporte</option>
                             </select>
                         </div>
-                        <div><label class="form-label">Número de documento <span class="text-red-600">*</span></label><input type="text" id="extNumDoc" class="form-input" required></div>
+                        <div><label class="form-label">Número de documento <span class="text-red-600">*</span></label><input type="text" id="extNumDoc" class="form-input"></div>
                         <div><label class="form-label">Fecha de expedición</label><input type="date" id="extFecExpedicion" class="form-input"></div>
                         <div><label class="form-label">Fecha de nacimiento</label><input type="date" id="extFecNacimiento" class="form-input"></div>
                         <div><label class="form-label">Nacionalidad</label><input type="text" id="extNacionalidad" class="form-input"></div>
-                        <div><label class="form-label">Celular <span class="text-red-600">*</span></label><input type="tel" id="extCelular" class="form-input" required></div>
-                        <div class="md:col-span-2"><label class="form-label">Correo electrónico <span class="text-red-600">*</span></label><input type="email" id="extCorreo" class="form-input" required></div>
+                        <div><label class="form-label">Celular <span class="text-red-600">*</span></label><input type="tel" id="extCelular" class="form-input"></div>
+                        <div class="md:col-span-2"><label class="form-label">Correo electrónico <span class="text-red-600">*</span></label><input type="email" id="extCorreo" class="form-input"></div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 bg-gray-50 p-4 rounded border">
                         <div class="md:col-span-2 font-bold text-xs text-[#03045e] uppercase mb-2">Contacto de emergencia</div>
@@ -388,7 +388,7 @@
                     <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos académicos (registro)</h3>
                     <div class="mb-4">
                         <label class="form-label">Actividades a realizar o materias a cursar <span class="text-red-600">*</span></label>
-                        <textarea id="extActividadesMaterias" rows="4" class="form-input" required placeholder="Describa las actividades académicas o materias que cursará durante su movilidad en la CUE."></textarea>
+                        <textarea id="extActividadesMaterias" rows="4" class="form-input" placeholder="Describa las actividades académicas o materias que cursará durante su movilidad en la CUE."></textarea>
                     </div>
                 </div>
 
