@@ -42,6 +42,10 @@
                 <button onclick="openReqsModal()" class="bg-white border-2 border-[#0077b6] text-[#0077b6] px-4 py-2 rounded font-bold hover:bg-blue-50 transition flex items-center gap-2 text-sm">
                     <i data-lucide="info" class="w-4 h-4"></i> Guía de Requisitos
                 </button>
+                <button id="btnExtramural" onclick="abrirModalExtramural()" class="hidden px-4 py-2 bg-purple-600 text-white rounded-lg font-bold shadow hover:bg-purple-700 flex items-center gap-2 transition-colors">
+                    <i data-lucide="briefcase" class="w-4 h-4"></i>
+                    Aviso Salida Extramural (SST)
+                </button>
                 <a href="mobility-wizard.html" class="bg-[#0077b6] text-white px-6 py-2 rounded font-bold hover:bg-[#03045e] transition shadow flex items-center gap-2 text-sm">
                     <i data-lucide="plus-circle" class="w-4 h-4"></i> Nueva Postulación
                 </a>
@@ -303,6 +307,219 @@
         </div>
     </div>
 
+    <!-- Modal Solicitar Certificado de Movilidad (estudiantes internos) -->
+    <div id="modal-certificado" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
+            <div class="bg-[#03045e] p-4 flex justify-between items-center text-white">
+                <h3 class="font-bold text-lg">Solicitar Certificado de Movilidad</h3>
+                <button type="button" onclick="cerrarModalCertificado()" class="text-gray-300 hover:text-white p-1 rounded transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Tipo de certificado</label>
+                    <select id="modalCertificadoTipo" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:border-[#0077b6] focus:ring-2 focus:ring-[#0077b6]/20 outline-none">
+                        <option value="">Seleccione...</option>
+                        <option value="notas_estudio">Certificado de Notas de Estudio</option>
+                        <option value="participacion_estancia">Certificado de Participación/Estancia</option>
+                    </select>
+                </div>
+                <p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    La expedición de este certificado será notificada a la caja de la universidad si genera algún costo.
+                </p>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="cerrarModalCertificado()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="button" id="btnEnviarSolicitudCertificado" class="px-6 py-2 bg-[#0077b6] text-white rounded-lg text-sm font-bold hover:bg-[#03045e] transition">
+                        Enviar Solicitud
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Actividad Laboral Extramural (Rediseñado con 3 secciones) -->
+    <div id="modalExtramural" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[95vh]">
+            <div class="bg-purple-700 p-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-lg flex items-center gap-2">
+                    <i data-lucide="briefcase"></i> Registro de Actividad Extramural
+                </h3>
+                <button onclick="cerrarModalExtramural()" class="hover:text-red-200">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="formExtramural" onsubmit="guardarExtramural(event)" class="p-6 space-y-5 overflow-y-auto">
+                <div class="bg-purple-50 p-3 rounded-lg border border-purple-200">
+                    <p class="text-xs text-purple-800 font-medium">
+                        Este aviso permite a Seguridad y Salud en el Trabajo (SST) conocer con detalle su actividad extramural,
+                        el lugar de destino y los contactos de emergencia. Complete toda la información solicitada.
+                    </p>
+                </div>
+
+                <!-- Sección 1: Datos Personales (solo lectura) -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                            <i data-lucide="user" class="w-4 h-4 text-purple-700"></i>
+                            Datos personales del solicitante
+                        </h4>
+                        <span class="text-[11px] font-semibold uppercase text-gray-400">Solo lectura</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Nombre Completo</label>
+                            <input id="exNombreCompleto" type="text" class="w-full border p-2 rounded-lg bg-gray-100 text-gray-600 text-sm" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Documento</label>
+                            <input id="exDocumento" type="text" class="w-full border p-2 rounded-lg bg-gray-100 text-gray-600 text-sm" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Celular</label>
+                            <input id="exCelular" type="text" class="w-full border p-2 rounded-lg bg-gray-100 text-gray-600 text-sm" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Rol</label>
+                            <input id="exRol" type="text" class="w-full border p-2 rounded-lg bg-gray-100 text-gray-600 text-sm" disabled>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Programa Académico / Dependencia</label>
+                            <input id="exPrograma" type="text" class="w-full border p-2 rounded-lg bg-gray-100 text-gray-600 text-sm" disabled>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 2: Destino -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                            <i data-lucide="map-pin" class="w-4 h-4 text-purple-700"></i>
+                            Información del destino
+                        </h4>
+                        <span class="text-[11px] font-semibold uppercase text-gray-400">Obligatorio</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">
+                                Institución de Destino <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="exInstitucion" required
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
+                                   placeholder="Ej: Cámara de Comercio">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">
+                                Ciudad de Destino <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="exCiudad" required
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
+                                   placeholder="Ej: Armenia">
+                        </div>
+                        <div class="md:col-span-3">
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">
+                                Dirección de Destino <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" id="exDireccion" required
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
+                                   placeholder="Ej: Calle 10 # 20-30, Barrio Centro">
+                        </div>
+                    </div>
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Fecha de Salida</label>
+                            <input type="date" id="exFechaSalida" required
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Fecha de Regreso</label>
+                            <input type="date" id="exFechaRegreso" required
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Duración</label>
+                            <input type="text" id="exDuracion"
+                                   class="w-full border p-2 rounded-lg bg-gray-100 text-gray-600 text-sm"
+                                   placeholder="Se calcula automáticamente" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Hora de la actividad</label>
+                            <input type="time" id="exHoraActividad" required
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 3: Riesgos (SST) -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h4 class="text-sm font-bold text-gray-800 flex items-center gap-2">
+                            <i data-lucide="heart-pulse" class="w-4 h-4 text-purple-700"></i>
+                            Información para SST (Riesgos)
+                        </h4>
+                        <span class="text-[11px] font-semibold uppercase text-gray-400">Uso exclusivo SST</span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div class="md:col-span-4 text-[11px] font-semibold text-gray-600 uppercase">
+                            Contacto de emergencia
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Nombre</label>
+                            <input type="text" id="exEmergNombre"
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Parentesco</label>
+                            <input type="text" id="exEmergParentesco"
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Teléfono</label>
+                            <input type="tel" id="exEmergTelefono"
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-gray-700 mb-1">Correo</label>
+                            <input type="email" id="exEmergCorreo"
+                                   class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">
+                            Necesidades médicas (enfermedades, medicamentos, alergias, restricciones)
+                        </label>
+                        <textarea id="exNecesidades" rows="3"
+                                  class="w-full border p-2 rounded-lg focus:ring-2 focus:ring-purple-500 focus:outline-none text-sm"
+                                  placeholder="Describa enfermedades de base, medicamentos permanentes, alergias, uso de dispositivos médicos, restricciones físicas, etc."></textarea>
+                    </div>
+                </div>
+
+                <!-- Footer: Aceptación y acción -->
+                <div class="pt-4 border-t flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <label class="flex items-start gap-2 text-xs text-gray-700">
+                        <input type="checkbox" id="exPoliticaDatos" class="mt-0.5 w-4 h-4 accent-purple-700" required>
+                        <span>
+                            Acepto la política de tratamiento de datos personales y autorizo que la información de esta actividad
+                            extramural sea compartida con el área de Seguridad y Salud en el Trabajo para fines de prevención y atención de emergencias.
+                        </span>
+                    </label>
+                    <div class="flex justify-end gap-3">
+                        <button type="button" onclick="cerrarModalExtramural()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg font-bold text-sm">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="px-6 py-2 bg-purple-700 text-white rounded-lg font-bold hover:bg-purple-800 flex items-center gap-2 text-sm">
+                            Registrar Aviso y Notificar a SST
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="../assets/js/auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -318,6 +535,14 @@
             }
 
             const tbody = document.getElementById('requestsTableBody');
+
+            // Mostrar botón de salida extramural solo para perfiles habilitados
+            const roleCode = currentUser.role && currentUser.role.code;
+            const allowedRolesExtramural = ['PROFESOR', 'DOCENTE', 'ADMINISTRATIVO', 'COLABORADOR'];
+            if (roleCode && allowedRolesExtramural.includes(roleCode.toUpperCase())) {
+                const btnExtramural = document.getElementById('btnExtramural');
+                if (btnExtramural) btnExtramural.classList.remove('hidden');
+            }
             
             const mockRequests = [
                 { id: 'REQ-1082', date: '18/02/2026', type: 'Práctica Empresarial', dest: 'Software SAS', status: 'EN_REVISION_POSTULACION', userEmail: 'estudiante@cue.edu.co' },
@@ -330,8 +555,28 @@
             window.CUE_STUDENT_MOCK_REQS = mockRequests;
 
             const localReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
-            const allReqs = [...mockRequests, ...localReqs];
-            const userReqs = allReqs.filter(req => req.userEmail === currentUser.email);
+            const extramuralesRaw = JSON.parse(localStorage.getItem('CUE_EXTRAMURALES') || '[]');
+
+            const safeLocalReqs = Array.isArray(localReqs) ? localReqs : [];
+            const safeExtramurales = Array.isArray(extramuralesRaw) ? extramuralesRaw : [];
+
+            const extramuralesForUser = safeExtramurales
+                .filter(item => (item.userEmail || '').trim() === (currentUser.email || '').trim())
+                .map(item => {
+                    return {
+                        ...item,
+                        // Normalizar campos para la tabla principal
+                        id: item.id || ('EXT-' + Math.floor(Math.random() * 10000)),
+                        type: 'Actividad Laboral Extramural (SST)',
+                        dest: item.institucionDestino || item.institucion || item.institucionExtramural || '—',
+                        date: item.fechaInicio || item.fechaSalida || item.fecha || '',
+                        status: item.estado || 'NOTIFICADO_SST,
+                        __isExtramural: true
+                    };
+                });
+
+            const allReqs = [...mockRequests, ...safeLocalReqs, ...extramuralesForUser];
+            const userReqs = allReqs.filter(req => req.userEmail === currentUser.email || req.__isExtramural);
 
             tbody.innerHTML = '';
 
@@ -339,8 +584,20 @@
                 tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500 italic">Aún no tienes trámites de movilidad registrados.</td></tr>`;
             } else {
                 userReqs.forEach(req => {
-                    let statusConfig = getStatusConfig(req.status, req.id, currentUser);
                     const dropdownId = `stu-kebab-dd-${req.id}`;
+                    const statusNorm = String(req.status || '').toUpperCase();
+                    const puedeSolicitarCertificado = statusNorm === 'MOVILIDAD_ACTIVA' || statusNorm === 'APROBADA_POSTULACION';
+
+                    // Badge de estado: caso especial para actividades extramurales
+                    const isExtramural = !!req.__isExtramural || String(req.id || '').startsWith('EXT-') || statusNorm === 'NOTIFICADO_SST';
+                    let statusBadgeHtml;
+                    if (isExtramural) {
+                        statusBadgeHtml = `<span class="px-3 py-1 bg-green-100 text-green-800 border border-green-300 rounded-full text-[10px] font-bold flex items-center gap-1 w-fit"><i data-lucide="check-circle" class="w-3 h-3"></i> NOTIFICADA Y APROBADA</span>`;
+                    } else {
+                        const statusConfig = getStatusConfig(req.status, req.id, currentUser);
+                        statusBadgeHtml = `<span class="px-2 py-1 rounded text-xs font-bold border ${statusConfig.badgeClass}">${statusConfig.label}</span>`;
+                    }
+
                     tbody.innerHTML += `
                         <tr class="hover:bg-gray-50 border-b last:border-0 transition">
                             <td class="p-4 font-mono font-bold text-[#03045e]">${req.id}</td>
@@ -350,32 +607,186 @@
                             </td>
                             <td class="p-4 text-gray-600">${req.date}</td>
                             <td class="p-4">
-                                <span class="px-2 py-1 rounded text-xs font-bold border ${statusConfig.badgeClass}">${statusConfig.label}</span>
+                                ${statusBadgeHtml}
                             </td>
                             <td class="p-4 text-center align-middle">
-                                <div class="relative inline-flex">
-                                    <button type="button" data-stu-kebab-btn="1" onclick="toggleKebabEstudiante('${dropdownId}')" class="p-2 rounded-full hover:bg-gray-100 transition" title="Menú de acciones">
-                                        <i data-lucide="more-vertical" class="w-5 h-5 text-gray-600"></i>
-                                    </button>
-                                    <div id="${dropdownId}" class="hidden absolute right-0 mt-1 top-full z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[220px] text-left">
-                                        <button type="button" onclick="abrirEstadoMovilidadEst('${req.id}'); closeKebabEstudiante('${dropdownId}')" class="w-full px-4 py-2 text-xs hover:bg-gray-50 flex items-center gap-2">
-                                            <span>Ver Estado (Trazabilidad)</span>
-                                        </button>
-                                        <button type="button" onclick="window.location.href='mobility-wizard.html?editId=${req.id}'" class="w-full px-4 py-2 text-xs hover:bg-gray-50 flex items-center gap-2">
-                                            <span>Editar Información</span>
-                                        </button>
-                                        <button type="button" onclick="abrirModalActualizarDocs('${req.id}'); closeKebabEstudiante('${dropdownId}')" class="w-full px-4 py-2 text-xs hover:bg-gray-50 flex items-center gap-2">
-                                            <span>Actualizar Documentos</span>
-                                        </button>
-                                    </div>
+                                <div class="flex flex-wrap items-center justify-center gap-2">
+                                    ${isExtramural ? '' : `<button type="button" onclick="abrirEstadoMovilidadEst('${req.id}')" class="px-3 py-1.5 rounded border border-gray-300 bg-white text-gray-700 text-xs font-bold hover:bg-gray-50 transition">Ver Detalles</button>`}
+                                    ${!isExtramural && puedeSolicitarCertificado ? `<button type="button" onclick="abrirModalCertificado('${req.id}'); closeKebabEstudiante('${dropdownId}')" class="px-3 py-1.5 rounded border border-[#0077b6] bg-[#0077b6] text-white text-xs font-bold hover:bg-[#03045e] transition">Solicitar Certificado</button>` : ''}
+                                    ${isExtramural ? '' : `
+                                        <div class="relative inline-flex">
+                                            <button type="button" data-stu-kebab-btn="1" onclick="toggleKebabEstudiante('${dropdownId}')" class="p-2 rounded-full hover:bg-gray-100 transition" title="Menú de acciones">
+                                                <i data-lucide="more-vertical" class="w-5 h-5 text-gray-600"></i>
+                                            </button>
+                                            <div id="${dropdownId}" class="hidden absolute right-0 mt-1 top-full z-50 bg-white border border-gray-200 rounded-lg shadow-lg py-1 min-w-[220px] text-left">
+                                                <button type="button" onclick="abrirEstadoMovilidadEst('${req.id}'); closeKebabEstudiante('${dropdownId}')" class="w-full px-4 py-2 text-xs hover:bg-gray-50 flex items-center gap-2">
+                                                    <span>Ver Estado (Trazabilidad)</span>
+                                                </button>
+                                                <button type="button" onclick="window.location.href='mobility-wizard.html?editId=${req.id}'" class="w-full px-4 py-2 text-xs hover:bg-gray-50 flex items-center gap-2">
+                                                    <span>Editar Información</span>
+                                                </button>
+                                                <button type="button" onclick="abrirModalActualizarDocs('${req.id}'); closeKebabEstudiante('${dropdownId}')" class="w-full px-4 py-2 text-xs hover:bg-gray-50 flex items-center gap-2">
+                                                    <span>Actualizar Documentos</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `}
                                 </div>
                             </td>
                         </tr>
                     `;
                 });
             }
-            lucide.createIcons();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // Listeners para cálculo automático de duración en actividad extramural
+            const exInicio = document.getElementById('exFechaSalida');
+            const exFin = document.getElementById('exFechaRegreso');
+            if (exInicio) exInicio.addEventListener('change', calcularDuracionExtramural);
+            if (exFin) exFin.addEventListener('change', calcularDuracionExtramural);
         });
+
+        function abrirModalExtramural() {
+            const modal = document.getElementById('modalExtramural');
+            if (!modal) return;
+
+            // Prefill datos personales en sección solo lectura
+            try {
+                const currentUser = AuthService.checkAuth();
+                const profileRaw = localStorage.getItem('CUE_USER_PROFILE');
+                const profile = profileRaw ? JSON.parse(profileRaw) : {};
+
+                const nombre = profile.nombres && profile.apellidos
+                    ? `${profile.nombres} ${profile.apellidos}`.trim()
+                    : (currentUser.name || '').trim();
+
+                const doc =
+                    profile.docNumber ||
+                    profile.numDoc ||
+                    currentUser.docNumber ||
+                    '';
+
+                const celular =
+                    profile.celular ||
+                    document.getElementById('profCelular')?.value ||
+                    '';
+
+                const programa =
+                    profile.programa ||
+                    profile.program ||
+                    currentUser.programa ||
+                    '';
+
+                const rol =
+                    (currentUser.role && (currentUser.role.name || currentUser.role.code)) ||
+                    '';
+
+                const setVal = (id, val) => {
+                    const el = document.getElementById(id);
+                    if (el) el.value = (val || '').trim();
+                };
+
+                setVal('exNombreCompleto', nombre);
+                setVal('exDocumento', doc);
+                setVal('exCelular', celular);
+                setVal('exRol', rol);
+                setVal('exPrograma', programa);
+            } catch (e) {
+                console.warn('No fue posible precargar datos personales para actividad extramural.', e);
+            }
+
+            const dur = document.getElementById('exDuracion');
+            if (dur) dur.value = '';
+
+            modal.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function cerrarModalExtramural() {
+            const modal = document.getElementById('modalExtramural');
+            if (!modal) return;
+            modal.classList.add('hidden');
+            const form = document.getElementById('formExtramural');
+            if (form) form.reset();
+        }
+
+        function calcularDuracionExtramural() {
+            const inicio = document.getElementById('exFechaSalida')?.value;
+            const fin = document.getElementById('exFechaRegreso')?.value;
+            const out = document.getElementById('exDuracion');
+            if (!out) return;
+            if (!inicio || !fin) {
+                out.value = '';
+                return;
+            }
+            const a = new Date(inicio);
+            const b = new Date(fin);
+            if (isNaN(a.getTime()) || isNaN(b.getTime()) || b < a) {
+                out.value = 'Verifique fechas';
+                return;
+            }
+            const diffMs = b - a;
+            const diffDays = Math.ceil(diffMs / (24 * 60 * 60 * 1000));
+            const months = (diffDays / 30).toFixed(1);
+            const weeks = Math.round(diffDays / 7 * 10) / 10;
+            if (diffDays <= 0) out.value = '0 días';
+            else if (diffDays >= 30) out.value = `${months} meses (${diffDays} días)`;
+            else if (diffDays >= 7) out.value = `${weeks} semanas (${diffDays} días)`;
+            else out.value = `${diffDays} días`;
+        }
+
+        function guardarExtramural(e) {
+            e.preventDefault();
+
+            const check = document.getElementById('exPoliticaDatos');
+            if (check && !check.checked) {
+                alert("Debe aceptar la política de tratamiento de datos para registrar el aviso extramural.");
+                return;
+            }
+
+            const getVal = (id) => (document.getElementById(id)?.value || '').trim();
+
+            const nuevaActividad = {
+                id: "EXT-" + Math.floor(Math.random() * 10000),
+                fechaRegistro: new Date().toISOString(),
+                estado: 'NOTIFICADO_SST',
+                // Sección personal
+                nombreCompleto: getVal('exNombreCompleto'),
+                documento: getVal('exDocumento'),
+                celular: getVal('exCelular'),
+                rol: getVal('exRol'),
+                programaAcademico: getVal('exPrograma'),
+                // Sección destino
+                institucionDestino: getVal('exInstitucion'),
+                ciudadDestino: getVal('exCiudad'),
+                direccionDestino: getVal('exDireccion'),
+                fechaSalida: getVal('exFechaSalida'),
+                fechaRegreso: getVal('exFechaRegreso'),
+                duracion: getVal('exDuracion'),
+                horaActividad: getVal('exHoraActividad'),
+                // Sección riesgos SST
+                contactoEmergenciaNombre: getVal('exEmergNombre'),
+                contactoEmergenciaParentesco: getVal('exEmergParentesco'),
+                contactoEmergenciaTelefono: getVal('exEmergTelefono'),
+                contactoEmergenciaCorreo: getVal('exEmergCorreo'),
+                necesidadesMedicas: getVal('exNecesidades')
+            };
+
+            let actividades = [];
+            try {
+                actividades = JSON.parse(localStorage.getItem('CUE_EXTRAMURALES') || '[]');
+                if (!Array.isArray(actividades)) actividades = [];
+            } catch (e) {
+                actividades = [];
+            }
+
+            actividades.push(nuevaActividad);
+            localStorage.setItem('CUE_EXTRAMURALES', JSON.stringify(actividades));
+
+            alert("Registro exitoso. La información ha sido guardada y el área de Seguridad y Salud en el Trabajo (SST) ha sido notificada.");
+            
+            cerrarModalExtramural();
+        }
 
         function getDocForStudent(user) {
             try {
@@ -665,6 +1076,32 @@
             document.getElementById('certModal').classList.remove('hidden');
         }
         function closeCertModal() { document.getElementById('certModal').classList.add('hidden'); }
+
+        let modalCertificadoReqId = null;
+        function abrirModalCertificado(reqId) {
+            modalCertificadoReqId = reqId;
+            const modal = document.getElementById('modal-certificado');
+            const select = document.getElementById('modalCertificadoTipo');
+            if (modal) {
+                if (select) select.value = '';
+                modal.classList.remove('hidden');
+            }
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+        function cerrarModalCertificado() {
+            const modal = document.getElementById('modal-certificado');
+            if (modal) modal.classList.add('hidden');
+            modalCertificadoReqId = null;
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnEnviar = document.getElementById('btnEnviarSolicitudCertificado');
+            if (btnEnviar) {
+                btnEnviar.addEventListener('click', function() {
+                    alert('Solicitud enviada a Tesorería/Registro exitosamente.');
+                    cerrarModalCertificado();
+                });
+            }
+        });
 
         function confirmCertRequest() {
             const reqId = document.getElementById('certReqId').value;

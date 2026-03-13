@@ -138,6 +138,58 @@
 
             localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(requests));
 
+            // Actividades Laborales Extramurales (SST + panel de usuario)
+            const extramuralesData = [
+                {
+                    id: "EXT-1050",
+                    userEmail: "test@cue.edu.co",
+                    nombreCompleto: "Profesor Roberto Gómez",
+                    documento: "1094000000",
+                    celular: "3001234567",
+                    rol: "PROFESOR",
+                    programa: "Ingeniería de Software",
+                    institucionDestino: "Cámara de Comercio de Armenia",
+                    ciudad: "Armenia",
+                    direccionDestino: "Carrera 14 # 23-15",
+                    fechaInicio: "2026-03-20",
+                    fechaFin: "2026-03-20",
+                    hora: "14:00",
+                    duracion: "1 día",
+                    contactoEmergenciaNombre: "María Gómez",
+                    contactoEmergenciaParentesco: "Esposa",
+                    contactoEmergenciaTelefono: "3109876543",
+                    contactoEmergenciaCorreo: "maria@gmail.com",
+                    necesidadesMedicas: "Alergia a la penicilina. Ningún medicamento de control.",
+                    aceptaPolitica: true,
+                    estado: "NOTIFICADO_SST"
+                },
+                {
+                    id: "EXT-1051",
+                    userEmail: "test@cue.edu.co",
+                    nombreCompleto: "Administrativo Carlos Pérez",
+                    documento: "1094555000",
+                    celular: "3007654321",
+                    rol: "ADMINISTRATIVO",
+                    programa: "Bienestar Universitario",
+                    institucionDestino: "Hospital San Juan de Dios",
+                    ciudad: "Armenia",
+                    direccionDestino: "Calle 10 # 8-20",
+                    fechaInicio: "2026-03-25",
+                    fechaFin: "2026-03-26",
+                    hora: "08:00",
+                    duracion: "2 días",
+                    contactoEmergenciaNombre: "Laura Pérez",
+                    contactoEmergenciaParentesco: "Hermana",
+                    contactoEmergenciaTelefono: "3112223344",
+                    contactoEmergenciaCorreo: "laura.perez@example.com",
+                    necesidadesMedicas: "Sin antecedentes médicos de importancia. No alergias conocidas.",
+                    aceptaPolitica: true,
+                    estado: "NOTIFICADO_SST"
+                }
+            ];
+
+            localStorage.setItem('CUE_EXTRAMURALES', JSON.stringify(extramuralesData));
+
             // Salidas académicas (Coordinación + SST): 5+ con transporte Universidad, 2 con propio
             const salidas = [];
             const tiposSalida = ['VISITA_EMPRESARIAL', 'SALIDA_CAMPO', 'CONGRESO_EVENTO', 'OTRA'];

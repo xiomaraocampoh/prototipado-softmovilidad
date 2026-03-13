@@ -53,6 +53,7 @@ const WizardLogic = {
             } else if(this.draftId) {
                 this.loadDraft(this.draftId);
             }
+            this.updateFields();
             this.updateUI();
             this.calculateDuration();
         }
@@ -289,6 +290,18 @@ const WizardLogic = {
         const noConv = ['Evento Académico/Investigativo', 'Diplomado Opción de Grado', 'Curso Corto', 'Curso Idiomas', 'Voluntariado', 'Otro'].includes(type);
         document.getElementById('entity_select')?.toggleAttribute('required', !noConv);
         
+        // Regla de negocio: no todos los externos se registran en Q10. Ocultar datos Q10 para tipos excluidos.
+        const q10ExcludedTypes = ['Visita/Salida Académica', 'Evento Académico/Investigativo', 'Voluntariado', 'Salida Académica'];
+        const q10Container = document.getElementById('q10DataContainer');
+        if (q10Container && this.role === 'EXTERNO') {
+            const requiresQ10 = !q10ExcludedTypes.includes(type);
+            if (requiresQ10) {
+                q10Container.classList.remove('hidden');
+            } else {
+                q10Container.classList.add('hidden');
+            }
+        }
+        
         // 3. Eliminamos la lógica de preguntar por transporte aquí. 
         // El contenedor 'transportContainer' debe estar oculto siempre en el wizard del solicitante.
         const transCont = document.getElementById('transportContainer');
@@ -317,22 +330,33 @@ const WizardLogic = {
                 }
             }
         }
-        // REQ-06: Al avanzar desde paso 3, si EXTERNO validar datos desagregados y FO-IN-012
+        // REQ-06: Al avanzar desde paso 3, si EXTERNO validar según si requiere Q10 o no
         if(dir === 1 && this.stepIdx === 3 && this.role === 'EXTERNO') {
-            const required = [
-                { id: 'extPrimerNombre', msg: 'Primer Nombre' },
-                { id: 'extPrimerApellido', msg: 'Primer Apellido' },
-                { id: 'extSexo', msg: 'Sexo' },
-                { id: 'extDireccion', msg: 'Dirección' },
-                { id: 'extPais', msg: 'País' },
-                { id: 'extDepartamento', msg: 'Departamento' },
-                { id: 'extMunicipio', msg: 'Municipio' },
-                { id: 'extTipoDoc', msg: 'Tipo de documento' },
-                { id: 'extNumDoc', msg: 'Número de documento' },
-                { id: 'extCelular', msg: 'Celular' },
-                { id: 'extCorreo', msg: 'Correo electrónico' },
-                { id: 'extActividadesMaterias', msg: 'Actividades a realizar o materias a cursar' }
-            ];
+            const q10ExcludedTypes = ['Visita/Salida Académica', 'Evento Académico/Investigativo', 'Voluntariado', 'Salida Académica'];
+            const type = document.getElementById('mobilityType')?.value || '';
+            const q10Hidden = document.getElementById('q10DataContainer')?.classList.contains('hidden');
+            const requiresQ10 = !q10ExcludedTypes.includes(type) && !q10Hidden;
+            const required = requiresQ10
+                ? [
+                    { id: 'extPrimerNombre', msg: 'Primer Nombre' },
+                    { id: 'extPrimerApellido', msg: 'Primer Apellido' },
+                    { id: 'extSexo', msg: 'Sexo' },
+                    { id: 'extDireccion', msg: 'Dirección' },
+                    { id: 'extPais', msg: 'País' },
+                    { id: 'extDepartamento', msg: 'Departamento' },
+                    { id: 'extMunicipio', msg: 'Municipio' },
+                    { id: 'extTipoDoc', msg: 'Tipo de documento' },
+                    { id: 'extNumDoc', msg: 'Número de documento' },
+                    { id: 'extCelular', msg: 'Celular' },
+                    { id: 'extCorreo', msg: 'Correo electrónico' },
+                    { id: 'extActividadesMaterias', msg: 'Actividades a realizar o materias a cursar' }
+                ]
+                : [
+                    { id: 'extNombreCompleto', msg: 'Nombre completo' },
+                    { id: 'extCelular', msg: 'Celular' },
+                    { id: 'extCorreo', msg: 'Correo electrónico' },
+                    { id: 'extActividadesMaterias', msg: 'Actividades a realizar o materias a cursar' }
+                ];
             for (const r of required) {
                 const el = document.getElementById(r.id);
                 const v = (el?.value || '').trim();
@@ -480,6 +504,8 @@ const WizardLogic = {
         setVal('actividadesMovilidad', expediente.actividadesDesc || '');
 
         if (this.role === 'EXTERNO') {
+            const fullName = externo.nombreCompleto || [externo.primerNombre, externo.segundoNombre, externo.primerApellido, externo.segundoApellido].filter(Boolean).join(' ');
+            setVal('extNombreCompleto', fullName || '');
             setVal('extPrimerNombre', externo.primerNombre || '');
             setVal('extSegundoNombre', externo.segundoNombre || '');
             setVal('extPrimerApellido', externo.primerApellido || '');
@@ -611,6 +637,7 @@ const WizardLogic = {
     gatherExternoFormData: function() {
         const get = (id) => (document.getElementById(id)?.value || '').trim();
         return {
+            nombreCompleto: get('extNombreCompleto'),
             primerNombre: get('extPrimerNombre'),
             segundoNombre: get('extSegundoNombre'),
             primerApellido: get('extPrimerApellido'),

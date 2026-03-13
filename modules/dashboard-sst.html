@@ -45,7 +45,7 @@
     </nav>
 
     <main class="max-w-7xl mx-auto mt-8 px-6 pb-12">
-        <div class="flex justify-between items-end mb-6 border-b pb-4">
+        <div class="flex justify-between items-end mb-4 border-b pb-4">
             <div>
                 <h2 class="text-2xl font-bold text-[#03045e]">Control de Riesgos en Salidas Académicas (REQ-14)</h2>
                 <p class="text-gray-500 text-sm">Solo se muestran salidas donde el coordinador marcó &quot;SÍ&quot; en transporte suministrado por la Universidad.</p>
@@ -55,7 +55,16 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div class="mb-6 flex flex-wrap gap-2">
+            <button id="tabBtnSalidas" type="button" onclick="switchSstTab('salidas')" class="px-4 py-2 rounded-full text-xs font-bold border border-red-700 bg-red-700 text-white shadow-sm hover:bg-red-800 transition">
+                Salidas Académicas
+            </button>
+            <button id="tabBtnExtramurales" type="button" onclick="switchSstTab('extramurales')" class="px-4 py-2 rounded-full text-xs font-bold border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition">
+                Avisos Extramurales
+            </button>
+        </div>
+
+        <div id="tabContentSalidas" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
             <table class="w-full text-left border-collapse">
                 <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
                     <tr>
@@ -67,9 +76,38 @@
                     </tr>
                 </thead>
                 <tbody id="sstTableBody" class="divide-y divide-gray-100 text-sm">
-                    </tbody>
+                </tbody>
             </table>
         </div>
+        
+        <section id="tabContentExtramurales" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hidden">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
+                <div>
+                    <h3 class="text-sm font-bold text-[#03045e]">Avisos Extramurales (Profesores/Admin)</h3>
+                    <p class="text-[11px] text-gray-500 mt-0.5">Actividades laborales extramurales notificadas a SST para seguimiento preventivo.</p>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-blue-50 text-blue-700 border border-blue-100">
+                    <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
+                    Bandeja informativa
+                </span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm border-collapse">
+                    <thead class="bg-gray-50 border-b border-gray-200 text-[11px] uppercase text-gray-500 font-bold">
+                        <tr>
+                            <th class="p-3 w-24">ID</th>
+                            <th class="p-3 w-28">Fecha actividad</th>
+                            <th class="p-3">Funcionario</th>
+                            <th class="p-3">Destino</th>
+                            <th class="p-3 w-40 text-center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="extramuralesTableBody" class="divide-y divide-gray-100">
+                        <!-- filas dinámicas desde CUE_EXTRAMURALES -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </main>
 
     <div id="sstModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
@@ -155,6 +193,137 @@
         </div>
     </div>
 
+    <div id="modal-detalle-extramural" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-[#03045e] text-white">
+                <div>
+                    <h3 class="text-sm font-bold flex items-center gap-2">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        Expediente SST – Actividad Extramural
+                    </h3>
+                    <p class="text-[11px] text-blue-100 mt-0.5">Revisión informativa del expediente médico y de riesgos.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide bg-green-100 text-green-800 border border-green-200">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        NOTIFICADO A SST
+                    </span>
+                    <button onclick="closeExtramuralModal()" class="text-blue-100 hover:text-white p-1 rounded-full hover:bg-blue-900/40 transition">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-5 overflow-y-auto flex-1 bg-gray-50">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-1 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h4 class="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+                            <i data-lucide="user" class="w-3.5 h-3.5 text-[#0077b6]"></i>
+                            El funcionario
+                        </h4>
+                        <dl class="space-y-2 text-sm">
+                            <div>
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Nombre</dt>
+                                <dd id="extrNombreFuncionario" class="font-semibold text-gray-800">—</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Rol</dt>
+                                <dd id="extrRolFuncionario" class="text-gray-700 text-xs">—</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Programa / Dependencia</dt>
+                                <dd id="extrProgramaFuncionario" class="text-gray-700 text-xs">—</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Celular</dt>
+                                <dd id="extrCelularFuncionario" class="text-gray-700 text-xs">—</dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="md:col-span-2 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <h4 class="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+                            <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#0077b6]"></i>
+                            El destino de la actividad
+                        </h4>
+                        <dl class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div>
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Institución destino</dt>
+                                <dd id="extrInstitucion" class="font-semibold text-gray-800">—</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Ciudad</dt>
+                                <dd id="extrCiudad" class="text-gray-700 text-xs">—</dd>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Dirección</dt>
+                                <dd id="extrDireccion" class="text-gray-700 text-xs">—</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Fechas</dt>
+                                <dd id="extrFechas" class="text-gray-700 text-xs">—</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Duración</dt>
+                                <dd id="extrDuracion" class="text-gray-700 text-xs">—</dd>
+                            </div>
+                            <div>
+                                <dt class="text-[10px] font-semibold text-gray-400 uppercase">Hora</dt>
+                                <dd id="extrHora" class="text-gray-700 text-xs">—</dd>
+                            </div>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-red-50 via-orange-50 to-amber-50 border border-red-200 rounded-lg p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div>
+                            <h4 class="text-[11px] font-bold text-red-800 uppercase tracking-wide flex items-center gap-1">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-red-600"></i>
+                                Riesgos y consideraciones médicas
+                            </h4>
+                            <p class="text-[11px] text-red-700/80 mt-0.5">
+                                Información crítica para respuesta ante emergencias durante la actividad extramural.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <h5 class="text-[11px] font-semibold text-red-900 uppercase tracking-wide mb-2">Contacto de emergencia</h5>
+                            <dl class="space-y-1.5">
+                                <div>
+                                    <dt class="text-[10px] font-semibold text-red-800/80 uppercase">Nombre</dt>
+                                    <dd id="extrContactoNombre" class="text-red-900 text-xs font-medium">—</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-[10px] font-semibold text-red-800/80 uppercase">Parentesco</dt>
+                                    <dd id="extrContactoRel" class="text-red-900 text-xs">—</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-[10px] font-semibold text-red-800/80 uppercase">Teléfono</dt>
+                                    <dd id="extrContactoTelefono" class="text-red-900 text-xs">—</dd>
+                                </div>
+                                <div>
+                                    <dt class="text-[10px] font-semibold text-red-800/80 uppercase">Correo</dt>
+                                    <dd id="extrContactoCorreo" class="text-red-900 text-xs break-all">—</dd>
+                                </div>
+                            </dl>
+                        </div>
+                        <div>
+                            <h5 class="text-[11px] font-semibold text-red-900 uppercase tracking-wide mb-2">Necesidades médicas</h5>
+                            <p id="extrNecesidadesMedicas" class="text-red-900 text-xs leading-relaxed bg-white/60 border border-red-100 rounded-md px-3 py-2 min-h-[60px]">
+                                —
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="border-t border-gray-200 bg-white px-5 py-3 flex justify-end">
+                <button onclick="closeExtramuralModal()" class="px-4 py-2 text-sm font-bold rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-100 transition">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="modalEstadoMovilidad" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[80vh] overflow-y-auto">
             <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50">
@@ -176,7 +345,9 @@
     <script>
         let currentSstId = null;
         let currentRole = null;
+        let extramuralesCache = [];
         const LS_SALIDAS = 'CUE_SALIDAS_ACADEMICAS';
+        const LS_EXTRAMURALES = 'CUE_EXTRAMURALES';
         const pushCueNotification = CUECore ? CUECore.pushCueNotification : () => {};
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -191,7 +362,9 @@
             document.getElementById('userNameDisplay').textContent = user.name;
             document.getElementById('userRoleDisplay').textContent = user.role.name;
 
+            seedExtramuralesDemo();
             loadSSTTable();
+            loadExtramuralesTable();
             if (typeof CUECore !== 'undefined') CUECore.initCueNotificationUI(currentRole);
             lucide.createIcons();
         });
@@ -240,6 +413,89 @@
                 `;
             });
             lucide.createIcons();
+        }
+
+        function loadExtramuralesTable() {
+            const tbody = document.getElementById('extramuralesTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const raw = safeParseArray(LS_EXTRAMURALES);
+            if (!Array.isArray(raw) || raw.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No hay actividades laborales extramurales notificadas a SST.</td></tr>`;
+                return;
+            }
+
+            const filtrados = raw.filter(item => {
+                if (!item) return false;
+                const rol =
+                    String(item.rolFuncionario || item.rol || item.applicantRole || '')
+                        .toUpperCase();
+                if (!rol) return true;
+                return ['PROFESOR', 'DOCENTE', 'ADMINISTRATIVO', 'COLABORADOR'].includes(rol);
+            });
+
+            extramuralesCache = filtrados;
+
+            if (filtrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No hay actividades laborales extramurales para funcionarios o administrativos.</td></tr>`;
+                return;
+            }
+
+            filtrados.forEach((item, idx) => {
+                const id = escapeHtml(item.id || `EXT-${idx + 1}`);
+                const fechaSalida = escapeHtml(
+                    item.fechaSalida || item.fecha || item.fechaInicio || '—'
+                );
+                const funcionario = escapeHtml(
+                    item.nombreFuncionario || item.funcionario || item.nombre || '—'
+                );
+                const institucion = escapeHtml(
+                    item.institucionDestino ||
+                        item.institucion ||
+                        item.institucionExtramural ||
+                        '—'
+                );
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="p-3 text-[11px] font-mono text-gray-700">${id}</td>
+                        <td class="p-3 text-xs text-gray-700">${fechaSalida}</td>
+                        <td class="p-3">
+                            <div class="text-sm font-semibold text-gray-800">${funcionario}</div>
+                        </td>
+                        <td class="p-3 text-xs text-gray-700">${institucion}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="verExpedienteExtramural('${id}')" class="inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold bg-blue-600 text-white hover:bg-blue-700 shadow-sm transition">
+                                Ver Expediente
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            lucide.createIcons();
+        }
+
+        function verExpedienteExtramural(id) {
+            const safeId = String(id || '').trim();
+            if (!safeId) {
+                alert('No se encontró el identificador de la actividad extramural.');
+                return;
+            }
+
+            if (!Array.isArray(extramuralesCache) || extramuralesCache.length === 0) {
+                const raw = safeParseArray(LS_EXTRAMURALES);
+                extramuralesCache = raw;
+            }
+
+            const index = extramuralesCache.findIndex(item => String(item.id || '').trim() === safeId);
+            if (index === -1) {
+                alert('No se encontró el expediente extramural en el sistema.');
+                return;
+            }
+
+            openExtramuralModal(index);
         }
 
         // 2. APERTURA DEL PANEL DE AUDITORÍA
@@ -563,6 +819,234 @@
                 .replaceAll('>', '&gt;')
                 .replaceAll('"', '&quot;')
                 .replaceAll("'", '&#039;');
+        }
+
+        function seedExtramuralesDemo() {
+            try {
+                const existingRaw = localStorage.getItem(LS_EXTRAMURALES);
+                if (existingRaw) {
+                    const parsed = JSON.parse(existingRaw);
+                    if (Array.isArray(parsed) && parsed.length > 0) return;
+                }
+            } catch {
+                // Ignorar errores de parseo y continuar con la siembra
+            }
+
+            const demo = [
+                {
+                    id: 'EXTR-001',
+                    fechaSalida: '2026-03-15',
+                    fechaFin: '2026-03-15',
+                    horaSalida: '08:00',
+                    nombreFuncionario: 'María Fernanda López',
+                    rolFuncionario: 'PROFESOR',
+                    programaFuncionario: 'Programa de Enfermería',
+                    celularFuncionario: '+57 300 123 4567',
+                    institucionDestino: 'Clínica Santa María',
+                    ciudadDestino: 'Cali, Valle del Cauca',
+                    direccionDestino: 'Carrera 15 # 5-25',
+                    duracionActividad: 'Jornada completa (8 horas)',
+                    contactoEmergenciaNombre: 'Carlos López',
+                    contactoEmergenciaParentesco: 'Padre',
+                    contactoEmergenciaTelefono: '+57 312 555 8899',
+                    contactoEmergenciaCorreo: 'carlos.lopez@example.com',
+                    necesidadesMedicas:
+                        'Antecedente de asma leve controlada. Porta inhalador de rescate. No alergias medicamentosas conocidas.'
+                },
+                {
+                    id: 'EXTR-002',
+                    fechaSalida: '2026-03-20',
+                    fechaFin: '2026-03-22',
+                    horaActividad: '07:30',
+                    nombreFuncionario: 'Juan Pablo Rincón',
+                    rolFuncionario: 'ADMINISTRATIVO',
+                    programaFuncionario: 'Bienestar Universitario',
+                    celularFuncionario: '+57 320 987 6543',
+                    institucionDestino: 'Fundación Hogar Comunitario El Progreso',
+                    ciudadDestino: 'Palmira, Valle del Cauca',
+                    direccionDestino: 'Calle 8 # 20-30 Barrio El Prado',
+                    duracionEstimada: '3 días de acompañamiento en campo',
+                    contactoEmergenciaNombre: 'Ana Marcela Rincón',
+                    contactoEmergenciaParentesco: 'Hermana',
+                    contactoEmergenciaTelefono: '+57 315 444 2211',
+                    contactoEmergenciaCorreo: 'ana.rincon@example.com',
+                    necesidadesMedicas:
+                        'Hipertensión arterial controlada con losartán 50 mg/día. Evitar exposición prolongada a altas temperaturas.'
+                },
+                {
+                    id: 'EXTR-003',
+                    fechaSalida: '2026-04-05',
+                    fechaFin: '2026-04-05',
+                    hora: '14:00',
+                    nombreFuncionario: 'Laura Catalina Gómez',
+                    rolFuncionario: 'DOCENTE',
+                    programaFuncionario: 'Psicología Organizacional',
+                    celularFuncionario: '+57 301 555 7788',
+                    institucionDestino: 'Industrias del Pacífico S.A.S.',
+                    ciudadDestino: 'Yumbo, Valle del Cauca',
+                    direccionDestino: 'Zona Industrial La Estancia, Bodega 12',
+                    duracion: 'Taller de 4 horas en planta',
+                    contactoEmergenciaNombre: 'Felipe Gómez',
+                    contactoEmergenciaParentesco: 'Esposo',
+                    contactoEmergenciaTelefono: '+57 311 666 9900',
+                    contactoEmergenciaCorreo: 'felipe.gomez@example.com',
+                    necesidadesMedicas:
+                        'Alergia conocida a mariscos. Evitar consumo de alimentos que puedan contener trazas. Sin antecedentes de hospitalización reciente.'
+                }
+            ];
+
+            try {
+                localStorage.setItem(LS_EXTRAMURALES, JSON.stringify(demo));
+            } catch {
+                // Si falla el almacenamiento, simplemente no se precargan datos
+            }
+        }
+
+        function openExtramuralModal(index) {
+            const item = Array.isArray(extramuralesCache) ? extramuralesCache[index] : null;
+            if (!item) {
+                alert('No se encontró el expediente extramural en el sistema.');
+                return;
+            }
+
+            const rol =
+                item.rolFuncionario ||
+                item.rol ||
+                item.applicantRole ||
+                'PROFESOR / ADMINISTRATIVO';
+            const programa =
+                item.programaFuncionario ||
+                item.programa ||
+                item.dependencia ||
+                '—';
+            const celular =
+                item.celularFuncionario ||
+                item.celular ||
+                item.telefono ||
+                '—';
+
+            const institucion =
+                item.institucionDestino ||
+                item.institucion ||
+                item.institucionExtramural ||
+                '—';
+            const ciudad = item.ciudadDestino || item.ciudad || '—';
+            const direccion =
+                item.direccionDestino || item.direccion || item.direccionLugar || '—';
+            const fechaInicio = item.fechaInicio || item.fechaSalida || item.fecha || '—';
+            const fechaFin = item.fechaFin || item.fechaRegreso || '';
+            const fechasLabel = fechaFin
+                ? `${fechaInicio} – ${fechaFin}`
+                : fechaInicio;
+            const duracion =
+                item.duracion ||
+                item.duracionActividad ||
+                item.duracionEstimada ||
+                '';
+            const hora =
+                item.horaSalida ||
+                item.horaActividad ||
+                item.hora ||
+                '';
+
+            const contactoNombre =
+                item.contactoEmergenciaNombre ||
+                item.contactoNombre ||
+                '';
+            const contactoRel =
+                item.contactoEmergenciaParentesco ||
+                item.contactoParentesco ||
+                '';
+            const contactoTel =
+                item.contactoEmergenciaTelefono ||
+                item.contactoTelefono ||
+                '';
+            const contactoCorreo =
+                item.contactoEmergenciaCorreo ||
+                item.contactoCorreo ||
+                '';
+            const necesidades =
+                item.necesidadesMedicas ||
+                item.observacionesMedicas ||
+                item.riesgosIdentificados ||
+                '';
+
+            document.getElementById('extrNombreFuncionario').textContent =
+                escapeHtml(
+                    item.nombreFuncionario || item.funcionario || item.nombre || '—'
+                );
+            document.getElementById('extrRolFuncionario').textContent =
+                escapeHtml(String(rol));
+            document.getElementById('extrProgramaFuncionario').textContent =
+                escapeHtml(String(programa));
+            document.getElementById('extrCelularFuncionario').textContent =
+                escapeHtml(String(celular));
+
+            document.getElementById('extrInstitucion').textContent =
+                escapeHtml(String(institucion));
+            document.getElementById('extrCiudad').textContent =
+                escapeHtml(String(ciudad));
+            document.getElementById('extrDireccion').textContent =
+                escapeHtml(String(direccion));
+            document.getElementById('extrFechas').textContent =
+                escapeHtml(String(fechasLabel || '—'));
+            document.getElementById('extrDuracion').textContent =
+                escapeHtml(String(duracion || '—'));
+            document.getElementById('extrHora').textContent =
+                escapeHtml(String(hora || '—'));
+
+            document.getElementById('extrContactoNombre').textContent =
+                escapeHtml(contactoNombre || '—');
+            document.getElementById('extrContactoRel').textContent =
+                escapeHtml(contactoRel || '—');
+            document.getElementById('extrContactoTelefono').textContent =
+                escapeHtml(contactoTel || '—');
+            document.getElementById('extrContactoCorreo').textContent =
+                escapeHtml(contactoCorreo || '—');
+            document.getElementById('extrNecesidadesMedicas').textContent =
+                escapeHtml(
+                    necesidades ||
+                        'Sin observaciones médicas registradas para esta actividad.'
+                );
+
+            const modal = document.getElementById('modal-detalle-extramural');
+            if (modal) {
+                modal.classList.remove('hidden');
+                lucide.createIcons();
+            }
+        }
+
+        function closeExtramuralModal() {
+            const modal = document.getElementById('modal-detalle-extramural');
+            if (modal) modal.classList.add('hidden');
+        }
+        
+        function switchSstTab(tab) {
+            const salidas = document.getElementById('tabContentSalidas');
+            const extr = document.getElementById('tabContentExtramurales');
+            const btnSal = document.getElementById('tabBtnSalidas');
+            const btnExt = document.getElementById('tabBtnExtramurales');
+
+            const isSalidas = tab === 'salidas';
+
+            if (salidas && extr) {
+                salidas.classList.toggle('hidden', !isSalidas);
+                extr.classList.toggle('hidden', isSalidas);
+            }
+
+            if (btnSal && btnExt) {
+                if (isSalidas) {
+                    btnSal.classList.add('bg-red-700', 'text-white', 'border-red-700');
+                    btnSal.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+                    btnExt.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+                    btnExt.classList.remove('bg-red-700', 'text-white', 'border-red-700');
+                } else {
+                    btnExt.classList.add('bg-red-700', 'text-white', 'border-red-700');
+                    btnExt.classList.remove('bg-white', 'text-gray-700', 'border-gray-300');
+                    btnSal.classList.add('bg-white', 'text-gray-700', 'border-gray-300');
+                    btnSal.classList.remove('bg-red-700', 'text-white', 'border-red-700');
+                }
+            }
         }
     </script>
 </body>
