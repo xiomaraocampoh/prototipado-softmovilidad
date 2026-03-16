@@ -50,6 +50,11 @@
                 data-target="tab-tipos">
                 <i data-lucide="settings" class="w-4 h-4"></i> Tipos Movilidad
             </button>
+            <button onclick="switchTab('tab-config-movilidad')"
+                class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
+                data-target="tab-config-movilidad">
+                <i data-lucide="sliders" class="w-4 h-4"></i> ⚙️ Configuración de Movilidades
+            </button>
             <button id="tab-reportes-btn" onclick="switchTab('view-reportes')"
                 class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition hidden"
                 data-target="view-reportes">
@@ -296,6 +301,51 @@
                 </div>
             </div>
 
+            <div id="tab-config-movilidad" class="ani-content-section hidden animate-fade-in">
+                <div class="mb-6 flex items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-[#03045e]">Gestión de Tipos de Movilidad y Requisitos</h2>
+                        <p class="text-gray-500 text-sm">Defina las reglas de cada tipo de movilidad y sus documentos requeridos.</p>
+                    </div>
+                    <div>
+                        <button onclick="openConfigMovilidadModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-[#0077b6] text-white rounded-lg text-sm font-bold shadow-sm hover:bg-[#005b8f] transition">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                            <span>+ Crear Nuevo Tipo</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase tracking-wide">
+                            <tr>
+                                <th class="p-4">Tipo de Movilidad</th>
+                                <th class="p-4 text-center">Requiere Q10</th>
+                                <th class="p-4">Requisitos Documentales</th>
+                                <th class="p-4 text-center w-32">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4 font-semibold text-[#03045e]">Intercambio Académico</td>
+                                <td class="p-4 text-center">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-green-50 text-green-700 border border-green-200">Sí</span>
+                                </td>
+                                <td class="p-4 text-gray-700">
+                                    <span class="inline-flex items-center px-2 py-0.5 mr-1 mb-1 rounded-full bg-gray-100 text-gray-700 text-xs border border-gray-200">Cédula</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 mr-1 mb-1 rounded-full bg-gray-100 text-gray-700 text-xs border border-gray-200">Notas</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 mr-1 mb-1 rounded-full bg-gray-100 text-gray-700 text-xs border border-gray-200">Carta de Aceptación</span>
+                                </td>
+                                <td class="p-4 text-center">
+                                    <button class="text-xs font-bold text-[#0077b6] hover:underline mr-2">Editar</button>
+                                    <button class="text-xs font-bold text-red-600 hover:underline">Eliminar</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
             <div id="view-reportes" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-[#03045e] flex items-center gap-2">
@@ -416,7 +466,86 @@
                 <div id="modalDocsContent" class="text-sm space-y-3 mb-6">
                     <!-- REQ-XX: Lista de documentos cargados / simulados para revisión individual -->
                 </div>
+                <div id="q10ApprovalContainer" class="hidden mb-4">
+                    <div class="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3">
+                        <div class="mt-0.5">
+                            <i data-lucide="info" class="w-5 h-5 text-blue-500"></i>
+                        </div>
+                        <div class="flex-1">
+                            <label for="sendToQ10Check" class="flex items-start gap-2 cursor-pointer">
+                                <input id="sendToQ10Check" type="checkbox" checked
+                                    class="mt-1 h-4 w-4 rounded border-blue-400 text-blue-600 focus:ring-blue-500">
+                                <span class="text-sm text-[#03045e] font-semibold leading-snug">
+                                    Generar y enviar plantilla a Registro y Control (Matrícula Q10)
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
                 <div id="modalActions" class="flex justify-end gap-3 pt-4 border-t"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-config-movilidad"
+        class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+            <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-[#03045e] text-white">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="sliders" class="w-5 h-5"></i>
+                    <h3 class="text-sm font-bold">Configurar Tipo de Movilidad</h3>
+                </div>
+                <button onclick="closeConfigMovilidadModal()" class="text-gray-200 hover:text-white p-1 rounded-full hover:bg-white/10 transition">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-5 overflow-y-auto text-sm">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Nombre de la Movilidad</label>
+                    <input id="cfgMovNombre" type="text" placeholder="Ej: Pasantía Especial"
+                        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0077b6] focus:border-[#0077b6]">
+                </div>
+
+                <div class="flex items-start gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                    <input id="cfgMovRequiereQ10" type="checkbox"
+                        class="mt-0.5 h-4 w-4 rounded border-blue-400 text-blue-600 focus:ring-blue-500">
+                    <div>
+                        <p class="text-sm font-semibold text-[#03045e]">¿Requiere envío de datos a Registro y Control (Q10)?</p>
+                        <p class="text-[11px] text-blue-700/80">Marque esta opción si este tipo de movilidad debe generar plantillas Q10 al ser aprobada.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between gap-3">
+                        <div>
+                            <p class="text-xs font-bold text-gray-600 uppercase tracking-wide">Requisitos Documentales</p>
+                            <p class="text-[11px] text-gray-500">Agregue los documentos que el estudiante debe adjuntar para este tipo.</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col md:flex-row gap-3">
+                        <input id="cfgMovReqInput" type="text" placeholder="Ej: Seguro Médico"
+                            class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0077b6] focus:border-[#0077b6]">
+                        <button type="button" onclick="addConfigMovilidadRequisito()"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold shadow-sm hover:bg-green-700 transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Añadir Requisito</span>
+                        </button>
+                    </div>
+                    <div id="cfgMovReqList"
+                        class="min-h-[40px] flex flex-wrap gap-2 border border-dashed border-gray-200 rounded-lg px-3 py-2 bg-gray-50">
+                        <!-- Chips dinámicos de requisitos -->
+                    </div>
+                </div>
+            </div>
+            <div class="px-5 py-3 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
+                <button type="button" onclick="closeConfigMovilidadModal()"
+                    class="px-4 py-2 text-sm font-bold text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-100 transition">
+                    Cancelar
+                </button>
+                <button type="button" onclick="saveConfigMovilidad()"
+                    class="px-5 py-2 text-sm font-bold text-white bg-[#0077b6] rounded-lg hover:bg-[#005b8f] transition">
+                    Guardar Configuración
+                </button>
             </div>
         </div>
     </div>
@@ -996,6 +1125,24 @@
             content.innerHTML = req.expedienteData || req.externoFOIN012 ? buildExpedienteHtml(req) : '<p class="text-gray-500 italic">No hay datos de expediente registrados para esta solicitud.</p>';
             renderDocsReview(req);
 
+            // Mostrar u ocultar el control de Q10 según el rol del solicitante
+            const q10Container = document.getElementById('q10ApprovalContainer');
+            const q10Checkbox = document.getElementById('sendToQ10Check');
+            if (q10Checkbox) {
+                q10Checkbox.checked = true;
+            }
+            if (q10Container) {
+                const rawRole = req.applicantRole || (req.externoFOIN012 ? 'EXTERNO' : 'ESTUDIANTE');
+                const applicantRole = String(rawRole || '').toUpperCase();
+                if (applicantRole === 'EXTERNO') {
+                    q10Container.classList.remove('hidden');
+                } else {
+                    if (!q10Container.classList.contains('hidden')) {
+                        q10Container.classList.add('hidden');
+                    }
+                }
+            }
+
             const actionsDiv = document.getElementById('modalActions');
             const dir = req.dir || 'SALIENTE';
             if (currentRole === 'ANI_SECRETARIA') {
@@ -1046,8 +1193,19 @@
             const allReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             const req = allReqs.find(r => r.id === currentRequestId);
             if (!req) return;
+            const q10Container = document.getElementById('q10ApprovalContainer');
+            const q10Checkbox = document.getElementById('sendToQ10Check');
+            const isVisible = q10Container && !q10Container.classList.contains('hidden');
+            const sendToQ10 = !!(isVisible && q10Checkbox && q10Checkbox.checked);
+
             processRequest('MOVILIDAD_ACTIVA');
-            enviarPlantillasRegistro(req);
+
+            if (sendToQ10) {
+                enviarPlantillasRegistro(req);
+                alert("✅ Solicitud Aprobada.\n\nLa plantilla ha sido generada y notificada a Registro y Control (Q10).");
+            } else {
+                alert("✅ Solicitud Aprobada.\n\nLa movilidad fue avalada sin notificación a Registro y Control.");
+            }
         }
 
         function enviarPlantillasRegistro(req) {
@@ -1093,8 +1251,6 @@
             const wsMat = XLSX.utils.aoa_to_sheet(dataMatricula);
             XLSX.utils.book_append_sheet(wbMat, wsMat, 'Matricula');
             XLSX.writeFile(wbMat, 'Matricula_Q10.xlsx');
-
-            alert('Aprobado exitosamente. Estado actualizado a MOVILIDAD_ACTIVA. Se han generado y descargado las plantillas Inscripcion_Q10.xlsx y Matricula_Q10.xlsx. Envío simulado al correo de Control y Registro.');
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -1848,6 +2004,78 @@
             XLSX.utils.book_append_sheet(wb, ws, 'SIRE');
             XLSX.writeFile(wb, 'Reporte_SIRE_Mineducacion.xlsx');
             alert('Reporte SIRE generado y descargado como "Reporte_SIRE_Mineducacion.xlsx".');
+        }
+
+        // ==========================================
+        // Prototipo: Configuración de Tipos de Movilidad y Requisitos
+        // ==========================================
+        let cfgMovReqItems = [];
+
+        function openConfigMovilidadModal() {
+            const modal = document.getElementById('modal-config-movilidad');
+            if (!modal) return;
+            cfgMovReqItems = [];
+            const inputNombre = document.getElementById('cfgMovNombre');
+            const chkQ10 = document.getElementById('cfgMovRequiereQ10');
+            const reqList = document.getElementById('cfgMovReqList');
+            const reqInput = document.getElementById('cfgMovReqInput');
+            if (inputNombre) inputNombre.value = '';
+            if (chkQ10) chkQ10.checked = false;
+            if (reqList) reqList.innerHTML = '';
+            if (reqInput) reqInput.value = '';
+            modal.classList.remove('hidden');
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function closeConfigMovilidadModal() {
+            const modal = document.getElementById('modal-config-movilidad');
+            if (!modal) return;
+            modal.classList.add('hidden');
+        }
+
+        function renderConfigMovilidadRequisitos() {
+            const reqList = document.getElementById('cfgMovReqList');
+            if (!reqList) return;
+            if (!cfgMovReqItems.length) {
+                reqList.innerHTML = '<span class="text-[11px] text-gray-400 italic">Sin requisitos añadidos aún.</span>';
+                return;
+            }
+            reqList.innerHTML = cfgMovReqItems.map((label, index) => `
+                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white border border-gray-300 text-xs text-gray-700 shadow-sm">
+                    <span>${escapeHtml(label)}</span>
+                    <button type="button" onclick="removeConfigMovilidadRequisito(${index})"
+                        class="ml-1 text-gray-400 hover:text-red-600">
+                        <i data-lucide="x" class="w-3 h-3"></i>
+                    </button>
+                </span>
+            `).join('');
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        function addConfigMovilidadRequisito() {
+            const input = document.getElementById('cfgMovReqInput');
+            if (!input) return;
+            const value = (input.value || '').trim();
+            if (!value) return;
+            cfgMovReqItems.push(value);
+            input.value = '';
+            renderConfigMovilidadRequisitos();
+        }
+
+        function removeConfigMovilidadRequisito(index) {
+            if (index < 0 || index >= cfgMovReqItems.length) return;
+            cfgMovReqItems.splice(index, 1);
+            renderConfigMovilidadRequisitos();
+        }
+
+        function saveConfigMovilidad() {
+            // Prototipo: solo mostramos mensaje y cerramos el modal
+            alert("Tipo de movilidad y sus requisitos han sido guardados exitosamente.");
+            closeConfigMovilidadModal();
         }
     </script>
 </body>

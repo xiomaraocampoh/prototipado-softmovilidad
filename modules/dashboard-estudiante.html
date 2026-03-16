@@ -532,11 +532,12 @@
             if (userReqs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500 italic">Aún no tienes trámites de movilidad registrados.</td></tr>`;
             } else {
+                const isExterno = currentUser.role && currentUser.role.code === 'EXTERNO';
                 userReqs.forEach(req => {
                     let statusConfig = getStatusConfig(req.status, req.id, currentUser);
                     const dropdownId = `stu-kebab-dd-${req.id}`;
                     const statusNorm = String(req.status || '').toUpperCase();
-                    const puedeSolicitarCertificado = statusNorm === 'MOVILIDAD_ACTIVA' || statusNorm === 'APROBADA_POSTULACION';
+                    const puedeSolicitarCertificado = !isExterno && (statusNorm === 'MOVILIDAD_ACTIVA' || statusNorm === 'APROBADA_POSTULACION');
                     tbody.innerHTML += `
                         <tr class="hover:bg-gray-50 border-b last:border-0 transition">
                             <td class="p-4 font-mono font-bold text-[#03045e]">${req.id}</td>

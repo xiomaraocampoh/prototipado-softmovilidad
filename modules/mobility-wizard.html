@@ -128,7 +128,7 @@
                         <label class="form-label text-[#03045e]">Tipo Específico de Movilidad (Requerido)</label>
                         <select id="mobilityType"
                             class="form-input md:w-1/2 border-[#0077b6] bg-blue-50 focus:ring-2 focus:ring-[#0077b6]"
-                            onchange="WizardLogic.updateFields()" required>
+                            onchange="WizardLogic.updateFields()">
                             <option value="">Seleccione...</option>
                         </select>
                         <p class="text-[10px] text-gray-400 mt-1">* Debe seleccionar un tipo para poder avanzar a la
@@ -337,19 +337,18 @@
                     <div class="rounded-lg border-2 border-[#0077b6] bg-blue-50/30 p-4 mb-6">
                         <p class="text-xs font-bold text-[#03045e] uppercase mb-4">Usuario entrante: complete sus datos personales, FO-IN-012 y académicos.</p>
                     </div>
-                    <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos de contacto</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                        <div class="md:col-span-2"><label class="form-label">Nombre completo <span class="text-red-600">*</span></label><input type="text" id="extNombreCompleto" class="form-input" placeholder="Nombre y apellidos"></div>
-                        <div><label class="form-label">Correo electrónico <span class="text-red-600">*</span></label><input type="email" id="extCorreo" class="form-input"></div>
+                    <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos Personales y de Contacto</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                        <div><label class="form-label">Primer Nombre <span class="text-red-600">*</span></label><input type="text" id="extPrimerNombre" class="form-input"></div>
+                        <div><label class="form-label">Segundo Nombre</label><input type="text" id="extSegundoNombre" class="form-input"></div>
+                        <div><label class="form-label">Primer Apellido <span class="text-red-600">*</span></label><input type="text" id="extPrimerApellido" class="form-input"></div>
+                        <div><label class="form-label">Segundo Apellido</label><input type="text" id="extSegundoApellido" class="form-input"></div>
+                        <div class="md:col-span-2"><label class="form-label">Correo electrónico <span class="text-red-600">*</span></label><input type="email" id="extCorreo" class="form-input"></div>
                         <div><label class="form-label">Celular <span class="text-red-600">*</span></label><input type="tel" id="extCelular" class="form-input"></div>
                     </div>
                     <div id="q10DataContainer">
-                        <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos personales (desagregados para registro Q10)</h3>
+                        <h3 class="font-bold text-[#03045e] text-sm mb-3 uppercase border-b pb-2">Datos demográficos para registro Q10</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                            <div><label class="form-label">Primer Nombre <span class="text-red-600">*</span></label><input type="text" id="extPrimerNombre" class="form-input"></div>
-                            <div><label class="form-label">Segundo Nombre</label><input type="text" id="extSegundoNombre" class="form-input"></div>
-                            <div><label class="form-label">Primer Apellido <span class="text-red-600">*</span></label><input type="text" id="extPrimerApellido" class="form-input"></div>
-                            <div><label class="form-label">Segundo Apellido</label><input type="text" id="extSegundoApellido" class="form-input"></div>
                             <div><label class="form-label">Sexo <span class="text-red-600">*</span></label>
                                 <select id="extSexo" class="form-input">
                                     <option value="">Seleccione...</option>

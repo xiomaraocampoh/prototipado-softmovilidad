@@ -338,8 +338,12 @@ const WizardLogic = {
             const requiresQ10 = !q10ExcludedTypes.includes(type) && !q10Hidden;
             const required = requiresQ10
                 ? [
+                    // Siempre obligatorios
                     { id: 'extPrimerNombre', msg: 'Primer Nombre' },
                     { id: 'extPrimerApellido', msg: 'Primer Apellido' },
+                    { id: 'extCorreo', msg: 'Correo electrónico' },
+                    { id: 'extCelular', msg: 'Celular' },
+                    // Campos demográficos extra para Q10
                     { id: 'extSexo', msg: 'Sexo' },
                     { id: 'extDireccion', msg: 'Dirección' },
                     { id: 'extPais', msg: 'País' },
@@ -347,14 +351,14 @@ const WizardLogic = {
                     { id: 'extMunicipio', msg: 'Municipio' },
                     { id: 'extTipoDoc', msg: 'Tipo de documento' },
                     { id: 'extNumDoc', msg: 'Número de documento' },
-                    { id: 'extCelular', msg: 'Celular' },
-                    { id: 'extCorreo', msg: 'Correo electrónico' },
                     { id: 'extActividadesMaterias', msg: 'Actividades a realizar o materias a cursar' }
                 ]
                 : [
-                    { id: 'extNombreCompleto', msg: 'Nombre completo' },
-                    { id: 'extCelular', msg: 'Celular' },
+                    // Caso sin Q10: mínimos obligatorios
+                    { id: 'extPrimerNombre', msg: 'Primer Nombre' },
+                    { id: 'extPrimerApellido', msg: 'Primer Apellido' },
                     { id: 'extCorreo', msg: 'Correo electrónico' },
+                    { id: 'extCelular', msg: 'Celular' },
                     { id: 'extActividadesMaterias', msg: 'Actividades a realizar o materias a cursar' }
                 ];
             for (const r of required) {
@@ -505,7 +509,7 @@ const WizardLogic = {
 
         if (this.role === 'EXTERNO') {
             const fullName = externo.nombreCompleto || [externo.primerNombre, externo.segundoNombre, externo.primerApellido, externo.segundoApellido].filter(Boolean).join(' ');
-            setVal('extNombreCompleto', fullName || '');
+            // El nombre completo se construye dinámicamente a partir de los campos desagregados
             setVal('extPrimerNombre', externo.primerNombre || '');
             setVal('extSegundoNombre', externo.segundoNombre || '');
             setVal('extPrimerApellido', externo.primerApellido || '');
@@ -636,8 +640,9 @@ const WizardLogic = {
 
     gatherExternoFormData: function() {
         const get = (id) => (document.getElementById(id)?.value || '').trim();
+        const nombreCompleto = [get('extPrimerNombre'), get('extSegundoNombre'), get('extPrimerApellido'), get('extSegundoApellido')].filter(Boolean).join(' ');
         return {
-            nombreCompleto: get('extNombreCompleto'),
+            nombreCompleto,
             primerNombre: get('extPrimerNombre'),
             segundoNombre: get('extSegundoNombre'),
             primerApellido: get('extPrimerApellido'),
