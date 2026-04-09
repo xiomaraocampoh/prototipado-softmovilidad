@@ -194,13 +194,13 @@ const WizardLogic = {
         try { convenios = JSON.parse(localStorage.getItem('CUE_CONVENIOS') || '[]'); } catch(e) {}
         
         if (convenios.length === 0) {
-            convenios = [{ nombre: "UNAM", pais: "México", ciudad: "CDMX", vigencia: "2027-12-31" }];
+            convenios = [{ nombre: "UNAM", pais: "México", ciudad: "CDMX", activo: true }];
         }
 
         let opts = '<option value="" selected disabled>Seleccione Institución...</option>';
         convenios.forEach(c => {
-            const isExp = new Date(c.vigencia) < new Date();
-            opts += `<option value="${c.nombre}" data-pais="${c.pais}" data-ciudad="${c.ciudad}" ${isExp ? 'disabled class="text-red-500 bg-red-50"' : ''}>${c.nombre} ${isExp ? '[VENCIDO]' : ''}</option>`;
+            const inactivo = c.activo === false;
+            opts += `<option value="${c.nombre}" data-pais="${c.pais}" data-ciudad="${c.ciudad}" ${inactivo ? 'disabled class="text-gray-400 bg-gray-50"' : ''}>${c.nombre}${inactivo ? ' [Inactivo]' : ''}</option>`;
         });
         opts += `<option value="OTRA" class="font-bold text-[#0077b6]">-- OTRA (Manual) --</option>`;
 
@@ -509,6 +509,8 @@ const WizardLogic = {
         setVal('montoBeca', expediente.montoBeca || '');
         this.toggleFinance();
         setVal('actividadesMovilidad', expediente.actividadesDesc || '');
+        setVal('proyectoInvestigacion', expediente.proyectoInvestigacion || '');
+        setVal('eventoCongreso', expediente.eventoCongreso || '');
 
         if (this.role === 'EXTERNO') {
             const fullName = externo.nombreCompleto || [externo.primerNombre, externo.segundoNombre, externo.primerApellido, externo.segundoApellido].filter(Boolean).join(' ');
@@ -642,6 +644,8 @@ const WizardLogic = {
             hasBeca: document.getElementById('hasBeca')?.value || '',
             montoBeca: get('montoBeca'),
             actividadesDesc: get('actividadesMovilidad'),
+            proyectoInvestigacion: get('proyectoInvestigacion'),
+            eventoCongreso: get('eventoCongreso'),
             documento: get('autoDoc'),
             programa: '',
             semestrePromedio: get('autoSem'),

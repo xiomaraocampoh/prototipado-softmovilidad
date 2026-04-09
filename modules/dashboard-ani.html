@@ -48,15 +48,10 @@
                 data-target="tab-credenciales">
                 <i data-lucide="users" class="w-4 h-4"></i> Accesos Externos
             </button>
-            <button onclick="switchTab('tab-tipos')"
+            <button onclick="switchTab('tab-gestion-tramites')"
                 class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
-                data-target="tab-tipos">
-                <i data-lucide="settings" class="w-4 h-4"></i> Tipos Movilidad
-            </button>
-            <button onclick="switchTab('tab-config-movilidad')"
-                class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
-                data-target="tab-config-movilidad">
-                <i data-lucide="sliders" class="w-4 h-4"></i> Configuración de Movilidades
+                data-target="tab-gestion-tramites">
+                <i data-lucide="folder-cog" class="w-4 h-4"></i> Gestion Tipos de Movilidad
             </button>
             <button id="tab-reportes-btn" onclick="switchTab('view-reportes')"
                 class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition hidden"
@@ -134,7 +129,7 @@
             <div id="tab-convenios" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-[#03045e]">Gestión de Convenios</h2>
-                    <p class="text-gray-500 text-sm">Administre las instituciones y fechas de vigencia.</p>
+                    <p class="text-gray-500 text-sm">Instituciones asociadas y estado activo (campo <code class="text-[11px] bg-gray-100 px-1 rounded">activo</code>).</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="bg-white p-5 rounded-xl shadow-sm border md:col-span-1 h-fit">
@@ -155,10 +150,12 @@
                                 <input type="text" id="convCiudad" placeholder="Ej: Lima" required
                                     class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Fecha de Vigencia</label>
-                                <input type="date" id="convVigencia" required
-                                    class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
+                            <div class="flex items-center justify-between gap-3 pt-1">
+                                <label class="text-xs font-bold text-gray-600">Estado activo</label>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="checkbox" id="convActivo" class="sr-only peer" checked>
+                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#0077b6]/30 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#0077b6]"></div>
+                                </label>
                             </div>
                             <button type="submit"
                                 class="w-full bg-[#0077b6] text-white py-2 rounded text-sm font-bold hover:bg-[#03045e] transition">Guardar
@@ -170,12 +167,12 @@
                             <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
                                 <tr>
                                     <th class="p-4">Institución</th>
-                                    <th class="p-4">Vigencia</th>
-                                    <th class="p-4 text-center">Estado</th>
+                                    <th class="p-4">Ciudad</th>
+                                    <th class="p-4">País</th>
+                                    <th class="p-4 text-center">Estado activo</th>
                                 </tr>
                             </thead>
                             <tbody id="conveniosTableBody" class="divide-y">
-                                <!-- Cargado desde CUE_CONVENIOS (localStorage) -->
                             </tbody>
                         </table>
                     </div>
@@ -209,89 +206,27 @@
                 </div>
             </div>
 
-            <!-- Listado editable de tipos de movilidad: CUE_TIPOS_MOVILIDAD (compartido con el wizard de solicitudes) -->
-            <div id="tab-tipos" class="ani-content-section hidden animate-fade-in">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-[#03045e]">Configuración de Movilidades</h2>
-                    <p class="text-gray-500 text-sm">Habilite o pause los tipos de movilidad ofertados en el formulario.
-                    </p>
-                </div>
-                <div class="bg-white rounded-xl shadow-sm border overflow-hidden max-w-4xl">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
-                            <tr>
-                                <th class="p-4">Tipo de Movilidad</th>
-                                <th class="p-4 text-center">Estado Actual</th>
-                                <th class="p-4 text-center">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y">
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-bold text-[#03045e]">Intercambio Académico</td>
-                                <td class="p-4 text-center"><span
-                                        class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-bold">Habilitado</span>
-                                </td>
-                                <td class="p-4 text-center"><button
-                                        class="text-orange-600 font-bold text-xs border border-orange-200 px-3 py-1 rounded hover:bg-orange-50">Pausar</button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-bold text-[#03045e]">Voluntariado</td>
-                                <td class="p-4 text-center"><span
-                                        class="bg-gray-100 text-gray-500 px-3 py-1 rounded-full text-xs font-bold">Suspendido</span>
-                                </td>
-                                <td class="p-4 text-center"><button
-                                        class="text-green-600 font-bold text-xs border border-green-200 px-3 py-1 rounded hover:bg-green-50">Habilitar</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Configuracion avanzada por tipo (modal + tabla demo; guardado local aun parcial en saveConfigMovilidad) -->
-            <div id="tab-config-movilidad" class="ani-content-section hidden animate-fade-in">
-                <div class="mb-6 flex items-center justify-between gap-4">
+            <!-- Gestion Tipos de Movilidad: CUE_TRAMITES_CONFIG (tipo_movilidad_requisito); CUE_TIPOS_MOVILIDAD derivado -->
+            <div id="tab-gestion-tramites" class="ani-content-section hidden animate-fade-in">
+                <div class="mb-6 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
                     <div>
-                        <h2 class="text-2xl font-bold text-[#03045e]">Gestión de Tipos de Movilidad y Requisitos</h2>
-                        <p class="text-gray-500 text-sm">Defina las reglas de cada tipo de movilidad y sus documentos requeridos.</p>
+                        <h2 class="text-2xl font-bold text-[#03045e]">Gestion Tipos de Movilidad</h2>
+                        <p class="text-gray-500 text-sm">Seleccione un tipo de movilidad y administre los requisitos documentales asociados (obligatoriedad y visibilidad).</p>
                     </div>
-                    <div>
-                        <button onclick="openConfigMovilidadModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-[#0077b6] text-white rounded-lg text-sm font-bold shadow-sm hover:bg-[#005b8f] transition">
-                            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-                            <span>+ Crear Nuevo Tipo</span>
-                        </button>
-                    </div>
+                    <button type="button" onclick="openConfigMovilidadModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-[#0077b6] text-white rounded-lg text-sm font-bold shadow-sm hover:bg-[#005b8f] transition shrink-0">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                        Nuevo tipo de movilidad
+                    </button>
                 </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase tracking-wide">
-                            <tr>
-                                <th class="p-4">Tipo de Movilidad</th>
-                                <th class="p-4 text-center">Requiere Q10</th>
-                                <th class="p-4">Requisitos Documentales</th>
-                                <th class="p-4 text-center w-32">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4 font-semibold text-[#03045e]">Intercambio Académico</td>
-                                <td class="p-4 text-center">
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-green-50 text-green-700 border border-green-200">Sí</span>
-                                </td>
-                                <td class="p-4 text-gray-700">
-                                    <span class="inline-flex items-center px-2 py-0.5 mr-1 mb-1 rounded-full bg-gray-100 text-gray-700 text-xs border border-gray-200">Cédula</span>
-                                    <span class="inline-flex items-center px-2 py-0.5 mr-1 mb-1 rounded-full bg-gray-100 text-gray-700 text-xs border border-gray-200">Notas</span>
-                                    <span class="inline-flex items-center px-2 py-0.5 mr-1 mb-1 rounded-full bg-gray-100 text-gray-700 text-xs border border-gray-200">Carta de Aceptación</span>
-                                </td>
-                                <td class="p-4 text-center">
-                                    <button class="text-xs font-bold text-[#0077b6] hover:underline mr-2">Editar</button>
-                                    <button class="text-xs font-bold text-red-600 hover:underline">Eliminar</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[420px]">
+                    <div class="lg:col-span-4 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col max-h-[600px]">
+                        <div class="px-4 py-3 bg-gray-50 border-b text-xs font-bold text-gray-500 uppercase tracking-wide">Tipos de movilidad</div>
+                        <ul id="gestionTramitesList" class="overflow-y-auto flex-1 divide-y divide-gray-100 text-sm"></ul>
+                    </div>
+                    <div class="lg:col-span-8 bg-white rounded-xl shadow-sm border border-gray-200 p-5 min-h-[360px] flex flex-col" id="gestionTramitesDetailWrap">
+                        <p class="text-gray-500 text-sm" id="gestionTramitesDetailEmpty">Seleccione un tipo en la lista para ver y editar sus requisitos.</p>
+                        <div id="gestionTramitesDetailContent" class="hidden flex-1 flex flex-col min-h-0 space-y-5"></div>
+                    </div>
                 </div>
             </div>
 
@@ -532,8 +467,9 @@
          *
          * Claves localStorage que mas veras aqui:
          *   CUE_MY_REQUESTS   -- solicitudes de movilidad (estado, expedienteData, externoFOIN012, dir, etc.)
-         *   CUE_CONVENIOS     -- convenios institucionales editados desde esta pantalla
-         *   CUE_TIPOS_MOVILIDAD -- array de strings; alimenta el wizard y la lista "Tipos Movilidad"
+         *   CUE_CONVENIOS     -- convenios: { nombre, ciudad, pais, activo }
+         *   CUE_TIPOS_MOVILIDAD -- array de strings (tipos habilitados); derivado de CUE_TRAMITES_CONFIG
+         *   CUE_TRAMITES_CONFIG -- tipos de movilidad con requisitos { id, nombre, es_active, requiereQ10, requisitos: [{ id, nombreDocumento, es_obligatorio, es_active }] }
          *
          * Roles: ANI_SECRETARIA ve la bandeja en estados de secretaria; ANI_DIRECCION ve direccion + pestaña Reportes.
          * Los estados de cada solicitud son strings (ej. EN_REVISION_SECRETARIA_ANI); conviven con datos demo embebidos
@@ -543,6 +479,7 @@
          */
         let currentRole = null;
         let currentRequestId = null;
+        let selectedTramiteId = null;
 
         const pushCueNotification = CUECore ? CUECore.pushCueNotification : () => {};
 
@@ -585,51 +522,347 @@
             }
         }
 
+        function normalizeConvenioRow(c) {
+            const raw = c || {};
+            const { vigencia: _v, ...rest } = raw;
+            const base = { nombre: rest.nombre || '', pais: rest.pais || '', ciudad: rest.ciudad || '' };
+            if (typeof rest.activo === 'boolean') base.activo = rest.activo;
+            else base.activo = true;
+            return base;
+        }
+
         function saveConvenio(e) {
             e.preventDefault();
             const nombre = document.getElementById('convNombre').value.trim();
             const pais = document.getElementById('convPais').value.trim();
             const ciudad = document.getElementById('convCiudad').value.trim();
-            const vigencia = document.getElementById('convVigencia').value;
-            if (!nombre || !pais || !ciudad || !vigencia) {
-                alert('Complete todos los campos del convenio.');
+            const activo = document.getElementById('convActivo') ? document.getElementById('convActivo').checked : true;
+            if (!nombre || !pais || !ciudad) {
+                alert('Complete institución, país y ciudad.');
                 return false;
             }
-            const convenios = getConvenios();
-            convenios.push({ nombre, pais, ciudad, vigencia });
+            const convenios = getConvenios().map((row) => normalizeConvenioRow(row));
+            convenios.push({ nombre, pais, ciudad, activo });
             localStorage.setItem(LS_CONVENIOS, JSON.stringify(convenios));
             document.getElementById('formConvenio').reset();
+            const chk = document.getElementById('convActivo');
+            if (chk) chk.checked = true;
             loadConveniosTable();
             alert('Convenio registrado correctamente.');
             return false;
         }
 
+        function toggleConvenioActivo(index) {
+            const convenios = getConvenios().map((row) => normalizeConvenioRow(row));
+            if (!convenios[index]) return;
+            convenios[index].activo = !convenios[index].activo;
+            localStorage.setItem(LS_CONVENIOS, JSON.stringify(convenios));
+            loadConveniosTable();
+        }
+
         function loadConveniosTable() {
             const tbody = document.getElementById('conveniosTableBody');
             if (!tbody) return;
-            let convenios = getConvenios();
+            let rawList = getConvenios();
+            const migrated = rawList.some((row) => row && ('vigencia' in row));
+            rawList = rawList.map((row) => normalizeConvenioRow(row));
+            if (migrated) localStorage.setItem(LS_CONVENIOS, JSON.stringify(rawList));
+            let convenios = rawList;
             if (convenios.length === 0) {
                 convenios = [
-                    { nombre: 'UNAM', pais: 'México', ciudad: 'CDMX', vigencia: '2027-12-31' },
-                    { nombre: 'DHBW Ravensburg', pais: 'Alemania', ciudad: 'Ravensburg', vigencia: '2023-12-31' }
+                    { nombre: 'UNAM', pais: 'México', ciudad: 'CDMX', activo: true },
+                    { nombre: 'DHBW Ravensburg', pais: 'Alemania', ciudad: 'Ravensburg', activo: true }
                 ];
                 localStorage.setItem(LS_CONVENIOS, JSON.stringify(convenios));
             }
-            const formatDate = (str) => {
-                if (!str) return 'N/A';
-                const d = new Date(str);
-                return isNaN(d.getTime()) ? str : d.toLocaleDateString('es-CO', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            };
-            tbody.innerHTML = convenios.map(c => {
-                const isExp = new Date(c.vigencia) < new Date();
-                const estadoClass = isExp ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
-                const estadoTxt = isExp ? 'Vencido' : 'Activo';
-                return `<tr class="hover:bg-gray-50">
+            tbody.innerHTML = convenios.map((c, idx) => {
+                const on = c.activo !== false;
+                const toggleCls = on ? 'bg-[#0077b6]' : 'bg-gray-300';
+                return `<tr class="hover:bg-gray-50 ${!on ? 'opacity-75' : ''}">
                     <td class="p-4 font-bold text-[#03045e]">${escapeHtml(c.nombre)}</td>
-                    <td class="p-4 text-gray-600">${formatDate(c.vigencia)}</td>
-                    <td class="p-4 text-center"><span class="${estadoClass} px-2 py-1 rounded text-xs font-bold">${estadoTxt}</span></td>
+                    <td class="p-4 text-gray-700">${escapeHtml(c.ciudad)}</td>
+                    <td class="p-4 text-gray-700">${escapeHtml(c.pais)}</td>
+                    <td class="p-4 text-center">
+                        <button type="button" role="switch" aria-checked="${on}" onclick="toggleConvenioActivo(${idx})"
+                            class="relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${toggleCls} focus:outline-none focus:ring-2 focus:ring-[#0077b6] focus:ring-offset-1">
+                            <span class="pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition ${on ? 'translate-x-5' : 'translate-x-0.5'}"></span>
+                        </button>
+                        <span class="block text-[10px] text-gray-500 mt-1">${on ? 'Activo' : 'Inactivo'}</span>
+                    </td>
                 </tr>`;
             }).join('');
+        }
+
+        const LS_TRAMITES_CONFIG = 'CUE_TRAMITES_CONFIG';
+
+        const ANI_MASTER_REQUISITOS = [
+            'Copia de cedula',
+            'Pasaporte',
+            'Carta de aceptacion',
+            'Seguro medico',
+            'Carta de motivacion',
+            'Certificado academico de notas',
+            'Carta de postulacion institucional',
+            'Tiquetes y/o visa',
+            'Certificado de afiliacion ARL',
+            'Carta de aval academico',
+            'Carnet de vacunacion'
+        ];
+
+        function buildDefaultTramitesConfig() {
+            let tipos = [];
+            try {
+                tipos = JSON.parse(localStorage.getItem('CUE_TIPOS_MOVILIDAD') || '[]');
+            } catch { tipos = []; }
+            const defaults = [
+                'Intercambio Académico (Semestre - Asignaturas)',
+                'Estancia Investigación',
+                'Evento Académico/Investigativo',
+                'Práctica Empresarial - Pasantía',
+                'Curso Corto'
+            ];
+            const merged = [...new Set([...(Array.isArray(tipos) ? tipos : []), ...defaults])];
+            const ts = Date.now();
+            const config = merged.map((nombre, i) => ({
+                id: 'tm-' + i + '-' + String(ts + i).slice(-8),
+                nombre,
+                es_active: true,
+                requiereQ10: String(nombre).toLowerCase().includes('intercambio'),
+                requisitos: [
+                    { id: 'rq-' + i + '-a-' + ts, nombreDocumento: 'Documento de identidad', es_obligatorio: true, es_active: true },
+                    { id: 'rq-' + i + '-b-' + ts, nombreDocumento: 'Carta de motivación o postulación', es_obligatorio: true, es_active: true }
+                ]
+            }));
+            localStorage.setItem(LS_TRAMITES_CONFIG, JSON.stringify(config));
+            syncTiposMovilidadFromConfig(config);
+            return config;
+        }
+
+        function getTramitesConfig() {
+            try {
+                const raw = localStorage.getItem(LS_TRAMITES_CONFIG);
+                if (raw) {
+                    const j = JSON.parse(raw);
+                    if (Array.isArray(j) && j.length) return j;
+                }
+            } catch { /* empty */ }
+            return buildDefaultTramitesConfig();
+        }
+
+        function setTramitesConfig(config) {
+            localStorage.setItem(LS_TRAMITES_CONFIG, JSON.stringify(config));
+            syncTiposMovilidadFromConfig(config);
+        }
+
+        function syncTiposMovilidadFromConfig(config) {
+            const activeNames = (config || []).filter(t => t.es_active !== false).map(t => t.nombre).filter(Boolean);
+            localStorage.setItem('CUE_TIPOS_MOVILIDAD', JSON.stringify(activeNames));
+        }
+
+        function renderGestionTramites() {
+            const listEl = document.getElementById('gestionTramitesList');
+            const config = getTramitesConfig();
+            if (!listEl) return;
+            if (!config.length) {
+                listEl.innerHTML = '<li class="p-4 text-xs text-gray-500">No hay tipos configurados. Use &quot;Nuevo tipo de movilidad&quot;.</li>';
+                renderGestionTramitesDetail();
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
+            if (!selectedTramiteId || !config.some(t => t.id === selectedTramiteId)) {
+                selectedTramiteId = config[0].id;
+            }
+            listEl.innerHTML = config.map(tm => {
+                const sel = tm.id === selectedTramiteId;
+                const active = tm.es_active !== false;
+                return `<li>
+                    <button type="button" onclick="selectGestionTramite('${escapeHtml(tm.id)}')"
+                        class="w-full text-left px-4 py-3 flex flex-col gap-1 transition ${sel ? 'bg-blue-50 border-l-4 border-[#0077b6]' : 'hover:bg-gray-50 border-l-4 border-transparent'}">
+                        <span class="font-semibold text-[#03045e]">${escapeHtml(tm.nombre)}</span>
+                        <span class="text-[10px] uppercase font-bold ${active ? 'text-green-700' : 'text-gray-400'}">${active ? 'Habilitado' : 'Deshabilitado'}</span>
+                    </button>
+                </li>`;
+            }).join('');
+            renderGestionTramitesDetail();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function selectGestionTramite(id) {
+            selectedTramiteId = id;
+            renderGestionTramites();
+        }
+
+        function renderGestionTramitesDetail() {
+            const empty = document.getElementById('gestionTramitesDetailEmpty');
+            const content = document.getElementById('gestionTramitesDetailContent');
+            const config = getTramitesConfig();
+            const tm = config.find(t => t.id === selectedTramiteId);
+            if (!tm) {
+                if (empty) empty.classList.remove('hidden');
+                if (content) { content.classList.add('hidden'); content.innerHTML = ''; }
+                return;
+            }
+            if (empty) empty.classList.add('hidden');
+            if (!content) return;
+            content.classList.remove('hidden');
+            const tipoOn = tm.es_active !== false;
+            const q10 = !!tm.requiereQ10;
+            const reqs = Array.isArray(tm.requisitos) ? tm.requisitos : [];
+            const existingLower = new Set(
+                reqs.map(r => String(r.nombreDocumento || '').trim().toLowerCase()).filter(Boolean)
+            );
+            const availableMasters = ANI_MASTER_REQUISITOS.filter(m => !existingLower.has(String(m).trim().toLowerCase()));
+            const masterSelectOptions = availableMasters.length
+                ? `<option value="">Seleccione documento maestro...</option>${availableMasters.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('')}`
+                : `<option value="">No quedan documentos maestros sin agregar</option>`;
+            content.innerHTML = `
+                <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 border-b border-gray-100 pb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-[#03045e]">${escapeHtml(tm.nombre)}</h3>
+                        <p class="text-xs text-gray-500 mt-1">Identificador interno: <span class="font-mono">${escapeHtml(tm.id)}</span></p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-bold text-gray-600">Tipo habilitado</span>
+                            <button type="button" onclick="toggleTramiteTipoActivo('${escapeHtml(tm.id)}')" class="relative inline-flex h-7 w-12 rounded-full transition-colors ${tipoOn ? 'bg-[#0077b6]' : 'bg-gray-300'} focus:outline-none focus:ring-2 focus:ring-[#0077b6]">
+                                <span class="inline-block h-6 w-6 transform rounded-full bg-white shadow transition ${tipoOn ? 'translate-x-5' : 'translate-x-0.5'}"></span>
+                            </button>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm">
+                            <input type="checkbox" class="rounded border-gray-300 text-[#0077b6] focus:ring-[#0077b6]" ${q10 ? 'checked' : ''} onchange="setTramiteRequiereQ10('${escapeHtml(tm.id)}', this.checked)">
+                            <span class="font-semibold text-gray-700">Requiere Q10 / Registro</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                    <h4 class="text-xs font-bold text-[#03045e] uppercase tracking-wide mb-3">Agregar Nuevo Requisito</h4>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
+                        <div class="flex-1 min-w-0">
+                            <label for="aniReqMasterSelect" class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Documento maestro</label>
+                            <select id="aniReqMasterSelect" class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white focus:outline-none focus:ring-2 focus:ring-[#0077b6]/30 focus:border-[#0077b6]">
+                                ${masterSelectOptions}
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-0 sm:max-w-xs">
+                            <label for="aniReqCustomInput" class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Otro documento (opcional)</label>
+                            <input type="text" id="aniReqCustomInput" maxlength="200" placeholder="Nombre si no esta en la lista maestra"
+                                class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0077b6]/30 focus:border-[#0077b6]">
+                        </div>
+                        <button type="button" onclick='addRequisitoToTramite(${JSON.stringify(tm.id)})'
+                            class="shrink-0 inline-flex items-center justify-center px-4 py-2 bg-[#0077b6] text-white rounded-lg text-sm font-bold shadow-sm hover:bg-[#005b8f] transition h-[38px]">
+                            Añadir a la lista
+                        </button>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Requisitos documentales (tipo_movilidad_requisito)</h4>
+                    <div class="border border-gray-200 rounded-lg overflow-hidden overflow-x-auto">
+                        <table class="w-full text-sm min-w-[520px]">
+                            <thead class="bg-gray-50 text-xs text-gray-500 uppercase">
+                                <tr>
+                                    <th class="p-3 text-left">Documento</th>
+                                    <th class="p-3 text-center w-28">Obligatorio</th>
+                                    <th class="p-3 text-center w-32">Activo (es_active)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100">
+                                ${reqs.length ? reqs.map(r => {
+                                    const rid = escapeHtml(r.id);
+                                    const doc = escapeHtml(r.nombreDocumento || '');
+                                    const ob = r.es_obligatorio !== false;
+                                    const ac = r.es_active !== false;
+                                    return `<tr class="${ac ? '' : 'bg-gray-50 opacity-80'}">
+                                        <td class="p-2">
+                                            <input type="text" value="${doc}" class="w-full border border-gray-200 rounded px-2 py-1.5 text-sm"
+                                                onchange="updateRequisitoNombre('${escapeHtml(tm.id)}','${rid}', this.value)">
+                                        </td>
+                                        <td class="p-2 text-center">
+                                            <input type="checkbox" class="rounded border-gray-300 text-[#0077b6]" ${ob ? 'checked' : ''}
+                                                onchange="setRequisitoObligatorio('${escapeHtml(tm.id)}','${rid}', this.checked)">
+                                        </td>
+                                        <td class="p-2 text-center">
+                                            <button type="button" onclick="toggleRequisitoEsActive('${escapeHtml(tm.id)}','${rid}')"
+                                                class="relative inline-flex h-7 w-12 mx-auto rounded-full ${ac ? 'bg-[#0077b6]' : 'bg-gray-300'}">
+                                                <span class="inline-block h-6 w-6 rounded-full bg-white shadow transform transition ${ac ? 'translate-x-5' : 'translate-x-0.5'}"></span>
+                                            </button>
+                                            <div class="text-[10px] text-gray-500 mt-0.5">${ac ? 'Visible' : 'Soft delete'}</div>
+                                        </td>
+                                    </tr>`;
+                                }).join('') : `<tr><td colspan="3" class="p-4 text-center text-gray-500 text-xs">Sin requisitos. Use el catalogo maestro u otro documento en la seccion superior.</td></tr>`}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="text-[11px] text-gray-500 mt-2">Desactivar un requisito conserva el registro con <code class="bg-gray-100 px-1 rounded">es_active = false</code> (baja lógica).</p>
+                </div>`;
+        }
+
+        function patchTramite(tmId, fn) {
+            const cfg = getTramitesConfig();
+            const idx = cfg.findIndex(t => t.id === tmId);
+            if (idx < 0) return;
+            fn(cfg[idx]);
+            setTramitesConfig(cfg);
+            renderGestionTramites();
+        }
+
+        function toggleTramiteTipoActivo(tmId) {
+            patchTramite(tmId, (tm) => { tm.es_active = tm.es_active === false; });
+        }
+
+        function setTramiteRequiereQ10(tmId, checked) {
+            patchTramite(tmId, (tm) => { tm.requiereQ10 = !!checked; });
+        }
+
+        function updateRequisitoNombre(tmId, rqId, value) {
+            const v = String(value || '').trim();
+            if (!v) return;
+            patchTramite(tmId, (tm) => {
+                const r = (tm.requisitos || []).find(x => x.id === rqId);
+                if (r) r.nombreDocumento = v;
+            });
+        }
+
+        function setRequisitoObligatorio(tmId, rqId, checked) {
+            patchTramite(tmId, (tm) => {
+                const r = (tm.requisitos || []).find(x => x.id === rqId);
+                if (r) r.es_obligatorio = !!checked;
+            });
+        }
+
+        function toggleRequisitoEsActive(tmId, rqId) {
+            patchTramite(tmId, (tm) => {
+                const r = (tm.requisitos || []).find(x => x.id === rqId);
+                if (r) r.es_active = r.es_active === false ? true : false;
+            });
+        }
+
+        function addRequisitoToTramite(tmId) {
+            const sel = document.getElementById('aniReqMasterSelect');
+            const free = document.getElementById('aniReqCustomInput');
+            let name = '';
+            if (sel && sel.value) name = String(sel.value).trim();
+            if (!name && free) name = String(free.value || '').trim();
+            if (!name) {
+                alert('Seleccione un documento maestro o escriba el nombre en el campo opcional.');
+                return;
+            }
+            const cfg = getTramitesConfig();
+            const tm = cfg.find(t => t.id === tmId);
+            if (!tm) return;
+            if (!tm.requisitos) tm.requisitos = [];
+            const low = name.toLowerCase();
+            if (tm.requisitos.some(r => String(r.nombreDocumento || '').trim().toLowerCase() === low)) {
+                alert('Ese documento ya esta en la lista de este tipo.');
+                return;
+            }
+            tm.requisitos.push({
+                id: 'rq-add-' + Date.now(),
+                nombreDocumento: name,
+                es_obligatorio: true,
+                es_active: true
+            });
+            setTramitesConfig(cfg);
+            renderGestionTramites();
         }
 
         /** Evita XSS al insertar texto de usuario o de localStorage en innerHTML. */
@@ -662,6 +895,9 @@
             }
             if (targetId === 'tab-credenciales') {
                 renderBandejaSolicitudesAcceso();
+            }
+            if (targetId === 'tab-gestion-tramites') {
+                renderGestionTramites();
             }
         }
 
@@ -974,33 +1210,36 @@
                 </div>
             `;
 
-            // Salud y Emergencia
+            // Salud y emergencia (mapeo solicitud_movilidad / expedienteData; externos FO-IN-012)
+            const epsMostrar = isExterno
+                ? val(ed.eps || ext.eps || '')
+                : val(ed.eps);
+            const alergiasMostrar = isExterno
+                ? val(ed.alergiasMeds || ext.necesidadesMedicas || '')
+                : val(ed.alergiasMeds);
+
             html += `
                 <div class="bg-white border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
-                    <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Salud y Emergencia</h4>
+                    <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Salud y emergencia</h4>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">EPS / Afiliación</p>
+                            <p class="font-medium text-gray-800">${epsMostrar}</p>
+                        </div>
+                        <div>
+                            <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Alergias / medicamentos / necesidades médicas</p>
+                            <p class="font-medium text-gray-800 whitespace-pre-wrap">${alergiasMostrar}</p>
+                        </div>
                         ${isExterno ? `
-                            <div class="md:col-span-2">
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Necesidades médicas</p>
-                                <p class="font-medium text-gray-800">${val(ext.necesidadesMedicas)}</p>
-                            </div>
                             <div>
                                 <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Contacto de emergencia</p>
                                 <p class="font-medium text-gray-800">${val(ext.contactoNombre)} (${val(ext.contactoParentesco)})</p>
                             </div>
                             <div>
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Teléfono / Correo</p>
+                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Teléfono / correo emergencia</p>
                                 <p class="font-medium text-gray-800">${val(ext.contactoTelefono)} / ${val(ext.contactoCorreo)}</p>
                             </div>
                         ` : `
-                            <div>
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">EPS / Seguro</p>
-                                <p class="font-medium text-gray-800">${val(ed.eps)}</p>
-                            </div>
-                            <div>
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Alergias / Medicamentos</p>
-                                <p class="font-medium text-gray-800">${val(ed.alergiasMeds)}</p>
-                            </div>
                             <div class="md:col-span-2">
                                 <p class="text-[11px] font-semibold text-gray-500 uppercase mb-0.5">Contacto de emergencia</p>
                                 <p class="font-medium text-gray-800">
@@ -1011,6 +1250,35 @@
                     </div>
                 </div>
             `;
+
+            const tipoTxt = String(ed.tipo || req.type || '');
+            const tipoL = tipoTxt.toLowerCase();
+            const proyectoVal = val(ed.proyectoInvestigacion || ed.proyecto_investigacion || '');
+            const eventoVal = val(ed.eventoCongreso || ed.evento_congreso || '');
+            const mostrarInvest = proyectoVal !== 'N/A' || tipoL.includes('estancia') || tipoL.includes('investigación') || tipoL.includes('investigacion');
+            const mostrarEvento = eventoVal !== 'N/A' || tipoL.includes('evento');
+
+            if (mostrarInvest || mostrarEvento) {
+                html += `
+                    <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-4 shadow-sm">
+                        <h4 class="font-bold text-[#03045e] text-xs uppercase mb-3">Campos dinámicos (tipo de movilidad)</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                            ${mostrarInvest ? `
+                                <div class="md:col-span-2">
+                                    <p class="text-[11px] font-semibold text-purple-800 uppercase mb-0.5">Proyecto de investigación</p>
+                                    <p class="font-medium text-gray-800">${proyectoVal}</p>
+                                </div>
+                            ` : ''}
+                            ${mostrarEvento ? `
+                                <div class="md:col-span-2">
+                                    <p class="text-[11px] font-semibold text-purple-800 uppercase mb-0.5">Evento / congreso</p>
+                                    <p class="font-medium text-gray-800">${eventoVal}</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
 
             // Propósito
             const proposito = isExterno
@@ -1259,12 +1527,6 @@
             XLSX.writeFile(wbMat, 'Matricula_Q10.xlsx');
         }
 
-        /* Este listener esta al final del archivo: asegura que la lista de tipos de movilidad (pestana Tipos) se pinte tras cargar el DOM. */
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof lucide !== 'undefined') lucide.createIcons();
-            cargarTiposMovilidad();
-        });
-
         const LS_SOLICITUDES_ACCESO = 'CUE_SOLICITUDES_ACCESO';
 
         function bandejaAccesosSetFeedback(message, kind) {
@@ -1396,45 +1658,6 @@
             localStorage.setItem(LS_SOLICITUDES_ACCESO, JSON.stringify(list));
             bandejaAccesosSetFeedback('Solicitud de acceso denegada.', 'warn');
             renderBandejaSolicitudesAcceso();
-        }
-
-        // --- Tipos de movilidad: array en CUE_TIPOS_MOVILIDAD; mismo origen que usa el wizard del solicitante. ---
-        function cargarTiposMovilidad() {
-            const lista = document.getElementById('listaTiposMovilidad');
-            if (!lista) return;
-
-            let tipos = JSON.parse(localStorage.getItem('CUE_TIPOS_MOVILIDAD') || '["Intercambio Académico", "Práctica Empresarial - Pasantía", "Estancia Investigación", "Diplomado"]');
-            localStorage.setItem('CUE_TIPOS_MOVILIDAD', JSON.stringify(tipos));
-
-            lista.innerHTML = tipos.map((t, index) => `
-        <li class="flex justify-between items-center p-3 border-b text-sm text-gray-700 bg-white">
-            <span class="font-bold">${t}</span>
-            <button onclick="eliminarTipoMovilidad(${index})" class="text-red-500 hover:text-red-700" title="Eliminar Tipo">Eliminar</button>
-        </li>
-    `).join('');
-        }
-
-        function agregarTipoMovilidad(e) {
-            e.preventDefault();
-            const input = document.getElementById('nuevoTipoMovilidad');
-            if (!input || input.value.trim() === '') return;
-
-            let tipos = JSON.parse(localStorage.getItem('CUE_TIPOS_MOVILIDAD') || '[]');
-            tipos.push(input.value.trim());
-            localStorage.setItem('CUE_TIPOS_MOVILIDAD', JSON.stringify(tipos));
-
-            input.value = '';
-            cargarTiposMovilidad();
-            alert("Tipo de Movilidad agregado exitosamente.");
-        }
-
-        function eliminarTipoMovilidad(index) {
-            if (confirm("¿Está seguro de eliminar este tipo de movilidad?")) {
-                let tipos = JSON.parse(localStorage.getItem('CUE_TIPOS_MOVILIDAD') || '[]');
-                tipos.splice(index, 1);
-                localStorage.setItem('CUE_TIPOS_MOVILIDAD', JSON.stringify(tipos));
-                cargarTiposMovilidad();
-            }
         }
 
         // --- Reportes (solo Direccion): KPIs y tabla filtrada sobre aniReportData en memoria. ---
@@ -2118,9 +2341,35 @@
         }
 
         function saveConfigMovilidad() {
-            // Pendiente de produccion: persistir en localStorage y enlazar con CUE_TIPOS_MOVILIDAD o estructura similar.
-            alert("Tipo de movilidad y sus requisitos han sido guardados exitosamente.");
+            const nombre = document.getElementById('cfgMovNombre')?.value.trim() || '';
+            if (!nombre) {
+                alert('Indique el nombre del tipo de movilidad.');
+                return;
+            }
+            const requiereQ10 = document.getElementById('cfgMovRequiereQ10')?.checked || false;
+            const cfg = getTramitesConfig();
+            const reqs = cfgMovReqItems.map((label, i) => ({
+                id: 'rq-new-' + Date.now() + '-' + i,
+                nombreDocumento: String(label || '').trim(),
+                es_obligatorio: true,
+                es_active: true
+            })).filter(r => r.nombreDocumento);
+            const nuevo = {
+                id: 'tm-new-' + Date.now(),
+                nombre,
+                es_active: true,
+                requiereQ10,
+                requisitos: reqs
+            };
+            cfg.push(nuevo);
+            setTramitesConfig(cfg);
+            selectedTramiteId = nuevo.id;
             closeConfigMovilidadModal();
+            alert('Tipo de movilidad y requisitos asociados guardados correctamente.');
+            const panel = document.getElementById('tab-gestion-tramites');
+            if (panel && !panel.classList.contains('hidden')) {
+                renderGestionTramites();
+            }
         }
     </script>
 </body>
