@@ -252,13 +252,14 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Observaciones Generales</label>
-                        <textarea id="certObs" rows="3" class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none" placeholder="Indique detalles adicionales..."></textarea>
+                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Observaciones</label>
+                        <textarea id="certObs" rows="3" readonly class="w-full border p-2 rounded text-sm bg-gray-50 text-gray-800 cursor-default focus:border-[#0077b6] focus:outline-none" placeholder="Se completa automaticamente en el flujo de movilidad."></textarea>
                     </div>
-                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded border">
-                        <span class="text-sm font-bold text-gray-600 uppercase">Total a Pagar:</span>
-                        <span class="text-lg font-bold text-green-700">$ 0 COP</span>
+                    <div class="flex justify-between items-center bg-gray-50 p-3 rounded border border-gray-200">
+                        <span class="text-sm font-bold text-gray-600 uppercase">Valor a Pagar</span>
+                        <span id="certValorPagarDisplay" class="text-lg font-bold text-gray-800 tabular-nums select-none" aria-readonly="true">0</span>
                     </div>
+                    <p class="text-[11px] text-gray-500">En solicitudes desde movilidad activa el valor es 0 COP y no puede modificarse.</p>
                     <div class="flex justify-end gap-3 pt-4 border-t">
                         <button type="button" onclick="closeCertModal()" class="px-4 py-2 border rounded text-gray-600 text-sm font-bold">Cancelar</button>
                         <button type="button" onclick="confirmCertRequest()" class="px-6 py-2 bg-[#0077b6] text-white rounded text-sm font-bold">Generar Ticket</button>
@@ -337,9 +338,15 @@
                         <option value="participacion_estancia">Certificado de Participación/Estancia</option>
                     </select>
                 </div>
-                <p class="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-3">
-                    La expedición de este certificado será notificada a la caja de la universidad si genera algún costo.
-                </p>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Observaciones</label>
+                    <textarea id="modalCertificadoObs" rows="2" readonly class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-gray-50 text-gray-800 cursor-default resize-none focus:outline-none" aria-readonly="true">Para tramite de movilidad</textarea>
+                </div>
+                <div class="flex justify-between items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+                    <span class="text-sm font-bold text-gray-700 uppercase">Valor a Pagar</span>
+                    <span id="modalCertificadoValor" class="text-lg font-bold text-gray-800 tabular-nums select-none" aria-readonly="true">0</span>
+                </div>
+                <p class="text-xs text-gray-600">Solicitud asociada a movilidad: observaciones y valor fijos segun politica (0 COP).</p>
                 <div class="flex justify-end gap-2 pt-2">
                     <button type="button" onclick="cerrarModalCertificado()" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-bold text-gray-600 hover:bg-gray-50">
                         Cancelar
@@ -794,10 +801,31 @@
             document.getElementById('profileModal').classList.remove('hidden'); 
         }
         
+        const CERT_OBS_MOVILIDAD = 'Para tramite de movilidad';
+        const CERT_VALOR_MOVILIDAD = 0;
+
+        function aplicarCamposCertificadoMovilidad() {
+            const obs = document.getElementById('certObs');
+            if (obs) {
+                obs.value = CERT_OBS_MOVILIDAD;
+                obs.readOnly = true;
+            }
+            const valDisp = document.getElementById('certValorPagarDisplay');
+            if (valDisp) valDisp.textContent = String(CERT_VALOR_MOVILIDAD);
+            const mObs = document.getElementById('modalCertificadoObs');
+            if (mObs) {
+                mObs.value = CERT_OBS_MOVILIDAD;
+                mObs.readOnly = true;
+            }
+            const mVal = document.getElementById('modalCertificadoValor');
+            if (mVal) mVal.textContent = String(CERT_VALOR_MOVILIDAD);
+        }
+
         function solicitarCertificado(id) {
             if (!puedeSolicitarCertificadoAcademico(AuthService.checkAuth())) return;
             document.getElementById('certReqId').value = id;
             document.getElementById('certForm').reset();
+            aplicarCamposCertificadoMovilidad();
             document.getElementById('certModal').classList.remove('hidden');
         }
         function closeCertModal() { document.getElementById('certModal').classList.add('hidden'); }
@@ -810,6 +838,7 @@
             const select = document.getElementById('modalCertificadoTipo');
             if (modal) {
                 if (select) select.value = '';
+                aplicarCamposCertificadoMovilidad();
                 modal.classList.remove('hidden');
             }
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -819,11 +848,46 @@
             if (modal) modal.classList.add('hidden');
             modalCertificadoReqId = null;
         }
+        function mapTipoCertificadoMovilidad(value) {
+            if (value === 'notas_estudio') return 'Certificado de Notas de Estudio';
+            if (value === 'participacion_estancia') return 'Certificado de Participación/Estancia';
+            return value || 'Certificado de Movilidad';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const btnEnviar = document.getElementById('btnEnviarSolicitudCertificado');
             if (btnEnviar) {
                 btnEnviar.addEventListener('click', function() {
-                    alert('Solicitud enviada a Tesorería/Registro exitosamente.');
+                    if (!puedeSolicitarCertificadoAcademico(AuthService.checkAuth())) return;
+                    const reqId = modalCertificadoReqId;
+                    const sel = document.getElementById('modalCertificadoTipo');
+                    const certType = sel && sel.value ? mapTipoCertificadoMovilidad(sel.value) : '';
+                    if (!certType || !reqId) {
+                        alert('Seleccione un tipo de certificado.');
+                        return;
+                    }
+                    let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+                    const u = AuthService.checkAuth();
+                    let actualizado = false;
+                    reqs = reqs.map(function(req) {
+                        if (String(req.id) === String(reqId)) {
+                            actualizado = true;
+                            req.certRequested = true;
+                            req.certType = certType;
+                            req.certStatus = 'PAGADO';
+                            req.certObs = CERT_OBS_MOVILIDAD;
+                            req.certValorPagar = CERT_VALOR_MOVILIDAD;
+                            req.applicantUserType = typeof AuthService.getUserType === 'function' ? AuthService.getUserType(u) : 'INTERNO';
+                            if (!req.applicantRole) req.applicantRole = u.role.code;
+                        }
+                        return req;
+                    });
+                    if (!actualizado) {
+                        alert('No se encontro la solicitud en almacenamiento local. Radique o guarde el tramite de movilidad para poder adjuntar el certificado.');
+                        return;
+                    }
+                    localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
+                    alert('Solicitud registrada. Estado: PAGADO (0 COP). Observaciones: ' + CERT_OBS_MOVILIDAD);
                     cerrarModalCertificado();
                 });
             }
@@ -833,20 +897,31 @@
             if (!puedeSolicitarCertificadoAcademico(AuthService.checkAuth())) return;
             const reqId = document.getElementById('certReqId').value;
             const certType = document.getElementById('certType').value;
-            if(!certType) return alert("Seleccione un tipo de certificado.");
-            
+            if (!certType) return alert('Seleccione un tipo de certificado.');
+            aplicarCamposCertificadoMovilidad();
+
             let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             const u = AuthService.checkAuth();
-            reqs = reqs.map(req => {
-                if (req.id === reqId) {
-                    req.certRequested = true; req.certType = certType; req.certStatus = 'PAGADO';
+            let actualizado = false;
+            reqs = reqs.map(function(req) {
+                if (String(req.id) === String(reqId)) {
+                    actualizado = true;
+                    req.certRequested = true;
+                    req.certType = certType;
+                    req.certStatus = 'PAGADO';
+                    req.certObs = CERT_OBS_MOVILIDAD;
+                    req.certValorPagar = CERT_VALOR_MOVILIDAD;
                     req.applicantUserType = typeof AuthService.getUserType === 'function' ? AuthService.getUserType(u) : 'INTERNO';
                     if (!req.applicantRole) req.applicantRole = u.role.code;
                 }
                 return req;
             });
+            if (!actualizado) {
+                alert('No se encontro la solicitud en almacenamiento local.');
+                return;
+            }
             localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
-            alert("Ticket generado. Estado: PAGADO ($0). Enviado a Registro Académico.");
+            alert('Ticket generado. Estado: PAGADO (0 COP). Enviado a Registro Academico.');
             closeCertModal();
         }
     </script>

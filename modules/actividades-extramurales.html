@@ -195,7 +195,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-700">Duracion estimada</label>
-                            <input type="text" id="exDuracion" readonly class="mt-1 w-full cursor-not-allowed rounded-lg border bg-gray-100 px-3 py-2 text-sm text-gray-600" placeholder="Se calcula con las fechas">
+                            <input type="text" id="exDuracion" class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]" placeholder="Ej: 4 horas, Todo el dia, 2 jornadas" autocomplete="off">
                         </div>
                     </div>
                 </div>
@@ -299,34 +299,9 @@
                 }
             }
 
-            const exInicio = document.getElementById('exFechaInicio');
-            const exFin = document.getElementById('exFechaFin');
-            if (exInicio) exInicio.addEventListener('change', actualizarDuracion);
-            if (exFin) exFin.addEventListener('change', actualizarDuracion);
-
             if (typeof lucide !== 'undefined') lucide.createIcons();
             updateGuardarExtramuralButton();
         })();
-
-        function actualizarDuracion() {
-            const inicio = document.getElementById('exFechaInicio') && document.getElementById('exFechaInicio').value;
-            const fin = document.getElementById('exFechaFin') && document.getElementById('exFechaFin').value;
-            const duracionInput = document.getElementById('exDuracion');
-            if (!duracionInput) return;
-            if (!inicio || !fin) {
-                duracionInput.value = '';
-                return;
-            }
-            const fechaInicio = new Date(inicio + 'T00:00:00');
-            const fechaFin = new Date(fin + 'T00:00:00');
-            if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime()) || fechaFin < fechaInicio) {
-                duracionInput.value = '';
-                return;
-            }
-            const diffMs = fechaFin.getTime() - fechaInicio.getTime();
-            const dias = Math.round(diffMs / (1000 * 60 * 60 * 24)) + 1;
-            duracionInput.value = dias <= 1 ? '1 dia (actividad de un solo dia)' : dias + ' dias';
-        }
 
         function badgeSiNo(ok) {
             if (ok) {
@@ -456,7 +431,6 @@
             document.getElementById('jefeNombre').value = user && user.name ? user.name : '';
             document.getElementById('jefeEmail').value = user && user.email ? user.email : '';
             document.getElementById('bannerExito').classList.add('hidden');
-            actualizarDuracion();
         }
 
         function enviarActividadExtramural(e) {
@@ -504,7 +478,7 @@
                 fechaInicio: document.getElementById('exFechaInicio').value,
                 fechaFin: document.getElementById('exFechaFin').value,
                 hora: document.getElementById('exHora').value,
-                duracion: document.getElementById('exDuracion').value,
+                duracion: (document.getElementById('exDuracion').value || '').trim(),
                 necesidadesMedicas: document.getElementById('exNecesidadesMedicas').value.trim(),
                 contactoEmergencia: {
                     nombre: document.getElementById('exEmergenciaNombre').value.trim(),
@@ -532,7 +506,6 @@
             document.getElementById('formActividadEquipo').reset();
             document.getElementById('jefeNombre').value = user && user.name ? user.name : '';
             document.getElementById('jefeEmail').value = user && user.email ? user.email : '';
-            actualizarDuracion();
             window.scrollTo({ top: 0, behavior: 'smooth' });
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }

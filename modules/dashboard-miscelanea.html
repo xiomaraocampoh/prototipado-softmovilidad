@@ -95,13 +95,24 @@
             window.location.href = '../menu-sistema.html';
         }
 
+        const CERT_OBS_MOVILIDAD_DEFAULT = 'Para tramite de movilidad';
+
+        function escapeHtmlMisc(s) {
+            if (s == null) return '';
+            return String(s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
         // 2. Renderizar tabla leyendo solicitudes de movilidad (certificados desde CUE_MY_REQUESTS)
         function loadCertificados() {
             const tbody = document.getElementById('tablaCertificadosBody');
             const totalSpan = document.getElementById('totalRegistros');
             tbody.innerHTML = '';
 
-            // Tomar solicitudes de movilidad salientes con certificado pedido ($0, estado PAGADO) y movilidad activa
+            // Tomar solicitudes de movilidad salientes con certificado pedido (estado PAGADO) y movilidad activa
             let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             let pendientes = requests.filter(r => {
                 if (r.dir !== 'SALIENTE' || r.certRequested !== true || r.certStatus !== 'PAGADO' || r.status !== 'MOVILIDAD_ACTIVA') return false;
@@ -117,16 +128,22 @@
 
             pendientes.forEach(req => {
                 const exp = req.expedienteData || {};
+                const obs = (req.certObs != null && String(req.certObs).trim() !== '')
+                    ? String(req.certObs).trim()
+                    : CERT_OBS_MOVILIDAD_DEFAULT;
+                const valorPagar = req.certValorPagar != null && req.certValorPagar !== ''
+                    ? Number(req.certValorPagar)
+                    : 0;
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td>${req.date || ''}</td>
-                    <td>${exp.documento || ''}</td>
-                    <td>${req.userName || req.userEmail || ''}</td>
-                    <td>${exp.contactoTel || ''}</td>
-                    <td>${req.certType || 'Certificado Académico'}</td>
-                    <td>${req.certObs || ''}</td>
-                    <td>${req.id}</td>
-                    <td>0</td>
+                    <td>${escapeHtmlMisc(req.date || '')}</td>
+                    <td>${escapeHtmlMisc(exp.documento || '')}</td>
+                    <td>${escapeHtmlMisc(req.userName || req.userEmail || '')}</td>
+                    <td>${escapeHtmlMisc(exp.contactoTel || '')}</td>
+                    <td>${escapeHtmlMisc(req.certType || 'Certificado Académico')}</td>
+                    <td>${escapeHtmlMisc(obs)}</td>
+                    <td>${escapeHtmlMisc(req.id)}</td>
+                    <td>${Number.isFinite(valorPagar) ? valorPagar : 0}</td>
                 `;
                 tbody.appendChild(tr);
             });
