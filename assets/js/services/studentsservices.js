@@ -1,5 +1,8 @@
 /**
- * Simula la consulta a la Base de Datos Académica
+ * Simulacion de base academica (estudiantes por programa y semestre).
+ *
+ * Modulo ES6 no enlazado actualmente en las paginas HTML. dashboard-acad.html usa su propia lista
+ * dbTotalEstudiantes en script inline para el buscador de participantes en salidas.
  */
 
 export const AcademicDB = {

@@ -11,6 +11,7 @@
 </head>
 <body class="bg-[#f0f4f8] font-['Inter']">
 
+    <!-- Panel del solicitante: mezcla datos demo (mockRequests) con CUE_MY_REQUESTS del wizard. Script inline extenso al final. -->
     <nav class="bg-white border-b-4 border-[#03045e] shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -491,6 +492,7 @@
 
     <script src="../assets/js/auth.js"></script>
     <script>
+        /* Tabla de solicitudes: union mockRequests + localStorage; certificados y salidas segun rol. */
         document.addEventListener('DOMContentLoaded', () => {
             const currentUser = AuthService.checkAuth();
             document.getElementById('userNameDisplay').textContent = currentUser.name;

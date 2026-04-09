@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Logica: ../assets/js/wizard-logic.js (al final del body). Requiere sesion de solicitante. -->
     <style>
         .form-label {
             display: block;
@@ -60,6 +61,7 @@
 
 <body class="bg-[#f0f4f8] text-[#1a1a1a] min-h-screen flex flex-col font-['Inter']">
 
+    <!-- Formulario multipaso FO-IN-012. WizardLogic.init() al cargar; persiste solicitudes en CUE_MY_REQUESTS. -->
     <nav class="bg-white border-b-4 border-[#03045e] shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-4">

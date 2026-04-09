@@ -133,6 +133,7 @@
 </head>
 <body>
 
+    <!-- Portal publico: login por correo + codigo de 4 digitos (AuthService en assets/js/auth.js). Tras login va al panel del solicitante. -->
     <nav class="navbar-classic">
         <img src="assets/img/logo_avh.png" alt="Logo CUE" style="height: 40px; background: white; padding: 2px; border-radius: 4px;">
     </nav>
@@ -224,6 +225,7 @@
 
     <script src="assets/js/auth.js"></script>
     <script>
+        /* Paso 1: solicitar codigo. Paso 2: validar codigo y crear sesion CUE_AUTH_USER. */
         // Ocultar íconos de Lucide ya que no se usan en este diseño
         const errorBox = document.getElementById('error-msg');
         const errorText = document.getElementById('error-text');

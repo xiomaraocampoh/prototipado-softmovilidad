@@ -1,3 +1,7 @@
+/**
+ * Estilos compartidos del backoffice y modulos con Tailwind + utilidades institutionales.
+ * Muchas pantallas usan principalmente Tailwind CDN; aqui van tokens (--cue-*) y clases reutilizables.
+ */
 /* Paleta de Colores CUE */
 :root {
     --cue-primary: #03045e;

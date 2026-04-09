@@ -12,6 +12,7 @@
 </head>
 <body class="bg-[#f0f4f8] font-['Inter']">
 
+    <!-- SST: salidas academicas con transporte universidad; checklist vehiculos. Notificaciones via cue-core.js. -->
     <nav class="bg-white border-b-4 border-red-700 shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 h-16 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -343,6 +344,7 @@
 
     <script src="../assets/js/auth.js"></script>
     <script>
+        /* Rol SST obligatorio. Lee salidas en CUE_SALIDAS_ACADEMICAS y extramurales en CUE_EXTRAMURALES. */
         let currentSstId = null;
         let currentRole = null;
         let extramuralesCache = [];

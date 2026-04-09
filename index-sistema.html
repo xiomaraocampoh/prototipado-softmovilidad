@@ -11,7 +11,8 @@
 </head>
 
 <body class="bg-[#8f8f8f] font-['Inter'] min-h-screen flex flex-col justify-center relative">
-    
+
+    <!-- Login gestores: ANI, Coordinacion, SST, Registro. auth.js loginBackoffice; siguiente pantalla menu-sistema.html -->
     <div class="w-full max-w-5xl mx-auto px-4 py-8 relative z-10">
         <div class="bg-[#f5f5f5] rounded-lg shadow-[0_10px_40px_rgba(0,0,0,0.4)] overflow-hidden border border-[#c7c7c7]">
             
@@ -91,6 +92,7 @@
 
     <script src="assets/js/auth.js"></script>
     <script>
+        /* Formulario backoffice: credenciales demo en MOCK_USERS (auth.js). Exito redirige al menu del sistema. */
         lucide.createIcons();
         const errorBox = document.getElementById('error-msg');
         const errorText = document.getElementById('error-text');

@@ -1,5 +1,11 @@
-//**Lógica de Negocio: Movilidad CUE (Modelo Profesional por Etapas SRS)**//
-
+/**
+ * Wizard FO-IN-012 (formulario multipaso de movilidad).
+ *
+ * Se carga en mobility-wizard.html despues de auth.js. Controla pasos, borradores, perfil de solo lectura
+ * para internos, formulario extendido para EXTERNO, y al radicar escribe en CUE_MY_REQUESTS.
+ *
+ * URL utiles: ?mode=docs (fase documentos), ?draft=id, ?editId=id.
+ */
 const WizardLogic = {
     stepIdx: 1,
     role: null,
@@ -540,6 +546,7 @@ const WizardLogic = {
         }
     },
 
+    /** Radicacion o actualizacion: escribe en CUE_MY_REQUESTS y asigna estado inicial segun rol y direccion. */
     submit: function(e) {
         e.preventDefault();
         // REQ-05: Checkbox obligatorio política de tratamiento de datos personales
@@ -741,4 +748,5 @@ const WizardLogic = {
     }
 };
 
+/* Arranque: unica instancia del wizard en la pagina del formulario. */
 document.addEventListener('DOMContentLoaded', () => WizardLogic.init());

@@ -1,6 +1,9 @@
 /**
- * CUE Movilidad - Core: Estado global y notificaciones
- * Sistema centralizado para localStorage y notificaciones cruzadas
+ * CUE Movilidad — notificaciones entre modulos (campana en la barra).
+ *
+ * Las notificaciones se guardan en localStorage bajo LS_NOTIFICATIONS. Cualquier pantalla puede llamar
+ * pushCueNotification(roles, mensaje); los dashboards que incluyen cue-core.js y el HTML de la campana
+ * inicializan initCueNotificationUI(codigoRol) para filtrar lo que ve cada rol.
  */
 (function (global) {
     'use strict';

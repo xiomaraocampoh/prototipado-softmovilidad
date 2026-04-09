@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión ANI - CUE Movilidad</title>
+    <!-- Tailwind CDN (prototipo); Lucide iconos; SheetJS para Excel en reportes y plantillas Q10; cue-core notificaciones -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../assets/css/style.css">
@@ -14,6 +15,13 @@
 </head>
 
 <body class="bg-[#f0f4f8] font-['Inter'] flex h-screen overflow-hidden">
+
+    <!--
+      Dashboard Oficina ANI (Agencia Nacional / Negocios Internacionales, según nomenclatura del proyecto).
+      Dos roles comparten esta vista: ANI_SECRETARIA (filtro documental inicial) y ANI_DIRECCION (aprobacion final + reportes).
+      La persistencia es solo en el navegador (localStorage). No hay backend en este prototipo.
+      Convenciones: cada pestaña principal es un div con clase "ani-content-section" y un id tipo "tab-*" o "view-reportes".
+    -->
 
     <aside class="w-64 bg-[#03045e] text-white flex flex-col hidden md:flex shadow-xl z-20">
         <div class="h-16 flex items-center px-6 border-b border-white/10">
@@ -96,6 +104,7 @@
 
         <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-[#f0f4f8]">
 
+            <!-- Bandeja: solicitudes filtradas por estado segun rol; datos en CUE_MY_REQUESTS + filas demo locales -->
             <div id="tab-bandeja" class="ani-content-section block animate-fade-in">
                 <div class="flex justify-between items-end mb-6">
                     <div>
@@ -121,6 +130,7 @@
                 </div>
             </div>
 
+            <!-- Convenios institucionales: clave localStorage CUE_CONVENIOS -->
             <div id="tab-convenios" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-[#03045e]">Gestión de Convenios</h2>
@@ -172,6 +182,7 @@
                 </div>
             </div>
 
+            <!-- Accesos temporarios para solicitantes externos (simulacion de correo con credenciales) -->
             <div id="tab-credenciales" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-[#03045e]">Generación de Credenciales (Externos)</h2>
@@ -219,6 +230,7 @@
                 </div>
             </div>
 
+            <!-- Listado editable de tipos de movilidad: CUE_TIPOS_MOVILIDAD (compartido con el wizard de solicitudes) -->
             <div id="tab-tipos" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-[#03045e]">Configuración de Movilidades</h2>
@@ -258,6 +270,7 @@
                 </div>
             </div>
 
+            <!-- Configuracion avanzada por tipo (modal + tabla demo; guardado local aun parcial en saveConfigMovilidad) -->
             <div id="tab-config-movilidad" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6 flex items-center justify-between gap-4">
                     <div>
@@ -303,6 +316,7 @@
                 </div>
             </div>
 
+            <!-- Solo visible para ANI_DIRECCION: KPIs, tabla cruda filtrada y descargas XLSX (SheetJS) -->
             <div id="view-reportes" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
                     <h2 class="text-2xl font-bold text-[#03045e] flex items-center gap-2">
@@ -403,6 +417,7 @@
         </main>
     </div>
 
+    <!-- Modal de revision documental: rellenado por openReview() desde CUE_MY_REQUESTS -->
     <div id="reviewModal"
         class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -444,6 +459,7 @@
         </div>
     </div>
 
+    <!-- Modal para definir un tipo nuevo (prototipo: saveConfigMovilidad solo confirma por ahora) -->
     <div id="modal-config-movilidad"
         class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -507,6 +523,7 @@
         </div>
     </div>
 
+    <!-- Linea de tiempo resumida del tramite (no es el motor de estados real; es una vista para usuario ANI) -->
     <div id="modalEstadoMovilidad" class="hidden fixed inset-0 bg-black/40 z-40 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-xl w-full max-w-xl max-h-[80vh] overflow-y-auto">
             <div class="flex items-center justify-between px-5 py-3 border-b border-gray-200 bg-gray-50">
@@ -528,11 +545,29 @@
 
     <script src="../assets/js/auth.js"></script>
     <script>
+        /*
+         * Dashboard ANI -- guia rapida para quien mantenga este archivo
+         *
+         * Contexto: pagina monolitica (HTML + JS inline) del backoffice ANI. Autenticacion con AuthService (auth.js);
+         * datos compartidos con el resto del prototipo en localStorage.
+         *
+         * Claves localStorage que mas veras aqui:
+         *   CUE_MY_REQUESTS   -- solicitudes de movilidad (estado, expedienteData, externoFOIN012, dir, etc.)
+         *   CUE_CONVENIOS     -- convenios institucionales editados desde esta pantalla
+         *   CUE_TIPOS_MOVILIDAD -- array de strings; alimenta el wizard y la lista "Tipos Movilidad"
+         *
+         * Roles: ANI_SECRETARIA ve la bandeja en estados de secretaria; ANI_DIRECCION ve direccion + pestaña Reportes.
+         * Los estados de cada solicitud son strings (ej. EN_REVISION_SECRETARIA_ANI); conviven con datos demo embebidos
+         * en loadTable() para que la UI nunca quede vacia en una demo sin datos.
+         *
+         * Dependencias globales: AuthService, CUECore (notificaciones), lucide (iconos), XLSX (export Excel en reportes y Q10).
+         */
         let currentRole = null;
         let currentRequestId = null;
 
         const pushCueNotification = CUECore ? CUECore.pushCueNotification : () => {};
 
+        /* Arranque: sesion, titulo lateral segun rol, tabla inicial, convenios, UI de notificaciones. */
         document.addEventListener('DOMContentLoaded', () => {
             const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
             if (!user || (user.role.code !== 'ANI_SECRETARIA' && user.role.code !== 'ANI_DIRECCION')) {
@@ -555,9 +590,9 @@
             lucide.createIcons();
         });
 
-        // ==========================================
-        // CONVENIOS (RF-11): persistencia en CUE_CONVENIOS
-        // ==========================================
+        // --- Convenios ---
+        // Listado de instituciones con vigencia. Si el array en localStorage esta vacio, se cargan dos filas de ejemplo
+        // para que la tabla no quede vacia la primera vez.
         const LS_CONVENIOS = 'CUE_CONVENIOS';
 
         function getConvenios() {
@@ -618,12 +653,13 @@
             }).join('');
         }
 
+        /** Evita XSS al insertar texto de usuario o de localStorage en innerHTML. */
         function escapeHtml(str) {
             return String(str == null ? '' : str)
                 .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        // Lógica del Sidebar y Pestañas
+        /** Muestra una seccion principal y marca el boton activo en el sidebar (data-target debe coincidir con el id del panel). */
         function switchTab(targetId) {
             // Ocultar todas las secciones
             document.querySelectorAll('.ani-content-section').forEach(el => el.classList.add('hidden'));
@@ -647,6 +683,11 @@
             }
         }
 
+        /**
+         * Rellena la bandeja documental. Une solicitudes reales (CUE_MY_REQUESTS) con dos REQ de demostracion
+         * para que siempre haya filas de ejemplo. Cada rol solo ve ciertos estados: Secretaria filtra estados de
+         * secretaria; Direccion filtra estados de direccion o revision total.
+         */
         function loadTable() {
             const tbody = document.getElementById('aniTableBody');
             tbody.innerHTML = '';
@@ -706,11 +747,14 @@
             openReview(req || { id: id, userEmail: id, type: '', dir: 'SALIENTE' });
         }
 
+        /**
+         * Modal informativo: resume el flujo (radicacion, aval academico, SST, ANI) segun flags en la solicitud.
+         * Si el id solo existe en los mocks de la bandeja, se usa ese fallback para no mostrar modal vacio.
+         */
         function openEstadoMovilidad(id) {
             const allReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             let req = allReqs.find(r => String(r.id) === String(id));
             if (!req) {
-                // incluir también mockRequests de la bandeja ANI
                 const mockFallback = [
                     { id: 'REQ-1082', type: 'Práctica Empresarial', status: 'EN_REVISION_SECRETARIA_ANI', userEmail: 'estudiante@cue.edu.co', dir: 'SALIENTE' },
                     { id: 'REQ-2005', type: 'Intercambio Académico', status: 'EN_REVISION_TOTAL', userEmail: 'externo@unam.mx', dir: 'ENTRANTE' }
@@ -801,6 +845,10 @@
             if (modal) modal.classList.add('hidden');
         }
 
+        /**
+         * Construye el HTML del expediente para el modal de revision. Hay dos formas de datos:
+         * internos (expedienteData) y entrantes con bloque externoFOIN012 rellenado desde el formulario FO-IN-012.
+         */
         function buildExpedienteHtml(req) {
             const ed = req.expedienteData || {};
             const ext = req.externoFOIN012 || {};
@@ -990,6 +1038,7 @@
             return html;
         }
 
+        /** Lista de documentos esperados segun direccion (entrante/saliente), tipo y modalidad; usada en la checklist del modal. */
         function getRequiredDocsForReq(req) {
             const ed = req.expedienteData || {};
             const dir = req.dir || ed.direccion || 'SALIENTE';
@@ -1023,6 +1072,7 @@
             return docs;
         }
 
+        /** Pinta la checklist de documentos con estado aniDocsStatus por id de documento. */
         function renderDocsReview(req) {
             const container = document.getElementById('modalDocsContent');
             if (!container) return;
@@ -1060,6 +1110,7 @@
             alert('Simulación de apertura del documento "' + docId + '" para la solicitud ' + reqId + '. En un entorno real aquí se abriría el PDF cargado.');
         }
 
+        /** Persiste APROBADO/RECHAZADO por documento y reabre el modal para refrescar la vista. */
         function setDocDecision(reqId, docId, decision) {
             let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             const idx = reqs.findIndex(r => r.id === reqId);
@@ -1072,6 +1123,10 @@
             openReview(req);
         }
 
+        /**
+         * Abre el modal de evaluacion: carga expediente, checklist documental y botones segun rol actual.
+         * Para EXTERNO puede mostrarse el bloque Q10 (plantillas a Registro); para otros roles se oculta.
+         */
         function openReview(req) {
             if (!req || !req.id) return;
             currentRequestId = req.id;
@@ -1082,7 +1137,6 @@
             content.innerHTML = req.expedienteData || req.externoFOIN012 ? buildExpedienteHtml(req) : '<p class="text-gray-500 italic">No hay datos de expediente registrados para esta solicitud.</p>';
             renderDocsReview(req);
 
-            // Mostrar u ocultar el control de Q10 según el rol del solicitante
             const q10Container = document.getElementById('q10ApprovalContainer');
             const q10Checkbox = document.getElementById('sendToQ10Check');
             if (q10Checkbox) {
@@ -1116,6 +1170,7 @@
             if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
+        /** Actualiza el estado de la solicitud actual en CUE_MY_REQUESTS y refresca la bandeja. Opcionalmente notifica a Coordinacion Academica. */
         function processRequest(newStatus) {
             let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             let found = null;
@@ -1146,6 +1201,10 @@
             loadTable();
         }
 
+        /**
+         * Flujo Direccion para entrante: deja la solicitud en MOVILIDAD_ACTIVA y, si el usuario marco envio Q10,
+         * genera dos Excel de muestra (inscripcion y matricula) para simular el handoff a Registro.
+         */
         function processRequestEntranteConPlantillas() {
             const allReqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
             const req = allReqs.find(r => r.id === currentRequestId);
@@ -1165,6 +1224,7 @@
             }
         }
 
+        /** Genera archivos Inscripcion_Q10.xlsx y Matricula_Q10.xlsx en el cliente con SheetJS. */
         function enviarPlantillasRegistro(req) {
             if (typeof XLSX === 'undefined') {
                 alert('No se pudo cargar la librería SheetJS.');
@@ -1210,14 +1270,13 @@
             XLSX.writeFile(wbMat, 'Matricula_Q10.xlsx');
         }
 
+        /* Este listener esta al final del archivo: asegura que la lista de tipos de movilidad (pestana Tipos) se pinte tras cargar el DOM. */
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
             cargarTiposMovilidad();
         });
 
-        // ==========================================
-        // REQ-08: Generación de accesos a externos (6 campos)
-        // ==========================================
+        // --- Accesos externos (simulacion): contrasena aleatoria y alert; no hay envio real de correo. ---
         function generarAccesoExterno(e) {
             e.preventDefault();
             const nombre = (document.getElementById('extName')?.value || '').trim();
@@ -1243,14 +1302,11 @@
             return false;
         }
 
-        // ==========================================
-        // 3. LÓGICA DE TIPOS DE MOVILIDAD
-        // ==========================================
+        // --- Tipos de movilidad: array en CUE_TIPOS_MOVILIDAD; mismo origen que usa el wizard del solicitante. ---
         function cargarTiposMovilidad() {
-            const lista = document.getElementById('listaTiposMovilidad'); // Asegúrate de que el ul/tbody tenga este ID
+            const lista = document.getElementById('listaTiposMovilidad');
             if (!lista) return;
 
-            // Cargar de LocalStorage o poner valores por defecto
             let tipos = JSON.parse(localStorage.getItem('CUE_TIPOS_MOVILIDAD') || '["Intercambio Académico", "Práctica Empresarial - Pasantía", "Estancia Investigación", "Diplomado"]');
             localStorage.setItem('CUE_TIPOS_MOVILIDAD', JSON.stringify(tipos));
 
@@ -1264,7 +1320,7 @@
 
         function agregarTipoMovilidad(e) {
             e.preventDefault();
-            const input = document.getElementById('nuevoTipoMovilidad'); // Asegúrate de que el input tenga este ID
+            const input = document.getElementById('nuevoTipoMovilidad');
             if (!input || input.value.trim() === '') return;
 
             let tipos = JSON.parse(localStorage.getItem('CUE_TIPOS_MOVILIDAD') || '[]');
@@ -1285,9 +1341,7 @@
             }
         }
 
-        // ==========================================
-        // Reportes y Estadísticas (Dirección ANI)
-        // ==========================================
+        // --- Reportes (solo Direccion): KPIs y tabla filtrada sobre aniReportData en memoria. ---
         let aniReportData = [];
 
         function buildAniReportDashboard() {
@@ -1333,6 +1387,7 @@
             renderTablaCruda();
         }
 
+        /** Rellena los tres selects del explorador de datos crudos a partir de aniReportData. */
         function buildReportFilters() {
             const selProg = document.getElementById('filtroPrograma');
             const selTipo = document.getElementById('filtroTipo');
@@ -1371,6 +1426,7 @@
             selAnio.innerHTML = htmlAnio;
         }
 
+        /** Aplica filtros programa/tipo/anio y vuelca filas en tablaCrudaBody. */
         function renderTablaCruda() {
             const tbody = document.getElementById('tablaCrudaBody');
             if (!tbody) return;
@@ -1411,12 +1467,11 @@
             }).join('');
         }
 
-        // ==========================================
-        // Reportes oficiales en Excel (CNA, Indicadores, SIRE)
-        // ==========================================
+        // --- Exportes Excel formales: solo incluyen solicitudes en estados "cerrados" o avanzados (ver Set en filtro). ---
 
         const LS_REQUESTS = 'CUE_MY_REQUESTS';
 
+        /** Filtra solicitudes aptas para reportes regulatorios: excluye borradores y estados tempranos. */
         function obtenerSolicitudesParaReportes() {
             let data = [];
             try {
@@ -1528,7 +1583,7 @@
             return true;
         }
 
-        // TAREA 1: REPORTE CNA
+        /** Plantilla tipo CNA: hojas Estudiantes y Profesores con encabezados institutionales y filas por solicitud. */
         function descargarReporteCNA() {
             if (!asegurarXlsxDisponible()) return;
             const solicitudes = obtenerSolicitudesParaReportes();
@@ -1739,7 +1794,7 @@
             alert('Reporte CNA generado y descargado como "Reporte_CNA_Movilidad.xlsx".');
         }
 
-        // TAREA 2: REPORTE INDICADORES DE ÁREA
+        /** Tabla resumida para seguimiento interno (ano-semestre, nacional/internacional, etc.). */
         function descargarReporteIndicadores() {
             if (!asegurarXlsxDisponible()) return;
             const solicitudes = obtenerSolicitudesParaReportes();
@@ -1809,7 +1864,7 @@
             alert('Reporte de Indicadores generado y descargado como "Indicadores_Area_Movilidad.xlsx".');
         }
 
-        // TAREA 3: REPORTE SIRE MINEDUCACIÓN
+        /** Formato columnar orientado a reporte SIRE (campos SNIES pueden ir vacios si no existen en el prototipo). */
         function descargarReporteSIRE() {
             if (!asegurarXlsxDisponible()) return;
             const solicitudes = obtenerSolicitudesParaReportes();
@@ -1902,9 +1957,7 @@
             alert('Reporte SIRE generado y descargado como "Reporte_SIRE_Mineducacion.xlsx".');
         }
 
-        // ==========================================
-        // Prototipo: Configuración de Tipos de Movilidad y Requisitos
-        // ==========================================
+        // Estado temporal del modal "Crear nuevo tipo" (chips de requisitos antes de guardar).
         let cfgMovReqItems = [];
 
         function openConfigMovilidadModal() {
@@ -1969,7 +2022,7 @@
         }
 
         function saveConfigMovilidad() {
-            // Prototipo: solo mostramos mensaje y cerramos el modal
+            // Pendiente de produccion: persistir en localStorage y enlazar con CUE_TIPOS_MOVILIDAD o estructura similar.
             alert("Tipo de movilidad y sus requisitos han sido guardados exitosamente.");
             closeConfigMovilidadModal();
         }

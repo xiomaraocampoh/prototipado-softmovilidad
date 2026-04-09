@@ -1,7 +1,8 @@
 /**
  * Estados estandarizados del flujo de movilidad (CUE).
- * Referencia única para wizard, ANI, Coordinación, SST y Registro.
- * Evita desfases entre "lo que guarda el wizard" y "lo que filtra cada bandeja".
+ *
+ * Referencia para alinear cadenas de estado entre wizard y bandejas. El codigo historico puede usar
+ * sinonimos; al anadir estados nuevos, documentarlos aqui y en docs/diccionario-datos-movilidad.md si aplica.
  */
 const STATUS = {
     // Radicado: lo ve Coordinación (Paz y Salvo)

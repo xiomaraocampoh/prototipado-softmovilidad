@@ -2,6 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <!-- Vista minimalista Registro: cola de certificados desde CUE_MY_REQUESTS (script inline). -->
     <title>Solicitudes de certificados pendientes por atender</title>
     <style>
         body {
@@ -83,6 +84,7 @@
     <button class="btn-cerrar" onclick="window.close()">Cerrar</button>
 
     <script>
+        /* Solo rol REGISTRO. Filtra solicitudes salientes con certificado pedido y estado pagado simulado. */
         // 1. Verificación de Rol
         const currentUser = JSON.parse(localStorage.getItem('CUE_AUTH_USER'));
         if (!currentUser || currentUser.role.code !== 'REGISTRO') {

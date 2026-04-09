@@ -1,6 +1,9 @@
 /**
- * Servicio de Gestión de Convenios
- * Simula la lectura del archivo CONVENIOS.xlsx y aplica reglas de negocio.
+ * Convenios institucionales (datos en memoria).
+ *
+ * Archivo pensado como modulo ES6 (export). Hoy no esta importado desde ningun HTML del prototipo;
+ * la pantalla operativa de convenios usa localStorage (CUE_CONVENIOS) en dashboard-ani.html.
+ * Mantener esta clase si en el futuro se unifica la fuente de datos o se conecta a un Excel real.
  */
 class AgreementService {
     constructor() {

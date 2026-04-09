@@ -1,6 +1,14 @@
 /**
- * Servicio de Autenticación y Gestión de Roles
- * Definición estricta según requerimientos del SRS y estructura jerárquica
+ * Autenticacion y roles — punto unico de entrada de sesion para todo el prototipo.
+ *
+ * Flujo portal: requestPortalCode genera un codigo de 4 digitos por correo (localStorage CUE_PORTAL_CODES);
+ * loginPortal valida el codigo, elimina el token de un solo uso y guarda CUE_AUTH_USER.
+ *
+ * Flujo backoffice: loginBackoffice compara email/contrasena con MOCK_USERS y solo acepta roles
+ * ANI_*, COORD_ACAD, SST, REGISTRO (isBackofficeRoleCode). Tras login, mismo CUE_AUTH_USER.
+ *
+ * La app no usa cookies ni servidor; cualquier dashboard comprueba la sesion leyendo CUE_AUTH_USER
+ * o llamando checkAuth({ redirectTo: '...' }).
  */
 
 const ROLES = {

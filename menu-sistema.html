@@ -84,6 +84,8 @@
     </style>
 </head>
 <body class="min-h-screen bg-white">
+
+    <!-- Hub tras login de gestor: enlaces a modulos; Movilidad segun rol (script al final lee CUE_AUTH_USER). -->
     <nav class="navbar-cue">
         <div class="flex items-center gap-3">
             <img src="assets/img/logo_avh.png" alt="Alexander von Humboldt" class="h-8 bg-white p-1 rounded" onerror="this.style.display='none'">
@@ -137,6 +139,7 @@
 
     <script src="assets/js/auth.js"></script>
     <script>
+        /* Exige sesion backoffice; configura enlace "Movilidad" al dashboard del rol (user.role.redirect). */
         (function() {
             const user = AuthService.checkAuth();
             const backofficeCodes = ['ANI_SECRETARIA', 'ANI_DIRECCION', 'COORD_ACAD', 'SST', 'REGISTRO'];
