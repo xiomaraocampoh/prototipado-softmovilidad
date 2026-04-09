@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividades Extramurales - CUE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .navbar-cue {
+            background-color: #00529c;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+        }
+        .sidebar {
+            width: 280px;
+            background: #fff;
+            position: fixed;
+            top: 56px;
+            left: 0;
+            bottom: 0;
+            border-right: 1px solid #e5e7eb;
+            overflow-y: auto;
+            z-index: 40;
+        }
+        .sidebar-user {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        .sidebar-user i { color: #6b7280; }
+        .sidebar-nav a {
+            display: block;
+            padding: 0.65rem 1.25rem;
+            color: #b91c1c;
+            text-decoration: none;
+            font-size: 14px;
+            border-left: 3px solid transparent;
+            transition: background 0.15s, border-color 0.15s;
+        }
+        .sidebar-nav a:hover {
+            background: #fef2f2;
+        }
+        .sidebar-nav a.movilidad:hover {
+            background: #eff6ff;
+            border-left-color: #00529c;
+            color: #00529c;
+        }
+        .sidebar-nav a.nav-active-extram {
+            border-left-color: #00529c;
+            background: #eff6ff;
+            color: #00529c;
+        }
+        .main-content {
+            margin-left: 280px;
+            margin-top: 56px;
+            min-height: calc(100vh - 56px);
+            background: #fff;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-white">
+
+    <nav class="navbar-cue">
+        <div class="flex items-center gap-3">
+            <img src="../assets/img/logo_avh.png" alt="Alexander von Humboldt" class="h-8 bg-white p-1 rounded" onerror="this.style.display='none'">
+            <img src="../assets/img/logo_camara.png" alt="Cámara de Comercio" class="h-7 opacity-95" onerror="this.style.display='none'">
+        </div>
+        <div class="flex items-center gap-3 text-white">
+            <i data-lucide="upload-cloud" class="w-5 h-5 opacity-90" title="Subir"></i>
+            <i data-lucide="folder" class="w-5 h-5 opacity-90" title="Archivo"></i>
+            <i data-lucide="play-circle" class="w-5 h-5 opacity-90" title="Ayuda"></i>
+        </div>
+    </nav>
+
+    <aside class="sidebar">
+        <div class="sidebar-user">
+            <i data-lucide="user" class="w-5 h-5"></i>
+            <span id="sidebarUserName">Usuario</span>
+        </div>
+        <nav class="sidebar-nav py-2">
+            <a href="#">Gestión de usuarios</a>
+            <a href="#">Administración ZonaPagos</a>
+            <a href="#">Proyectos</a>
+            <a href="#">Proyectos IST</a>
+            <a href="#">Archivo</a>
+            <a href="#">Control documental</a>
+            <a href="#">Paz y Salvo</a>
+            <a href="actividades-extramurales.html" class="movilidad nav-active-extram">Actividades Extramurales</a>
+            <a href="#" id="linkMiscelanea">Miscelánea</a>
+            <a href="#" id="linkMovilidad" class="movilidad">Movilidad</a>
+            <a href="#">Créditos</a>
+            <a href="#">Digitalización de documentos para aprobación</a>
+            <a href="#">Digitalización historia académica</a>
+            <a href="#">Aprobación de compras y servicios</a>
+            <a href="#">Gestión de equipos</a>
+            <a href="#">Votación</a>
+            <a href="#">Educación continua</a>
+            <a href="#">Talento humano</a>
+        </nav>
+    </aside>
+
+    <main class="main-content relative p-6 md:p-10 pb-16">
+        <div id="bannerExito" class="hidden mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-800 shadow-sm">
+            <p class="font-bold">Registro guardado correctamente</p>
+            <p class="mt-1 text-green-700">La solicitud quedó almacenada de forma temporal en el sistema. El area de Seguridad y Salud en el Trabajo podra consultarla cuando corresponda.</p>
+        </div>
+
+        <div class="max-w-4xl">
+            <h1 class="text-xl font-bold text-[#03045e]">Actividades extramurales (equipo)</h1>
+            <p class="mt-1 text-sm text-gray-600">Formulario para que un jefe o responsable registre una actividad y asigne al personal que participara.</p>
+
+            <form id="formActividadEquipo" class="mt-8 space-y-6" onsubmit="enviarActividadExtramural(event)">
+                <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-gray-800">Responsable del registro</h2>
+                    <p class="text-[11px] text-gray-500">Datos de quien completa el formulario (sesion actual).</p>
+                    <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600">Nombre del jefe o responsable</label>
+                            <input type="text" id="jefeNombre" readonly class="mt-1 w-full cursor-not-allowed rounded-lg border bg-gray-100 px-3 py-2 text-sm text-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-600">Correo institucional</label>
+                            <input type="text" id="jefeEmail" readonly class="mt-1 w-full cursor-not-allowed rounded-lg border bg-gray-100 px-3 py-2 text-sm text-gray-700">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-gray-800">Personal asignado a la actividad</h2>
+                    <p class="text-[11px] text-gray-500">Busque por nombre o numero de documento y agregue una o varias personas.</p>
+                    <div class="mt-4 flex flex-col gap-2 sm:flex-row">
+                        <input type="text" id="busquedaPersonal" autocomplete="off" placeholder="Nombre o cedula" class="flex-1 rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]">
+                        <button type="button" onclick="agregarPersonalDesdeBusqueda()" class="rounded-lg bg-[#0077b6] px-4 py-2 text-sm font-bold text-white hover:bg-[#03045e]">Agregar</button>
+                    </div>
+                    <p id="msgBusqueda" class="mt-2 hidden text-xs text-amber-700"></p>
+                    <div class="mt-4 overflow-x-auto rounded-lg border border-gray-200">
+                        <table class="w-full min-w-[320px] text-left text-sm">
+                            <thead class="border-b border-gray-200 bg-gray-50 text-[11px] uppercase text-gray-500">
+                                <tr>
+                                    <th class="p-3">Nombre</th>
+                                    <th class="p-3">Documento</th>
+                                    <th class="p-3 w-24 text-center">Quitar</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tablaPersonalAsignado" class="divide-y divide-gray-100">
+                                <tr id="filaPersonalVacio">
+                                    <td colspan="3" class="p-4 text-center text-xs italic text-gray-400">No hay personal agregado aun.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-gray-800">Detalle de la actividad</h2>
+                    <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700">Institucion de destino <span class="text-red-500">*</span></label>
+                            <input type="text" id="exInstitucionDestino" required class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]" placeholder="Ej: Institucion o empresa visitada">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700">Direccion de destino <span class="text-red-500">*</span></label>
+                            <input type="text" id="exDireccionDestino" required class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]" placeholder="Direccion completa">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700">Fecha de inicio <span class="text-red-500">*</span></label>
+                            <input type="date" id="exFechaInicio" required class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700">Fecha de fin <span class="text-red-500">*</span></label>
+                            <input type="date" id="exFechaFin" required class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700">Hora de la actividad <span class="text-red-500">*</span></label>
+                            <input type="time" id="exHora" required class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700">Duracion estimada</label>
+                            <input type="text" id="exDuracion" readonly class="mt-1 w-full cursor-not-allowed rounded-lg border bg-gray-100 px-3 py-2 text-sm text-gray-600" placeholder="Se calcula con las fechas">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-gray-800">Necesidades medicas y alergias (equipo)</h2>
+                    <p class="text-[11px] text-gray-500">Indique condiciones relevantes para SST respecto al grupo asignado.</p>
+                    <label class="mt-3 block text-xs font-bold text-gray-700">Descripcion</label>
+                    <textarea id="exNecesidadesMedicas" rows="4" class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]" placeholder="Alergias, medicamentos, observaciones medicas o de riesgo biologico conocidas."></textarea>
+                </div>
+
+                <div class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+                    <h2 class="text-sm font-bold text-gray-800">Contacto de emergencia (referencia del tramite)</h2>
+                    <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700">Nombre</label>
+                            <input type="text" id="exEmergenciaNombre" class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700">Parentesco</label>
+                            <input type="text" id="exEmergenciaParentesco" class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-gray-700">Telefono</label>
+                            <input type="tel" id="exEmergenciaTelefono" class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-gray-700">Correo electronico</label>
+                            <input type="email" id="exEmergenciaCorreo" class="mt-1 w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0077b6]">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-4 border-t border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                    <label class="inline-flex items-start gap-2 text-xs text-gray-600">
+                        <input type="checkbox" id="exAceptaDatos" required class="mt-0.5">
+                        <span>Acepto la <span class="font-bold">politica de tratamiento de datos personales</span> y autorizo el uso de esta informacion para la gestion de Seguridad y Salud en el Trabajo.</span>
+                    </label>
+                    <div class="flex gap-3">
+                        <button type="button" onclick="resetFormularioEquipo(event)" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-bold text-gray-700 hover:bg-gray-50">Limpiar</button>
+                        <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-[#03045e] px-6 py-2 text-sm font-bold text-white hover:bg-black">
+                            Guardar solicitud
+                            <i data-lucide="send" class="h-4 w-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script src="../assets/js/auth.js"></script>
+    <script>
+        const LS_PENDIENTES = 'CUE_EXTRAMURALES_PENDIENTES';
+
+        const CATALOGO_PERSONAL_DEMO = [
+            { nombre: 'rabajodr 1', cedula: '4123450' },
+            { nombre: 'Trabajador 2', cedula: '123456789098' },
+            { nombre: 'Trabajador 3', cedula: '21345465768798' },
+            { nombre: 'Trabajdor 4', cedula: '0192837465' },
+            { nombre: 'Trabajador 5', cedula: '1092457098' },
+            { nombre: 'Trabajador 6', cedula: '111112223456' }
+        ];
+
+        let personalSeleccionado = [];
+
+        (function init() {
+            const user = AuthService.checkAuth();
+            const backofficeCodes = ['ANI_SECRETARIA', 'ANI_DIRECCION', 'COORD_ACAD', 'SST', 'REGISTRO'];
+            const isBackoffice = user && user.role && backofficeCodes.includes(user.role.code);
+
+            if (!user || !isBackoffice) {
+                window.location.href = '../index-sistema.html';
+                return;
+            }
+
+            const name = user.name || user.email || 'Usuario';
+            document.getElementById('sidebarUserName').textContent = name;
+            document.getElementById('jefeNombre').value = name;
+            document.getElementById('jefeEmail').value = user.email || '';
+
+            const dashboardPath = user.role.redirect || 'dashboard-ani.html';
+            const movilidadLink = document.getElementById('linkMovilidad');
+            const miscelaneaLink = document.getElementById('linkMiscelanea');
+
+            if (user.role.code === 'REGISTRO') {
+                if (movilidadLink) movilidadLink.style.display = 'none';
+                if (miscelaneaLink) {
+                    miscelaneaLink.href = 'dashboard-miscelanea.html';
+                    miscelaneaLink.textContent = 'Miscelánea (Caja)';
+                }
+            } else {
+                if (movilidadLink) {
+                    movilidadLink.href = dashboardPath;
+                    movilidadLink.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        window.location.href = dashboardPath;
+                    });
+                }
+                if (miscelaneaLink) {
+                    miscelaneaLink.classList.add('opacity-60', 'pointer-events-none', 'cursor-not-allowed');
+                }
+            }
+
+            const exInicio = document.getElementById('exFechaInicio');
+            const exFin = document.getElementById('exFechaFin');
+            if (exInicio) exInicio.addEventListener('change', actualizarDuracion);
+            if (exFin) exFin.addEventListener('change', actualizarDuracion);
+
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        })();
+
+        function actualizarDuracion() {
+            const inicio = document.getElementById('exFechaInicio') && document.getElementById('exFechaInicio').value;
+            const fin = document.getElementById('exFechaFin') && document.getElementById('exFechaFin').value;
+            const duracionInput = document.getElementById('exDuracion');
+            if (!duracionInput) return;
+            if (!inicio || !fin) {
+                duracionInput.value = '';
+                return;
+            }
+            const fechaInicio = new Date(inicio + 'T00:00:00');
+            const fechaFin = new Date(fin + 'T00:00:00');
+            if (isNaN(fechaInicio.getTime()) || isNaN(fechaFin.getTime()) || fechaFin < fechaInicio) {
+                duracionInput.value = '';
+                return;
+            }
+            const diffMs = fechaFin.getTime() - fechaInicio.getTime();
+            const dias = Math.round(diffMs / (1000 * 60 * 60 * 24)) + 1;
+            duracionInput.value = dias <= 1 ? '1 dia (actividad de un solo dia)' : dias + ' dias';
+        }
+
+        function renderTablaPersonal() {
+            const tbody = document.getElementById('tablaPersonalAsignado');
+            const vacia = document.getElementById('filaPersonalVacio');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+            if (personalSeleccionado.length === 0) {
+                const tr = document.createElement('tr');
+                tr.id = 'filaPersonalVacio';
+                tr.innerHTML = '<td colspan="3" class="p-4 text-center text-xs italic text-gray-400">No hay personal agregado aun.</td>';
+                tbody.appendChild(tr);
+                return;
+            }
+            personalSeleccionado.forEach((p, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML =
+                    '<td class="p-3 text-gray-800">' + escapeHtml(p.nombre) + '</td>' +
+                    '<td class="p-3 font-mono text-xs text-gray-600">' + escapeHtml(p.cedula) + '</td>' +
+                    '<td class="p-3 text-center"><button type="button" onclick="quitarPersonal(' + idx + ')" class="text-sm font-bold text-red-600 hover:underline">Quitar</button></td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        function escapeHtml(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function agregarPersonalDesdeBusqueda() {
+            const input = document.getElementById('busquedaPersonal');
+            const msg = document.getElementById('msgBusqueda');
+            const q = (input && input.value ? input.value : '').trim().toLowerCase();
+            if (!q) {
+                if (msg) {
+                    msg.textContent = 'Escriba un nombre o cedula para buscar.';
+                    msg.classList.remove('hidden');
+                }
+                return;
+            }
+            const matches = CATALOGO_PERSONAL_DEMO.filter(function(p) {
+                return p.nombre.toLowerCase().indexOf(q) !== -1 || String(p.cedula).indexOf(q.replace(/\D/g, '')) !== -1;
+            });
+            if (matches.length === 0) {
+                if (msg) {
+                    msg.textContent = 'No se encontraron coincidencias en el directorio de demostracion.';
+                    msg.classList.remove('hidden');
+                }
+                return;
+            }
+            const candidato = matches[0];
+            const ya = personalSeleccionado.some(function(p) { return p.cedula === candidato.cedula; });
+            if (ya) {
+                if (msg) {
+                    msg.textContent = 'Esa persona ya esta en la lista.';
+                    msg.classList.remove('hidden');
+                }
+                return;
+            }
+            personalSeleccionado.push({ nombre: candidato.nombre, cedula: candidato.cedula });
+            if (msg) msg.classList.add('hidden');
+            if (input) input.value = '';
+            renderTablaPersonal();
+        }
+
+        function quitarPersonal(index) {
+            personalSeleccionado.splice(index, 1);
+            renderTablaPersonal();
+        }
+
+        function resetFormularioEquipo(ev) {
+            if (ev) ev.preventDefault();
+            personalSeleccionado = [];
+            renderTablaPersonal();
+            document.getElementById('formActividadEquipo').reset();
+            const user = AuthService.checkAuth();
+            document.getElementById('jefeNombre').value = user && user.name ? user.name : '';
+            document.getElementById('jefeEmail').value = user && user.email ? user.email : '';
+            document.getElementById('bannerExito').classList.add('hidden');
+            actualizarDuracion();
+        }
+
+        function enviarActividadExtramural(e) {
+            e.preventDefault();
+            document.getElementById('bannerExito').classList.add('hidden');
+
+            if (personalSeleccionado.length === 0) {
+                const msg = document.getElementById('msgBusqueda');
+                if (msg) {
+                    msg.textContent = 'Agregue al menos una persona al personal asignado.';
+                    msg.classList.remove('hidden');
+                }
+                return;
+            }
+
+            const acepta = document.getElementById('exAceptaDatos');
+            if (acepta && !acepta.checked) {
+                window.alert('Debe aceptar la politica de tratamiento de datos para continuar.');
+                return;
+            }
+
+            const user = AuthService.checkAuth();
+            const registro = {
+                id: 'EXT-' + Date.now(),
+                fechaRegistro: new Date().toISOString(),
+                jefeNombre: user && user.name ? user.name : document.getElementById('jefeNombre').value,
+                jefeEmail: user && user.email ? user.email : document.getElementById('jefeEmail').value,
+                personalAsignado: personalSeleccionado.slice(),
+                institucionDestino: document.getElementById('exInstitucionDestino').value.trim(),
+                direccionDestino: document.getElementById('exDireccionDestino').value.trim(),
+                fechaInicio: document.getElementById('exFechaInicio').value,
+                fechaFin: document.getElementById('exFechaFin').value,
+                hora: document.getElementById('exHora').value,
+                duracion: document.getElementById('exDuracion').value,
+                necesidadesMedicas: document.getElementById('exNecesidadesMedicas').value.trim(),
+                contactoEmergencia: {
+                    nombre: document.getElementById('exEmergenciaNombre').value.trim(),
+                    parentesco: document.getElementById('exEmergenciaParentesco').value.trim(),
+                    telefono: document.getElementById('exEmergenciaTelefono').value.trim(),
+                    correo: document.getElementById('exEmergenciaCorreo').value.trim()
+                },
+                estado: 'PENDIENTE_REVISION',
+                origenFormulario: 'JEFE_EQUIPO'
+            };
+
+            let lista = [];
+            try {
+                lista = JSON.parse(localStorage.getItem(LS_PENDIENTES) || '[]');
+                if (!Array.isArray(lista)) lista = [];
+            } catch (err) {
+                lista = [];
+            }
+            lista.push(registro);
+            localStorage.setItem(LS_PENDIENTES, JSON.stringify(lista));
+
+            document.getElementById('bannerExito').classList.remove('hidden');
+            personalSeleccionado = [];
+            renderTablaPersonal();
+            document.getElementById('formActividadEquipo').reset();
+            document.getElementById('jefeNombre').value = user && user.name ? user.name : '';
+            document.getElementById('jefeEmail').value = user && user.email ? user.email : '';
+            actualizarDuracion();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+    </script>
+</body>
+</html>

@@ -344,13 +344,60 @@
 
     <script src="../assets/js/auth.js"></script>
     <script>
-        /* Rol SST obligatorio. Lee salidas en CUE_SALIDAS_ACADEMICAS y extramurales en CUE_EXTRAMURALES. */
+        /* Rol SST obligatorio. Lee salidas en CUE_SALIDAS_ACADEMICAS; extramurales en CUE_EXTRAMURALES y equipo en CUE_EXTRAMURALES_PENDIENTES. */
         let currentSstId = null;
         let currentRole = null;
         let extramuralesCache = [];
         const LS_SALIDAS = 'CUE_SALIDAS_ACADEMICAS';
         const LS_EXTRAMURALES = 'CUE_EXTRAMURALES';
+        const LS_EXTRAMURALES_PEND = 'CUE_EXTRAMURALES_PENDIENTES';
         const pushCueNotification = CUECore ? CUECore.pushCueNotification : () => {};
+
+        function expandPendienteEquipoParaSst(p) {
+            if (!p || !Array.isArray(p.personalAsignado) || p.personalAsignado.length === 0) return null;
+            const teamLabel = p.personalAsignado
+                .map(function(x) {
+                    const n = (x && x.nombre) ? String(x.nombre).trim() : '';
+                    const c = x && x.cedula ? String(x.cedula).trim() : '';
+                    return c ? n + ' (' + c + ')' : n;
+                })
+                .filter(Boolean)
+                .join('; ');
+            const cEmerg = p.contactoEmergencia || {};
+            return {
+                id: p.id,
+                fechaRegistro: p.fechaRegistro,
+                jefeNombre: p.jefeNombre,
+                jefeEmail: p.jefeEmail,
+                personalAsignado: p.personalAsignado,
+                nombreFuncionario: (p.jefeNombre ? String(p.jefeNombre).trim() : 'Responsable') + ' (registro por jefe de equipo)',
+                rolFuncionario: 'DOCENTE',
+                programaFuncionario: teamLabel || '—',
+                celularFuncionario: '—',
+                institucionDestino: p.institucionDestino,
+                ciudadDestino: p.ciudadDestino || '—',
+                direccionDestino: p.direccionDestino,
+                fechaSalida: p.fechaInicio,
+                fechaFin: p.fechaFin,
+                fechaInicio: p.fechaInicio,
+                duracion: p.duracion,
+                hora: p.hora,
+                contactoEmergenciaNombre: cEmerg.nombre,
+                contactoEmergenciaParentesco: cEmerg.parentesco,
+                contactoEmergenciaTelefono: cEmerg.telefono,
+                contactoEmergenciaCorreo: cEmerg.correo,
+                necesidadesMedicas: p.necesidadesMedicas,
+                estado: p.estado,
+                origenFormulario: p.origenFormulario
+            };
+        }
+
+        function rebuildExtramuralesListaCompleta() {
+            const principal = safeParseArray(LS_EXTRAMURALES);
+            const pend = safeParseArray(LS_EXTRAMURALES_PEND);
+            const expandidos = pend.map(expandPendienteEquipoParaSst).filter(Boolean);
+            return principal.concat(expandidos);
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             const user = AuthService.checkAuth({ redirectTo: '../index-sistema.html' });
@@ -422,7 +469,7 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
-            const raw = safeParseArray(LS_EXTRAMURALES);
+            const raw = rebuildExtramuralesListaCompleta();
             if (!Array.isArray(raw) || raw.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-gray-400 text-xs italic">No hay actividades laborales extramurales notificadas a SST.</td></tr>`;
                 return;
@@ -487,11 +534,14 @@
             }
 
             if (!Array.isArray(extramuralesCache) || extramuralesCache.length === 0) {
-                const raw = safeParseArray(LS_EXTRAMURALES);
-                extramuralesCache = raw;
+                extramuralesCache = rebuildExtramuralesListaCompleta();
             }
 
-            const index = extramuralesCache.findIndex(item => String(item.id || '').trim() === safeId);
+            let index = extramuralesCache.findIndex(item => String(item.id || '').trim() === safeId);
+            if (index === -1) {
+                extramuralesCache = rebuildExtramuralesListaCompleta();
+                index = extramuralesCache.findIndex(item => String(item.id || '').trim() === safeId);
+            }
             if (index === -1) {
                 alert('No se encontró el expediente extramural en el sistema.');
                 return;
