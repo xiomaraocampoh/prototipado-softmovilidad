@@ -19,7 +19,9 @@ const STATUS = {
     MOVILIDAD_ACTIVA: 'MOVILIDAD_ACTIVA',
     EN_REVISION_LEGALIZACION: 'EN_REVISION_LEGALIZACION',
     BORRADOR: 'BORRADOR',
-    RECHAZADO: 'RECHAZADO'
+    RECHAZADO: 'RECHAZADO',
+    /** Radicación solo informativa (Rector u oficina ANI); sin aval académico ni SST */
+    NOTIFICADA_ANI: 'NOTIFICADA_ANI'
 };
 
 /** Estados que muestra Coordinación en Paz y Salvo (solicitudes salientes ya aprobadas por ANI) */

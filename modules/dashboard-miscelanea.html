@@ -103,7 +103,12 @@
 
             // Tomar solicitudes de movilidad salientes con certificado pedido ($0, estado PAGADO) y movilidad activa
             let requests = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
-            let pendientes = requests.filter(r => r.dir === 'SALIENTE' && r.certRequested === true && r.certStatus === 'PAGADO' && r.status === 'MOVILIDAD_ACTIVA');
+            let pendientes = requests.filter(r => {
+                if (r.dir !== 'SALIENTE' || r.certRequested !== true || r.certStatus !== 'PAGADO' || r.status !== 'MOVILIDAD_ACTIVA') return false;
+                const ar = String(r.applicantRole || 'ESTUDIANTE').toUpperCase();
+                const ut = String(r.applicantUserType || 'INTERNO').toUpperCase();
+                return ar === 'ESTUDIANTE' && ut === 'INTERNO';
+            });
 
             if (pendientes.length === 0) {
                 totalSpan.textContent = '0';

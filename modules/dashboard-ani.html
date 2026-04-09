@@ -685,7 +685,9 @@
 
             const visibleReqs = allReqs.filter(req => {
                 const st = String(req.status || '').toUpperCase();
-                if (currentRole === 'ANI_SECRETARIA') return st === 'EN_REVISION_SECRETARIA_ANI' || st === 'REVISION_ANI';
+                if (currentRole === 'ANI_SECRETARIA') {
+                    return st === 'EN_REVISION_SECRETARIA_ANI' || st === 'REVISION_ANI' || st === 'NOTIFICADA_ANI';
+                }
                 if (currentRole === 'ANI_DIRECCION') return st === 'EN_REVISION_DIRECCION_ANI' || st === 'EN_REVISION_TOTAL';
                 return false;
             });
@@ -758,16 +760,17 @@
             if (!body) return;
 
             const applicantRole = String(req.applicantRole || '').toUpperCase();
-            const sinAvalCoord = ['PROFESOR', 'ADMINISTRATIVO', 'EGRESADO'].includes(applicantRole);
+            const sinAvalCoord = ['PROFESOR', 'ADMINISTRATIVO', 'EGRESADO', 'RECTOR'].includes(applicantRole);
+            const esRectorInform = applicantRole === 'RECTOR' || status === 'NOTIFICADA_ANI';
 
             const paso1Ok = true;
-            const paso2Ok = status !== 'PENDIENTE_PAZ_SALVO' && status !== '';
-            const mostrarPaso3 = requiereTransporte;
+            const paso2Ok = esRectorInform ? true : (status !== 'PENDIENTE_PAZ_SALVO' && status !== '');
+            const mostrarPaso3 = !esRectorInform && requiereTransporte;
             const sstAprobado = req.sstReviewFlag === true || (req.sstReview && req.sstReview.estado === 'APROBADO');
             const paso3Ok = mostrarPaso3 && sstAprobado;
-            const estadosPaso4Ok = ['EN_REVISION_DIRECCION_ANI', 'PENDIENTE_MATRICULA', 'MOVILIDAD_ACTIVA', 'APROBADA_POSTULACION', 'EN_REVISION_TOTAL'];
+            const estadosPaso4Ok = ['EN_REVISION_DIRECCION_ANI', 'PENDIENTE_MATRICULA', 'MOVILIDAD_ACTIVA', 'APROBADA_POSTULACION', 'EN_REVISION_TOTAL', 'NOTIFICADA_ANI'];
             const paso4Ok = estadosPaso4Ok.includes(status);
-            const estadosPaso5Ok = ['MOVILIDAD_ACTIVA', 'PENDIENTE_MATRICULA', 'APROBADA_FINAL'];
+            const estadosPaso5Ok = ['MOVILIDAD_ACTIVA', 'PENDIENTE_MATRICULA', 'APROBADA_FINAL', 'NOTIFICADA_ANI'];
             const paso5Ok = estadosPaso5Ok.includes(status);
 
             const renderStep = (label, desc, done, noAplica) => {
@@ -794,19 +797,23 @@
             steps.push(renderStep('Radicación', 'El estudiante radica la solicitud FO-IN-012 en el sistema de movilidad.', paso1Ok, false));
             steps.push(renderStep(
                 'Aval Coordinación Académica',
-                sinAvalCoord
+                esRectorInform
+                    ? 'No aplica: solicitud informativa del Rector; no pasa por Coordinación Académica.'
+                    : sinAvalCoord
                     ? 'No aplica: para Profesores, Administrativos y Egresados no se requiere aval de Coordinación Académica.'
                     : 'Coordinación Académica revisa requisitos del programa y decide si la movilidad es viable.',
-                sinAvalCoord ? true : paso2Ok,
-                sinAvalCoord
+                esRectorInform ? true : (sinAvalCoord ? true : paso2Ok),
+                esRectorInform || sinAvalCoord
             ));
             steps.push(renderStep(
                 'Aval SST',
-                mostrarPaso3
+                esRectorInform
+                    ? 'No aplica: formulario informativo del Rector; sin revisión de vehículo ni SST.'
+                    : mostrarPaso3
                     ? 'SST verifica condiciones de transporte y seguridad cuando la movilidad requiere vehículo o transporte suministrado.'
                     : 'No aplica: esta movilidad no requiere transporte suministrado por la Universidad.',
-                paso3Ok,
-                !mostrarPaso3
+                esRectorInform ? true : paso3Ok,
+                esRectorInform || !mostrarPaso3
             ));
             steps.push(renderStep('Revisión Secretaría ANI', 'Secretaría ANI valida la documentación y soportes requeridos para la movilidad.', paso4Ok, false));
             steps.push(renderStep('Aprobación Final Dirección ANI', 'Dirección ANI emite la aprobación final de la movilidad (activa o pendiente de matrícula).', paso5Ok, false));
@@ -1349,7 +1356,12 @@
             const email = String(sol.correo || '').trim().toLowerCase();
             const name = String(sol.nombresApellidos || '').trim() || email;
             if (typeof AuthService !== 'undefined' && AuthService.registerApprovedExternalUser) {
-                AuthService.registerApprovedExternalUser({ email, name, nombresApellidos: name });
+                AuthService.registerApprovedExternalUser({
+                    email,
+                    name,
+                    nombresApellidos: name,
+                    rolInstitucionOrigen: sol.rolInstitucionOrigen
+                });
             }
             list[idx] = {
                 ...sol,

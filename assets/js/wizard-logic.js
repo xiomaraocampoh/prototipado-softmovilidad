@@ -36,6 +36,8 @@ const WizardLogic = {
         this.editId = urlParams.get('editId');
 
         this.setupUI();
+        const rectorBanner = document.getElementById('rectorInformBanner');
+        if (rectorBanner) rectorBanner.classList.toggle('hidden', this.role !== 'RECTOR');
         this.loadProfile();
         this.loadAgreements();
         this.toggleExternoForm();
@@ -97,6 +99,8 @@ const WizardLogic = {
                 return 'ESTUDIANTE';
             case 'EXTERNO':
                 return 'EXTERNO';
+            case 'RECTOR':
+                return 'RECTOR';
             case 'DOCENTE':
             case 'PROFESOR':
                 return 'PROFESOR';
@@ -568,7 +572,9 @@ const WizardLogic = {
             const isEstOrExt = applicantRole === 'ESTUDIANTE' || applicantRole === 'EXTERNO';
             const isProfAdminEgr = ['PROFESOR', 'ADMINISTRATIVO', 'EGRESADO'].includes(applicantRole);
             let statusFinal;
-            if (existingReq) {
+            if (this.role === 'RECTOR') {
+                statusFinal = 'NOTIFICADA_ANI';
+            } else if (existingReq) {
                 statusFinal = existingReq.status || (dir === 'ENTRANTE' ? 'EN_REVISION_TOTAL' : 'EN_REVISION_SECRETARIA_ANI');
             } else if (isEstOrExt) {
                 statusFinal = 'PENDIENTE_PAZ_SALVO';
@@ -586,8 +592,15 @@ const WizardLogic = {
                 dir: dir,
                 status: statusFinal,
                 userEmail: this.user.email,
-                applicantRole
+                applicantRole,
+                applicantUserType: typeof AuthService !== 'undefined' && typeof AuthService.getUserType === 'function'
+                    ? AuthService.getUserType(this.user)
+                    : 'INTERNO'
             };
+            if (this.role === 'RECTOR') {
+                data.requiereTransporte = false;
+                data.flujoRectorInformativo = true;
+            }
             data.expedienteData = this.gatherExpedienteData();
             if (this.role === 'EXTERNO') {
                 data.externoFOIN012 = this.gatherExternoFormData();
@@ -599,7 +612,9 @@ const WizardLogic = {
             } else {
                 reqs.push(data);
             }
-            alert("Postulación Radicada exitosamente.");
+            alert(this.role === 'RECTOR'
+                ? 'Solicitud registrada como notificación informativa para la oficina ANI.'
+                : 'Postulación Radicada exitosamente.');
         }
         localStorage.setItem('CUE_MY_REQUESTS', JSON.stringify(reqs));
         window.location.href='dashboard-estudiante.html';
@@ -671,7 +686,7 @@ const WizardLogic = {
     // REQ-04: Perfil solo lectura para Estudiante, Profesor, Administrativo CUE; vacío → "N/A (Actualizar en perfil)"
     loadProfile: function() {
         const NA = 'N/A (Actualizar en perfil)';
-        const isInterno = ['ESTUDIANTE', 'DOCENTE', 'COLABORADOR'].includes(this.role);
+        const isInterno = ['ESTUDIANTE', 'DOCENTE', 'COLABORADOR', 'RECTOR'].includes(this.role);
         let profile = {};
         try {
             const raw = localStorage.getItem('CUE_USER_PROFILE');

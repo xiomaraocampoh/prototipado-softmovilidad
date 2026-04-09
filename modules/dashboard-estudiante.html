@@ -163,18 +163,18 @@
                                 <input type="date" id="profFecNac" class="w-full border p-2 rounded text-sm focus:outline-none prof-locked">
                             </div>
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Nacionalidad</label>
-                                <input type="text" id="profNacionalidad" class="w-full border p-2 rounded text-sm focus:outline-none prof-locked">
-                            </div>
-                            <div>
                                 <label class="block text-xs font-bold text-gray-600 mb-1">Número de Celular</label>
                                 <input type="tel" id="profCelular" class="w-full border p-2 rounded text-sm focus:outline-none prof-locked">
                             </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">EPS <span class="text-gray-400 font-normal">(tabla solicitante)</span></label>
+                                <input type="text" id="profEps" class="w-full border p-2 rounded text-sm focus:outline-none prof-locked" placeholder="EPS o seguro de salud">
+                            </div>
                             <div id="extRoleContainer" class="hidden">
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Rol de Solicitante Externo</label>
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Rol en su institución de origen</label>
                                 <select id="profRolExt" class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#03045e]">
                                     <option value="Estudiante">Estudiante</option>
-                                    <option value="Profesor">Profesor / Investigador</option>
+                                    <option value="Docente">Docente</option>
                                     <option value="Administrativo">Administrativo</option>
                                 </select>
                             </div>
@@ -189,16 +189,31 @@
                         </div>
                     </div>
 
-                    <div>
-                        <h4 class="font-bold text-[#03045e] text-sm border-b pb-2 mb-4">Información Complementaria</h4>
+                    <div id="extDireccionUniWrap" class="hidden">
+                        <h4 class="font-bold text-[#03045e] text-sm border-b pb-2 mb-4">Datos de contacto (externo)</h4>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Dirección de Residencia</label>
-                                <input type="text" class="w-full border p-2 rounded text-sm focus:border-[#03045e] focus:outline-none" value="Calle Principal #123">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Nacionalidad</label>
+                                <input type="text" id="profNacionalidad" class="w-full border p-2 rounded text-sm focus:outline-none prof-locked">
                             </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Dirección de residencia</label>
+                                <input type="text" id="profDirResidencia" class="w-full border p-2 rounded text-sm focus:border-[#03045e] focus:outline-none prof-locked">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Universidad de origen</label>
+                                <input type="text" id="profUniversidadOrigen" class="w-full border p-2 rounded text-sm focus:border-[#03045e] focus:outline-none prof-locked">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-[#03045e] text-sm border-b pb-2 mb-4">Información médica y movilidad</h4>
+                        <p class="text-[11px] text-gray-500 mb-2">La EPS se registra como dato del solicitante. Las alergias u observaciones médicas se toman de su solicitud de movilidad más reciente.</p>
+                        <div class="grid grid-cols-1 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">EPS Actual / Seguro de Salud</label>
-                                <input type="text" class="w-full border p-2 rounded text-sm focus:border-[#03045e] focus:outline-none" value="Sanitas EPS">
+                                <label class="block text-xs font-bold text-gray-600 mb-1">Alergias / observaciones médicas <span class="text-gray-400 font-normal">(vinculado a solicitud actual)</span></label>
+                                <textarea id="profAlergiasMovilidad" readonly rows="2" class="w-full border p-2 rounded text-sm bg-gray-50 text-gray-700 cursor-not-allowed" placeholder="Radique o actualice una solicitud en el formulario de movilidad para ver este dato."></textarea>
                             </div>
                         </div>
                     </div>
@@ -340,14 +355,28 @@
     <script src="../assets/js/auth.js"></script>
     <script>
         /* Tabla de solicitudes: union mockRequests + localStorage; certificados y salidas segun rol. */
+        function puedeSolicitarCertificadoAcademico(user) {
+            if (!user || !user.role || user.role.code !== 'ESTUDIANTE') return false;
+            const ut = typeof AuthService.getUserType === 'function' ? AuthService.getUserType(user) : (user.userType === 'EXTERNO' ? 'EXTERNO' : 'INTERNO');
+            return ut === 'INTERNO';
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const currentUser = AuthService.checkAuth();
             document.getElementById('userNameDisplay').textContent = currentUser.name;
             document.getElementById('userRoleDisplay').textContent = currentUser.role.name;
 
+            const cardCert = document.getElementById('card-certificados');
+            if (cardCert) cardCert.style.display = puedeSolicitarCertificadoAcademico(currentUser) ? '' : 'none';
+            if (!puedeSolicitarCertificadoAcademico(currentUser)) {
+                ['certModal', 'modal-certificado'].forEach((id) => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.add('hidden');
+                });
+            }
+
             if (currentUser.role && currentUser.role.code === 'EXTERNO') {
-                const cardCert = document.getElementById('card-certificados');
-                if (cardCert) cardCert.style.display = 'none';
+                /* externos: sin bloque de certificados ni salidas CUE */
             } else {
                 loadSalidasPendientes(currentUser);
             }
@@ -373,12 +402,11 @@
             if (userReqs.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500 italic">Aún no tienes trámites de movilidad registrados.</td></tr>`;
             } else {
-                const isExterno = currentUser.role && currentUser.role.code === 'EXTERNO';
                 userReqs.forEach(req => {
-                    let statusConfig = getStatusConfig(req.status, req.id, currentUser);
+                    let statusConfig = getStatusConfig(req.status, req.id);
                     const dropdownId = `stu-kebab-dd-${req.id}`;
                     const statusNorm = String(req.status || '').toUpperCase();
-                    const puedeSolicitarCertificado = !isExterno && (statusNorm === 'MOVILIDAD_ACTIVA' || statusNorm === 'APROBADA_POSTULACION');
+                    const puedeSolicitarCertificado = puedeSolicitarCertificadoAcademico(currentUser) && (statusNorm === 'MOVILIDAD_ACTIVA' || statusNorm === 'APROBADA_POSTULACION');
                     tbody.innerHTML += `
                         <tr class="hover:bg-gray-50 border-b last:border-0 transition">
                             <td class="p-4 font-mono font-bold text-[#03045e]">${req.id}</td>
@@ -488,8 +516,7 @@
             input.click();
         }
 
-        function getStatusConfig(status, id, currentUser) {
-            const isExterno = currentUser && currentUser.role && currentUser.role.code === 'EXTERNO';
+        function getStatusConfig(status, id) {
             let config = { badgeClass: 'bg-gray-100 text-gray-600 border-gray-200', label: status };
             switch(status) {
                 case 'EN_REVISION_POSTULACION':
@@ -511,6 +538,10 @@
                 case 'MOVILIDAD_ACTIVA':
                     config.badgeClass = 'bg-green-100 text-green-800 border-green-200';
                     config.label = 'Activa / Vigente';
+                    break;
+                case 'NOTIFICADA_ANI':
+                    config.badgeClass = 'bg-indigo-100 text-indigo-900 border-indigo-200';
+                    config.label = 'Notificada a ANI';
                     break;
             }
             return config;
@@ -556,16 +587,17 @@
             }
 
             const applicantRole = String(req.applicantRole || '').toUpperCase();
-            const sinAvalCoord = ['PROFESOR', 'ADMINISTRATIVO', 'EGRESADO'].includes(applicantRole);
+            const sinAvalCoord = ['PROFESOR', 'ADMINISTRATIVO', 'EGRESADO', 'RECTOR'].includes(applicantRole);
+            const esRectorInform = applicantRole === 'RECTOR' || status === 'NOTIFICADA_ANI';
 
             const paso1Ok = true;
-            const paso2Ok = status !== 'PENDIENTE_PAZ_SALVO' && status !== '';
-            const mostrarPaso3 = requiereTransporte;
+            const paso2Ok = esRectorInform ? true : (status !== 'PENDIENTE_PAZ_SALVO' && status !== '');
+            const mostrarPaso3 = !esRectorInform && requiereTransporte;
             const sstAprobado = req.sstReviewFlag === true || (req.sstReview && req.sstReview.estado === 'APROBADO');
             const paso3Ok = mostrarPaso3 && sstAprobado;
-            const estadosPaso4Ok = ['EN_REVISION_DIRECCION_ANI', 'PENDIENTE_MATRICULA', 'MOVILIDAD_ACTIVA', 'APROBADA_POSTULACION', 'EN_REVISION_TOTAL'];
+            const estadosPaso4Ok = ['EN_REVISION_DIRECCION_ANI', 'PENDIENTE_MATRICULA', 'MOVILIDAD_ACTIVA', 'APROBADA_POSTULACION', 'EN_REVISION_TOTAL', 'NOTIFICADA_ANI'];
             const paso4Ok = estadosPaso4Ok.includes(status);
-            const estadosPaso5Ok = ['MOVILIDAD_ACTIVA', 'PENDIENTE_MATRICULA', 'APROBADA_FINAL'];
+            const estadosPaso5Ok = ['MOVILIDAD_ACTIVA', 'PENDIENTE_MATRICULA', 'APROBADA_FINAL', 'NOTIFICADA_ANI'];
             const paso5Ok = estadosPaso5Ok.includes(status);
 
             const renderStep = (label, desc, done, noAplica) => {
@@ -592,19 +624,23 @@
             steps.push(renderStep('Radicación por Estudiante', 'El solicitante radica la solicitud FO-IN-012 en el sistema de movilidad.', paso1Ok, false));
             steps.push(renderStep(
                 'Aval Coordinación Académica',
-                sinAvalCoord
+                esRectorInform
+                    ? 'No aplica: solicitud informativa del Rector; no pasa por revisión de Coordinación Académica.'
+                    : sinAvalCoord
                     ? 'No aplica: para Profesores, Administrativos y Egresados no se requiere aval de Coordinación Académica.'
                     : 'Coordinación Académica revisa requisitos del programa y decide si la movilidad es viable.',
-                sinAvalCoord ? true : paso2Ok,
-                sinAvalCoord
+                esRectorInform ? true : (sinAvalCoord ? true : paso2Ok),
+                esRectorInform || sinAvalCoord
             ));
             steps.push(renderStep(
                 'Revisión Vehículo / SST',
-                mostrarPaso3
+                esRectorInform
+                    ? 'No aplica: el formulario del Rector es informativo para ANI y no incluye revisión de vehículo ni SST.'
+                    : mostrarPaso3
                     ? 'SST verifica condiciones de transporte cuando la movilidad requiere vehículo suministrado.'
                     : 'No aplica: esta movilidad no requiere transporte suministrado por la Universidad.',
-                paso3Ok,
-                !mostrarPaso3
+                esRectorInform ? true : paso3Ok,
+                esRectorInform || !mostrarPaso3
             ));
             steps.push(renderStep('Revisión Secretaría ANI', 'Secretaría ANI valida la documentación y soportes requeridos para la movilidad.', paso4Ok, false));
             steps.push(renderStep('Aprobación Dirección ANI', 'Dirección ANI emite la aprobación final de la movilidad (activa o pendiente de matrícula).', paso5Ok, false));
@@ -642,45 +678,100 @@
         }
 
         function saveProfileAndClose() {
+            const currentUser = AuthService.checkAuth();
             const profile = {
                 docNumber: document.getElementById('profNumDoc')?.value?.trim() || '',
                 semester: document.getElementById('profSemestre')?.value?.trim() || '',
                 promedio: document.getElementById('profPromedio')?.value?.trim() || '',
                 nombres: document.getElementById('profNombres')?.value?.trim() || '',
-                apellidos: document.getElementById('profApellidos')?.value?.trim() || ''
+                apellidos: document.getElementById('profApellidos')?.value?.trim() || '',
+                tipoDoc: document.getElementById('profTipoDoc')?.value || '',
+                eps: document.getElementById('profEps')?.value?.trim() || '',
+                celular: document.getElementById('profCelular')?.value?.trim() || ''
             };
+            if (currentUser.role.code === 'EXTERNO') {
+                profile.nacionalidad = document.getElementById('profNacionalidad')?.value?.trim() || '';
+                profile.direccionResidencia = document.getElementById('profDirResidencia')?.value?.trim() || '';
+                profile.universidadOrigen = document.getElementById('profUniversidadOrigen')?.value?.trim() || '';
+                profile.rolInstitucionOrigen = document.getElementById('profRolExt')?.value || '';
+            }
             try { localStorage.setItem('CUE_USER_PROFILE', JSON.stringify(profile)); } catch (e) {}
             alert('Perfil actualizado exitosamente en el sistema.');
             document.getElementById('profileModal').classList.add('hidden');
         }
         function openReqsModal() { document.getElementById('reqsModal').classList.remove('hidden'); }
+        function fillAlergiasDesdeUltimaSolicitud(userEmail) {
+            const ta = document.getElementById('profAlergiasMovilidad');
+            if (!ta) return;
+            let reqs = [];
+            try { reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]'); } catch (e) { reqs = []; }
+            const mine = reqs.filter((r) => String(r.userEmail || '').toLowerCase() === String(userEmail || '').toLowerCase());
+            const parseTs = (d) => {
+                if (!d) return 0;
+                const t = Date.parse(d);
+                return isNaN(t) ? 0 : t;
+            };
+            mine.sort((a, b) => parseTs(b.date) - parseTs(a.date));
+            for (const r of mine) {
+                const exp = r.expedienteData || {};
+                const v = String(exp.alergiasMeds || '').trim();
+                if (v) {
+                    ta.value = v;
+                    return;
+                }
+                const ext = r.externoFOIN012 || {};
+                const m = String(ext.necesidadesMedicas || '').trim();
+                if (m) {
+                    ta.value = m;
+                    return;
+                }
+            }
+            ta.value = '';
+        }
+
         function openProfileModal() { 
             const currentUser = AuthService.checkAuth();
+            let profile = {};
+            try { profile = JSON.parse(localStorage.getItem('CUE_USER_PROFILE') || '{}'); } catch (e) { profile = {}; }
+
             const alertBox = document.getElementById('profileAlertBox');
             const lockedFields = document.querySelectorAll('.prof-locked');
             const extRoleCont = document.getElementById('extRoleContainer');
+            const extDirUni = document.getElementById('extDireccionUniWrap');
             
-            // Lógica de visualización basada en el rol del usuario (Interno vs Externo)
             if (currentUser.role.code === 'EXTERNO') {
                 alertBox.className = "text-sm p-3 rounded mb-6 border bg-blue-50 border-blue-200 text-blue-800";
-                alertBox.innerHTML = "<strong>Bienvenido(a).</strong> Por favor, complete todos sus datos personales y académicos para continuar con sus solicitudes de movilidad entrante.";
+                alertBox.innerHTML = "<strong>Bienvenido(a).</strong> Por favor, complete todos sus datos personales para continuar con sus solicitudes de movilidad entrante.";
                 
                 extRoleCont.classList.remove('hidden');
+                if (extDirUni) extDirUni.classList.remove('hidden');
                 
-                // Habilitar campos para edición
                 lockedFields.forEach(field => {
                     field.readOnly = false;
                     if(field.tagName === 'SELECT') field.disabled = false;
                     field.classList.remove('bg-gray-100', 'cursor-not-allowed', 'text-gray-500');
                     field.classList.add('focus:border-[#03045e]', 'bg-white');
                 });
+
+                document.getElementById('profNombres').value = profile.nombres || (currentUser.name || '').split(' ')[0] || '';
+                document.getElementById('profApellidos').value = profile.apellidos || (currentUser.name || '').split(' ').slice(1).join(' ') || '';
+                document.getElementById('profNumDoc').value = profile.docNumber || '';
+                document.getElementById('profCelular').value = profile.celular || '';
+                document.getElementById('profEps').value = profile.eps || '';
+                document.getElementById('profTipoDoc').value = profile.tipoDoc || 'CC';
+                document.getElementById('profNacionalidad').value = profile.nacionalidad || '';
+                document.getElementById('profDirResidencia').value = profile.direccionResidencia || '';
+                document.getElementById('profUniversidadOrigen').value = profile.universidadOrigen || '';
+                const rolExt = profile.rolInstitucionOrigen || currentUser.rolInstitucionOrigen || 'Estudiante';
+                const re = document.getElementById('profRolExt');
+                if (re) re.value = ['Estudiante', 'Docente', 'Administrativo'].includes(rolExt) ? rolExt : 'Estudiante';
             } else {
                 alertBox.className = "text-sm p-3 rounded mb-6 border bg-yellow-50 border-yellow-200 text-yellow-800";
                 alertBox.innerHTML = "<strong>Nota Informativa:</strong> Sus datos personales y académicos son administrados directamente por Control y Registro. Si requiere actualizarlos, por favor realice la gestión directamente en el <strong>Portal CUE (Q10)</strong>.";
                 
                 extRoleCont.classList.add('hidden');
+                if (extDirUni) extDirUni.classList.add('hidden');
                 
-                // Bloquear campos de solo lectura
                 lockedFields.forEach(field => {
                     field.readOnly = true;
                     if(field.tagName === 'SELECT') field.disabled = true;
@@ -688,21 +779,23 @@
                     field.classList.remove('focus:border-[#03045e]', 'bg-white');
                 });
 
-                // Simulación de carga de datos desde Q10
-                document.getElementById('profNombres').value = currentUser.name.split(' ')[0];
-                document.getElementById('profApellidos').value = "Ocampo Hurtado";
-                document.getElementById('profNumDoc').value = "1094000000";
-                document.getElementById('profCelular').value = "3001234567";
-                document.getElementById('profSemestre').value = "5";
-                document.getElementById('profPromedio').value = "4.2";
-                document.getElementById('profNacionalidad').value = "Colombiana";
-                document.getElementById('profTipoDoc').value = "CC";
+                const parts = (currentUser.name || '').trim().split(/\s+/);
+                document.getElementById('profNombres').value = profile.nombres || parts[0] || '';
+                document.getElementById('profApellidos').value = profile.apellidos || parts.slice(1).join(' ') || 'Ocampo Hurtado';
+                document.getElementById('profNumDoc').value = profile.docNumber || '1094000000';
+                document.getElementById('profCelular').value = profile.celular || '3001234567';
+                document.getElementById('profEps').value = profile.eps || 'Sanitas EPS';
+                document.getElementById('profSemestre').value = profile.semester || '5';
+                document.getElementById('profPromedio').value = profile.promedio || '4.2';
+                document.getElementById('profTipoDoc').value = profile.tipoDoc || 'CC';
             }
-            
+
+            fillAlergiasDesdeUltimaSolicitud(currentUser.email);
             document.getElementById('profileModal').classList.remove('hidden'); 
         }
         
         function solicitarCertificado(id) {
+            if (!puedeSolicitarCertificadoAcademico(AuthService.checkAuth())) return;
             document.getElementById('certReqId').value = id;
             document.getElementById('certForm').reset();
             document.getElementById('certModal').classList.remove('hidden');
@@ -711,6 +804,7 @@
 
         let modalCertificadoReqId = null;
         function abrirModalCertificado(reqId) {
+            if (!puedeSolicitarCertificadoAcademico(AuthService.checkAuth())) return;
             modalCertificadoReqId = reqId;
             const modal = document.getElementById('modal-certificado');
             const select = document.getElementById('modalCertificadoTipo');
@@ -736,14 +830,18 @@
         });
 
         function confirmCertRequest() {
+            if (!puedeSolicitarCertificadoAcademico(AuthService.checkAuth())) return;
             const reqId = document.getElementById('certReqId').value;
             const certType = document.getElementById('certType').value;
             if(!certType) return alert("Seleccione un tipo de certificado.");
             
             let reqs = JSON.parse(localStorage.getItem('CUE_MY_REQUESTS') || '[]');
+            const u = AuthService.checkAuth();
             reqs = reqs.map(req => {
                 if (req.id === reqId) {
                     req.certRequested = true; req.certType = certType; req.certStatus = 'PAGADO';
+                    req.applicantUserType = typeof AuthService.getUserType === 'function' ? AuthService.getUserType(u) : 'INTERNO';
+                    if (!req.applicantRole) req.applicantRole = u.role.code;
                 }
                 return req;
             });

@@ -110,6 +110,21 @@ function setAuthUser(user) {
     localStorage.setItem(LS_KEYS.authUser, JSON.stringify(user));
 }
 
+/**
+ * Tipo de vínculo con la institución: INTERNO (@cue y roles de planta) vs EXTERNO (portal entrante).
+ * Certificados académicos de movilidad solo aplican a ESTUDIANTE + INTERNO.
+ */
+function inferUserTypeFromRole(roleCode) {
+    return roleCode === ROLES.EXTERNO.code ? 'EXTERNO' : 'INTERNO';
+}
+
+function getUserType(user) {
+    if (!user || typeof user !== 'object') return 'INTERNO';
+    if (user.userType === 'EXTERNO' || user.role?.code === ROLES.EXTERNO.code) return 'EXTERNO';
+    if (user.userType === 'INTERNO') return 'INTERNO';
+    return inferUserTypeFromRole(user.role?.code);
+}
+
 function gen4DigitCode() {
     return String(Math.floor(Math.random() * 9000) + 1000);
 }
@@ -176,11 +191,17 @@ const AuthService = {
             x => String(x.email || '').toLowerCase() === e && Number(x.estado_activo) === 1
         );
         const displayName = mock?.name || approved?.name || e;
-        setAuthUser({
+        const userType = inferUserTypeFromRole(role.code);
+        const baseUser = {
             email: e,
             name: displayName,
-            role
-        });
+            role,
+            userType
+        };
+        if (approved && approved.rolInstitucionOrigen) {
+            baseUser.rolInstitucionOrigen = approved.rolInstitucionOrigen;
+        }
+        setAuthUser(baseUser);
         return { success: true, redirect: role.redirect };
     },
 
@@ -201,8 +222,10 @@ const AuthService = {
             name: name || email,
             roleCode: ROLES.EXTERNO.code,
             estado_activo: 1,
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
+            rolInstitucionOrigen: payload.rolInstitucionOrigen ? String(payload.rolInstitucionOrigen).trim() : undefined
         };
+        if (!record.rolInstitucionOrigen) delete record.rolInstitucionOrigen;
         if (idx >= 0) {
             users[idx] = { ...users[idx], ...record };
         } else {
@@ -224,7 +247,8 @@ const AuthService = {
             setAuthUser({
                 email: user.email,
                 name: user.name,
-                role: user.role
+                role: user.role,
+                userType: inferUserTypeFromRole(user.role.code)
             });
             return { success: true, redirect: user.role.redirect };
         }
@@ -256,4 +280,8 @@ const AuthService = {
     }
 };
 
+AuthService.getUserType = getUserType;
+AuthService.inferUserTypeFromRole = inferUserTypeFromRole;
+
 window.AuthService = AuthService;
+window.getUserType = getUserType;
