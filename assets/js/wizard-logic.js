@@ -75,22 +75,19 @@ const WizardLogic = {
         if(dirEl) dirEl.value = (this.role === 'EXTERNO') ? 'ENTRANTE' : 'SALIENTE';
     },
 
-    // REQ-06: Paso 1 (Datos Personales): EXTERNO no ve "nombre único", ve campos separados en paso 3. Paso 2 (Académico): EXTERNO no ve "Programa al que pertenece", ve textarea "Actividades a realizar o materias a cursar".
+    // REQ-06: EXTERNO usa externalFormData; internos ven studentPersonalData (perfil lectura sin campo programa académico; se retiró el selector/listado de programa).
     toggleExternoForm: function() {
         const interno = document.getElementById('studentPersonalData');
         const externo = document.getElementById('externalFormData');
-        const programaWrapper = document.getElementById('programaSelectWrapper');
         const nombreUnicoContainer = document.getElementById('nombreUnicoContainer');
         if (this.role === 'EXTERNO') {
             if (nombreUnicoContainer) nombreUnicoContainer.classList.add('hidden');
             if (interno) interno.classList.add('hidden');
             if (externo) externo.classList.remove('hidden');
-            if (programaWrapper) programaWrapper.classList.add('hidden');
         } else {
             if (nombreUnicoContainer) nombreUnicoContainer.classList.remove('hidden');
             if (interno) interno.classList.remove('hidden');
             if (externo) externo.classList.add('hidden');
-            if (programaWrapper) programaWrapper.classList.remove('hidden');
         }
     },
 
@@ -118,15 +115,11 @@ const WizardLogic = {
         const isProfAdminGrad = rolesNoSemestre.includes(this.role);
 
         const semWrapper = document.getElementById('autoSemWrapper');
-        const programaWrapper = document.getElementById('programaSelectWrapper');
-        const programaLabel = document.getElementById('programaLabel');
 
         if (isProfAdminGrad) {
             if (semWrapper) semWrapper.classList.add('hidden');
-            if (programaLabel) programaLabel.textContent = 'Programa / Dependencia';
         } else {
             if (semWrapper) semWrapper.classList.remove('hidden');
-            if (programaLabel) programaLabel.textContent = 'Programa al que pertenece';
         }
     },
 
@@ -635,7 +628,7 @@ const WizardLogic = {
             montoBeca: get('montoBeca'),
             actividadesDesc: get('actividadesMovilidad'),
             documento: get('autoDoc'),
-            programa: get('autoPrograma'),
+            programa: '',
             semestrePromedio: get('autoSem'),
             eps: get('sstEps'),
             alergiasMeds: get('sstMeds'),
@@ -686,7 +679,6 @@ const WizardLogic = {
         } catch (e) {}
         if (!isInterno) return; // Externos diligencian sus datos en el formulario (REQ-06 Módulo 2)
         const docNumber = profile.docNumber ?? profile.numDoc ?? this.user?.docNumber ?? '';
-        const programa = profile.programa ?? profile.program ?? this.user?.programa ?? '';
         const semester = profile.semester != null ? profile.semester : this.user?.semester;
         const promedio = profile.promedio != null ? profile.promedio : this.user?.promedio;
         const semText = (semester != null && semester !== '') ? (promedio != null && promedio !== '' ? `Sem ${semester} / Prom ${promedio}` : `Sem ${semester}`) : (promedio != null && promedio !== '' ? `Prom ${promedio}` : '');
@@ -703,7 +695,6 @@ const WizardLogic = {
             el.value = (value === undefined || value === null || String(value).trim() === '') ? NA : String(value).trim();
         };
         setReadonlyAndNA(document.getElementById('autoDoc'), docNumber);
-        setReadonlyAndNA(document.getElementById('autoPrograma'), programa);
         setReadonlyAndNA(document.getElementById('autoSem'), semText);
         setReadonlyAndNA(document.getElementById('sstEps'), eps);
         setReadonlyAndNA(document.getElementById('sstMeds'), alergias);

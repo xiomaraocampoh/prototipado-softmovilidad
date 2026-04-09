@@ -182,51 +182,30 @@
                 </div>
             </div>
 
-            <!-- Accesos temporarios para solicitantes externos (simulacion de correo con credenciales) -->
+            <!-- Bandeja: solicitudes desde index.html (CUE_SOLICITUDES_ACCESO); aprobacion escribe en auth.js registerApprovedExternalUser -->
             <div id="tab-credenciales" class="ani-content-section hidden animate-fade-in">
                 <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-[#03045e]">Generación de Credenciales (Externos)</h2>
-                    <p class="text-gray-500 text-sm">Cree cuentas temporales para solicitantes de movilidad entrante (REQ-08).</p>
+                    <h2 class="text-2xl font-bold text-[#03045e]">Accesos externos</h2>
+                    <p class="text-gray-500 text-sm">Solicitudes de acceso al portal enviadas por usuarios no institucionales. Apruebe o rechace cada una.</p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border max-w-xl">
-                    <form id="formCredencialesExterno" onsubmit="return generarAccesoExterno(event);" class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Nombre completo <span class="text-red-600">*</span></label>
-                            <input type="text" id="extName" required placeholder="Ej: Carlos Méndez López"
-                                class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Correo electrónico <span class="text-red-600">*</span></label>
-                            <input type="email" id="extEmail" required placeholder="Para envío de clave"
-                                class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Institución de origen <span class="text-red-600">*</span></label>
-                            <input type="text" id="extInst" required placeholder="Ej: UNAM"
-                                class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-600 mb-1">Documento de identidad <span class="text-red-600">*</span></label>
-                            <input type="text" id="extDoc" required placeholder="Número de documento o pasaporte"
-                                class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Fecha de inicio del acceso <span class="text-red-600">*</span></label>
-                                <input type="date" id="extFecInicio" required
-                                    class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-600 mb-1">Fecha de fin del acceso <span class="text-red-600">*</span></label>
-                                <input type="date" id="extFecFin" required
-                                    class="w-full border p-2 rounded text-sm focus:border-[#0077b6] focus:outline-none">
-                            </div>
-                        </div>
-                        <button type="submit"
-                            class="w-full bg-[#03045e] text-white py-3 rounded text-sm font-bold flex justify-center items-center gap-2 hover:bg-black transition">
-                            <i data-lucide="mail-send" class="w-4 h-4"></i> Generar y Enviar Acceso
-                        </button>
-                    </form>
+                <div id="bandejaAccesosFeedback" class="hidden mb-4 rounded-lg border px-4 py-3 text-sm" role="status"></div>
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-bold">
+                                <tr>
+                                    <th class="p-4">Nombre</th>
+                                    <th class="p-4">Correo</th>
+                                    <th class="p-4">Universidad origen</th>
+                                    <th class="p-4">Movilidad</th>
+                                    <th class="p-4 text-center w-52">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bandejaAccesosBody" class="divide-y divide-gray-100">
+                            </tbody>
+                        </table>
+                    </div>
+                    <p id="bandejaAccesosEmpty" class="p-6 text-center text-gray-500 text-sm hidden">No hay solicitudes pendientes.</p>
                 </div>
             </div>
 
@@ -680,6 +659,9 @@
 
             if (targetId === 'view-reportes' && currentRole === 'ANI_DIRECCION') {
                 buildAniReportDashboard();
+            }
+            if (targetId === 'tab-credenciales') {
+                renderBandejaSolicitudesAcceso();
             }
         }
 
@@ -1276,30 +1258,132 @@
             cargarTiposMovilidad();
         });
 
-        // --- Accesos externos (simulacion): contrasena aleatoria y alert; no hay envio real de correo. ---
-        function generarAccesoExterno(e) {
-            e.preventDefault();
-            const nombre = (document.getElementById('extName')?.value || '').trim();
-            const correo = (document.getElementById('extEmail')?.value || '').trim();
-            const institucion = (document.getElementById('extInst')?.value || '').trim();
-            const documento = (document.getElementById('extDoc')?.value || '').trim();
-            const fecInicio = document.getElementById('extFecInicio')?.value || '';
-            const fecFin = document.getElementById('extFecFin')?.value || '';
+        const LS_SOLICITUDES_ACCESO = 'CUE_SOLICITUDES_ACCESO';
 
-            if (!nombre || !correo || !institucion || !documento || !fecInicio || !fecFin) {
-                alert("Complete todos los campos: nombre, correo, institución, documento, fecha inicio y fecha fin del acceso.");
-                return false;
+        function bandejaAccesosSetFeedback(message, kind) {
+            const el = document.getElementById('bandejaAccesosFeedback');
+            if (!el) return;
+            el.textContent = message || '';
+            el.classList.remove('hidden', 'border-emerald-200', 'bg-emerald-50', 'text-emerald-900', 'border-red-200', 'bg-red-50', 'text-red-900', 'border-amber-200', 'bg-amber-50', 'text-amber-900');
+            if (!message) {
+                el.classList.add('hidden');
+                return;
             }
-            if (new Date(fecFin) < new Date(fecInicio)) {
-                alert("La fecha de fin del acceso debe ser posterior a la fecha de inicio.");
-                return false;
+            if (kind === 'ok') {
+                el.classList.add('border-emerald-200', 'bg-emerald-50', 'text-emerald-900');
+            } else if (kind === 'warn') {
+                el.classList.add('border-amber-200', 'bg-amber-50', 'text-amber-900');
+            } else {
+                el.classList.add('border-red-200', 'bg-red-50', 'text-red-900');
             }
+        }
 
-            const randomPassword = Math.random().toString(36).substring(2, 10);
-            const msg = `Credenciales generadas y enviadas.\n\nPara: ${correo}\nNombre: ${nombre}\nInstitución: ${institucion}\nDocumento: ${documento}\nAcceso desde: ${fecInicio} hasta ${fecFin}\nUsuario: ${correo}\nContraseña temporal: ${randomPassword}`;
-            alert(msg);
-            document.getElementById('formCredencialesExterno').reset();
-            return false;
+        /** Lee CUE_SOLICITUDES_ACCESO y pinta filas en estado PENDIENTE (misma clave que index.html). */
+        function renderBandejaSolicitudesAcceso() {
+            const tbody = document.getElementById('bandejaAccesosBody');
+            const emptyEl = document.getElementById('bandejaAccesosEmpty');
+            if (!tbody) return;
+            let list = [];
+            try {
+                list = JSON.parse(localStorage.getItem(LS_SOLICITUDES_ACCESO) || '[]');
+                if (!Array.isArray(list)) list = [];
+            } catch {
+                list = [];
+            }
+            const pendientes = list.filter((s) => s.estado === 'PENDIENTE');
+            tbody.innerHTML = '';
+            if (pendientes.length === 0) {
+                if (emptyEl) emptyEl.classList.remove('hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+                return;
+            }
+            if (emptyEl) emptyEl.classList.add('hidden');
+            pendientes.forEach((s) => {
+                const id = escapeHtml(String(s.id || ''));
+                const nombre = escapeHtml(String(s.nombresApellidos || ''));
+                const correo = escapeHtml(String(s.correo || ''));
+                const uni = escapeHtml(String(s.universidadOrigen || ''));
+                const mov = escapeHtml(String(s.movilidadInteres || ''));
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="p-4 font-medium text-gray-800">${nombre}</td>
+                    <td class="p-4 text-gray-700">${correo}</td>
+                    <td class="p-4 text-gray-700">${uni}</td>
+                    <td class="p-4 text-gray-700">${mov}</td>
+                    <td class="p-4 text-center whitespace-nowrap">
+                        <button type="button" class="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-bold bg-emerald-600 text-white hover:bg-emerald-700 mr-1"
+                            data-accion="aprobar" data-id="${id}">Aprobar</button>
+                        <button type="button" class="inline-flex items-center px-3 py-1.5 rounded-md text-xs font-bold bg-red-600 text-white hover:bg-red-700"
+                            data-accion="rechazar" data-id="${id}">Rechazar</button>
+                    </td>`;
+                tbody.appendChild(tr);
+            });
+            tbody.querySelectorAll('button[data-accion]').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const sid = btn.getAttribute('data-id');
+                    const accion = btn.getAttribute('data-accion');
+                    if (accion === 'aprobar') aprobarSolicitudAcceso(sid);
+                    else rechazarSolicitudAcceso(sid);
+                });
+            });
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+        }
+
+        function aprobarSolicitudAcceso(solicitudId) {
+            bandejaAccesosSetFeedback('', '');
+            let list = [];
+            try {
+                list = JSON.parse(localStorage.getItem(LS_SOLICITUDES_ACCESO) || '[]');
+                if (!Array.isArray(list)) list = [];
+            } catch {
+                list = [];
+            }
+            const idx = list.findIndex((s) => String(s.id) === String(solicitudId) && s.estado === 'PENDIENTE');
+            if (idx < 0) {
+                bandejaAccesosSetFeedback('No se encontró la solicitud o ya fue gestionada.', 'err');
+                renderBandejaSolicitudesAcceso();
+                return;
+            }
+            const sol = list[idx];
+            const email = String(sol.correo || '').trim().toLowerCase();
+            const name = String(sol.nombresApellidos || '').trim() || email;
+            if (typeof AuthService !== 'undefined' && AuthService.registerApprovedExternalUser) {
+                AuthService.registerApprovedExternalUser({ email, name, nombresApellidos: name });
+            }
+            list[idx] = {
+                ...sol,
+                estado: 'APROBADO',
+                gestionadoEn: new Date().toISOString()
+            };
+            localStorage.setItem(LS_SOLICITUDES_ACCESO, JSON.stringify(list));
+            bandejaAccesosSetFeedback('Acceso aprobado. El usuario ya puede iniciar sesión en el portal.', 'ok');
+            renderBandejaSolicitudesAcceso();
+        }
+
+        function rechazarSolicitudAcceso(solicitudId) {
+            bandejaAccesosSetFeedback('', '');
+            let list = [];
+            try {
+                list = JSON.parse(localStorage.getItem(LS_SOLICITUDES_ACCESO) || '[]');
+                if (!Array.isArray(list)) list = [];
+            } catch {
+                list = [];
+            }
+            const idx = list.findIndex((s) => String(s.id) === String(solicitudId) && s.estado === 'PENDIENTE');
+            if (idx < 0) {
+                bandejaAccesosSetFeedback('No se encontró la solicitud o ya fue gestionada.', 'err');
+                renderBandejaSolicitudesAcceso();
+                return;
+            }
+            list[idx] = {
+                ...list[idx],
+                estado: 'RECHAZADO',
+                gestionadoEn: new Date().toISOString()
+            };
+            localStorage.setItem(LS_SOLICITUDES_ACCESO, JSON.stringify(list));
+            bandejaAccesosSetFeedback('Solicitud de acceso denegada.', 'warn');
+            renderBandejaSolicitudesAcceso();
         }
 
         // --- Tipos de movilidad: array en CUE_TIPOS_MOVILIDAD; mismo origen que usa el wizard del solicitante. ---

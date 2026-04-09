@@ -3,6 +3,8 @@
  *
  * Flujo portal: requestPortalCode genera un codigo de 4 digitos por correo (localStorage CUE_PORTAL_CODES);
  * loginPortal valida el codigo, elimina el token de un solo uso y guarda CUE_AUTH_USER.
+ * Correos externos (no @cue.edu.co) solo reciben codigo y sesion si estan en MOCK_USERS o fueron aprobados
+ * en la bandeja ANI (CUE_PORTAL_USUARIOS_EXTERNO), alineado con el formulario de solicitud en index.html.
  *
  * Flujo backoffice: loginBackoffice compara email/contrasena con MOCK_USERS y solo acepta roles
  * ANI_*, COORD_ACAD, SST, REGISTRO (isBackofficeRoleCode). Tras login, mismo CUE_AUTH_USER.
@@ -46,7 +48,9 @@ const MOCK_USERS = [
 
 const LS_KEYS = {
     authUser: 'CUE_AUTH_USER',
-    portalCodes: 'CUE_PORTAL_CODES'
+    portalCodes: 'CUE_PORTAL_CODES',
+    // Usuarios externos aprobados por ANI (bandeja en dashboard-ani); sin esto, correos no @cue.edu.co no entran al portal salvo MOCK_USERS.
+    portalApprovedExternos: 'CUE_PORTAL_USUARIOS_EXTERNO'
 };
 
 function safeParseObject(key) {
@@ -58,6 +62,48 @@ function safeParseObject(key) {
     } catch {
         return {};
     }
+}
+
+function safeParseArray(key) {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+        const data = JSON.parse(raw);
+        return Array.isArray(data) ? data : [];
+    } catch {
+        return [];
+    }
+}
+
+/** Listado persistente de externos con acceso al portal (rol EXTERNO, estado_activo 1). */
+function getPortalApprovedExternos() {
+    return safeParseArray(LS_KEYS.portalApprovedExternos);
+}
+
+/**
+ * Resuelve si el correo puede iniciar sesión en el portal con código de 4 dígitos.
+ * Internos @cue.edu.co sin ficha en MOCK siguen como ESTUDIANTE por defecto.
+ * Externos solo entran si están en MOCK_USERS o en la lista aprobada por ANI.
+ */
+function resolvePortalLoginRole(email) {
+    const e = String(email || '').trim().toLowerCase();
+    const mock = MOCK_USERS.find(u => u.email === e);
+    if (mock) return { ok: true, role: mock.role };
+
+    if (e.endsWith('@cue.edu.co')) {
+        return { ok: true, role: ROLES.ESTUDIANTE };
+    }
+
+    const approved = getPortalApprovedExternos().find(
+        u => String(u.email || '').toLowerCase() === e && Number(u.estado_activo) === 1
+    );
+    if (approved) return { ok: true, role: ROLES.EXTERNO };
+
+    return {
+        ok: false,
+        message:
+            'Su correo no tiene acceso autorizado. Si es usuario externo, solicite acceso desde el portal y espere la aprobación de la oficina ANI.'
+    };
 }
 
 function setAuthUser(user) {
@@ -78,14 +124,6 @@ function isBackofficeRoleCode(code) {
     ].includes(code);
 }
 
-function inferPortalRoleByEmail(email) {
-    const e = String(email || '').trim().toLowerCase();
-    const mock = MOCK_USERS.find(u => u.email === e);
-    if (mock) return mock.role;
-    if (e.endsWith('@cue.edu.co')) return ROLES.ESTUDIANTE;
-    return ROLES.EXTERNO;
-}
-
 const AuthService = {
     // =========================
     // 1) Portal CUE (Solicitantes) – código de acceso de 4 dígitos
@@ -94,6 +132,11 @@ const AuthService = {
         const e = String(email || '').trim().toLowerCase();
         if (!e || !e.includes('@')) {
             return { success: false, message: 'Ingrese un correo válido' };
+        }
+
+        const gate = resolvePortalLoginRole(e);
+        if (!gate.ok) {
+            return { success: false, message: gate.message };
         }
 
         const codes = safeParseObject(LS_KEYS.portalCodes);
@@ -123,14 +166,51 @@ const AuthService = {
         delete codes[e];
         localStorage.setItem(LS_KEYS.portalCodes, JSON.stringify(codes));
 
-        const role = inferPortalRoleByEmail(e);
+        const resolved = resolvePortalLoginRole(e);
+        if (!resolved.ok) {
+            return { success: false, message: resolved.message };
+        }
+        const role = resolved.role;
         const mock = MOCK_USERS.find(u => u.email === e);
+        const approved = getPortalApprovedExternos().find(
+            x => String(x.email || '').toLowerCase() === e && Number(x.estado_activo) === 1
+        );
+        const displayName = mock?.name || approved?.name || e;
         setAuthUser({
             email: e,
-            name: mock?.name || e,
+            name: displayName,
             role
         });
         return { success: true, redirect: role.redirect };
+    },
+
+    /**
+     * Registra o actualiza un externo aprobado para que pueda usar loginPortal.
+     * Lo invoca el dashboard ANI al aprobar una fila de CUE_SOLICITUDES_ACCESO.
+     */
+    registerApprovedExternalUser: function(payload) {
+        const email = String(payload?.email || '').trim().toLowerCase();
+        const name = String(payload?.name || payload?.nombresApellidos || '').trim();
+        if (!email || !email.includes('@')) {
+            return { success: false, message: 'Correo inválido' };
+        }
+        let users = getPortalApprovedExternos();
+        const idx = users.findIndex(u => String(u.email || '').toLowerCase() === email);
+        const record = {
+            email,
+            name: name || email,
+            roleCode: ROLES.EXTERNO.code,
+            estado_activo: 1,
+            updatedAt: new Date().toISOString()
+        };
+        if (idx >= 0) {
+            users[idx] = { ...users[idx], ...record };
+        } else {
+            record.createdAt = record.updatedAt;
+            users.push(record);
+        }
+        localStorage.setItem(LS_KEYS.portalApprovedExternos, JSON.stringify(users));
+        return { success: true };
     },
 
     // =========================
