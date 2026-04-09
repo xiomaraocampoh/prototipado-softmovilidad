@@ -143,18 +143,13 @@ Los listados detallados de RF/RNF, máquina de estados y cumplimiento normativo 
 - **RNF-04** Disponibilidad esperada en especificación.
 - **RNF-05** Tratamiento de datos personales.
 
----
-
-## Máquina de estados (referencia)
-
-Estados usados de forma dispersa en el prototipo incluyen, entre otros: `BORRADOR`, `EN_REVISION_COORDINACION`, `EN_REVISION_POSTULACION`, `EN_REVISION_SECRETARIA_ANI`, `EN_REVISION_DIRECCION_ANI`, `EN_REVISION_TOTAL`, `APROBADA_POSTULACION`, `EN_REVISION_LEGALIZACION`, `PENDIENTE_MATRICULA`, `MOVILIDAD_ACTIVA`. La fuente unificada de constantes está en `assets/js/state.js`; el wizard y cada dashboard pueden usar variantes según evolución del código.
 
 ---
 
 ## Guía rápida para nuevos desarrolladores
 
-1. Leer este README y `docs/diccionario-datos-movilidad.md` si vas a tocar datos de solicitud o expediente.
+1. Leer este README y `+/diccionario-datos-movilidad.md` si vas a tocar datos de solicitud o expediente.
 2. Trazar el flujo desde `mobility-wizard.js` → `CUE_MY_REQUESTS` → dashboard que filtra por `status`.
 3. No asumir backend: toda regla debe implementarse en cliente o documentarse como pendiente.
-4. Mantener comentarios en español claro, sin iconos decorativos; explicar claves `localStorage` al añadir nuevas.
+4. Mantener comentarios en español claro; explicar claves `localStorage` al añadir nuevas.
 5. Si añades páginas nuevas, enlázalas desde `menu-sistema.html` o el portal según el rol y documenta la ruta en esta tabla de estructura.
