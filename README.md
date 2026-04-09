@@ -1,10 +1,10 @@
 # Sistema de Gestión de Movilidad Académica y Laboral - CUE
 **Prototipo de Alta Fidelidad - Corporación Universitaria Empresarial Alexander von Humboldt**
 
-## 📖 Descripción del Proyecto
+## Descripción del Proyecto
 Prototipo funcional diseñado para digitalizar, centralizar y optimizar los procesos de movilidad académica (entrante y saliente, nacional e internacional) y salidas académicas de la institución. Este sistema reemplaza la gestión manual, asegura el cumplimiento normativo exigido por el Ministerio de Educación Nacional y facilita la recopilación de datos para el Consejo Nacional de Acreditación (CNA).
 
-## 🛠️ Stack Tecnológico (Prototipo)
+## Stack Tecnológico (Prototipo)
 - **Frontend:** HTML5 Semántico, Tailwind CSS (CDN).
 - **Lógica / Interacciones:** Vanilla JavaScript (ES6+).
 - **Persistencia de Datos:** `localStorage` (Simulación de Base de Datos y Backend).
@@ -12,7 +12,7 @@ Prototipo funcional diseñado para digitalizar, centralizar y optimizar los proc
 
 ---
 
-## 👥 Roles del Sistema
+## Roles del Sistema
 Según las últimas definiciones operativas, el sistema maneja los siguientes perfiles:
 
 1. **Solicitante Interno:** Estudiante, Profesor no docente, Administrativo, Egresado (Sus datos base vienen de Q10).
@@ -25,7 +25,7 @@ Según las últimas definiciones operativas, el sistema maneja los siguientes pe
 
 ---
 
-## 📋 Requisitos Funcionales (RF)
+## Requisitos Funcionales (RF)
 
 ### Módulo del Solicitante (Fase 1 y Fase 2)
 - **RF-01 Registro de Solicitud:** Permitir registrar solicitudes de movilidad académica saliente y entrante.
@@ -57,7 +57,7 @@ Según las últimas definiciones operativas, el sistema maneja los siguientes pe
 
 ---
 
-## ⚙️ Requisitos No Funcionales (RNF)
+## Requisitos No Funcionales (RNF)
 - **RNF-01 Seguridad y Roles:** Autenticación y autorización estricta basada en roles (RBAC).
 - **RNF-02 Terminología Legal (NUEVO):** Todo texto en la interfaz debe ajustarse a las normativas del Ministerio, reemplazando el uso de "Docente" por "Profesor" o "Profesor no docente".
 - **RNF-03 Accesibilidad:** Acceso vía navegador web compatible con dispositivos móviles y escritorio (Responsive Design).
@@ -66,7 +66,7 @@ Según las últimas definiciones operativas, el sistema maneja los siguientes pe
 
 ---
 
-## 🔄 Máquina de Estados del Proceso
+## Máquina de Estados del Proceso
 Las solicitudes fluyen a través de los siguientes estados principales almacenados en el motor del sistema:
 1. `BORRADOR` (Incompleto por el usuario).
 2. `EN_REVISION_COORDINACION` (Aval de homologación).
@@ -79,7 +79,7 @@ Las solicitudes fluyen a través de los siguientes estados principales almacenad
 
 ---
 
-## 🚀 Guía de Ejecución (Local)
+## Guía de Ejecución (Local)
 Para levantar este prototipo en una máquina local:
 1. Clonar el repositorio.
 2. Abrir el archivo `index.html` en cualquier navegador moderno (preferiblemente usando una extensión como *Live Server* en VSCode).

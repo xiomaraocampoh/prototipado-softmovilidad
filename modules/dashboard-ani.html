@@ -40,11 +40,6 @@
                 data-target="tab-credenciales">
                 <i data-lucide="users" class="w-4 h-4"></i> Accesos Externos
             </button>
-            <button onclick="switchTab('tab-programas')"
-                class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
-                data-target="tab-programas">
-                <i data-lucide="book-open" class="w-4 h-4"></i> Programas
-            </button>
             <button onclick="switchTab('tab-tipos')"
                 class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
                 data-target="tab-tipos">
@@ -53,7 +48,7 @@
             <button onclick="switchTab('tab-config-movilidad')"
                 class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition"
                 data-target="tab-config-movilidad">
-                <i data-lucide="sliders" class="w-4 h-4"></i> ⚙️ Configuración de Movilidades
+                <i data-lucide="sliders" class="w-4 h-4"></i> Configuración de Movilidades
             </button>
             <button id="tab-reportes-btn" onclick="switchTab('view-reportes')"
                 class="ani-tab w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-blue-200 hover:bg-white/5 hover:text-white font-semibold transition hidden"
@@ -221,44 +216,6 @@
                             <i data-lucide="mail-send" class="w-4 h-4"></i> Generar y Enviar Acceso
                         </button>
                     </form>
-                </div>
-            </div>
-
-            <div id="tab-programas" class="ani-content-section hidden animate-fade-in">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-[#03045e]">Programas Académicos (REQ-09)</h2>
-                    <p class="text-gray-500 text-sm">Gestión de programas y correo del coordinador para la bandeja de Paz y Salvo.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-5 rounded-xl shadow-sm border md:col-span-1 h-fit">
-                        <h4 class="font-bold text-[#03045e] border-b pb-2 mb-4">Agregar Programa</h4>
-                        <form id="formPrograma" class="space-y-4" onsubmit="return agregarProgramaANI(event);">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Nombre del Programa <span class="text-red-600">*</span></label>
-                                <input type="text" id="progNombre" placeholder="Ej: Ingeniería de Software" required
-                                    class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-500 mb-1">Correo del Coordinador Académico <span class="text-red-600">*</span></label>
-                                <input type="email" id="progCorreoCoord" placeholder="Ej: coord.software@cue.edu.co" required
-                                    class="w-full border p-2 rounded text-sm focus:outline-none focus:border-[#0077b6]">
-                            </div>
-                            <button type="submit" class="w-full bg-[#0077b6] text-white py-2 rounded text-sm font-bold hover:bg-[#03045e] transition">Guardar Programa</button>
-                        </form>
-                    </div>
-                    <div class="bg-white rounded-xl shadow-sm border overflow-hidden md:col-span-2">
-                        <table class="w-full text-left text-sm">
-                            <thead class="bg-gray-50 border-b text-xs text-gray-500 uppercase">
-                                <tr>
-                                    <th class="p-4">Programa</th>
-                                    <th class="p-4">Correo Coordinador</th>
-                                    <th class="p-4 text-center w-24">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody id="programasTableBody" class="divide-y divide-gray-100">
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </div>
 
@@ -1202,9 +1159,9 @@
 
             if (sendToQ10) {
                 enviarPlantillasRegistro(req);
-                alert("✅ Solicitud Aprobada.\n\nLa plantilla ha sido generada y notificada a Registro y Control (Q10).");
+                alert("Solicitud aprobada.\n\nLa plantilla ha sido generada y notificada a Registro y Control (Q10).");
             } else {
-                alert("✅ Solicitud Aprobada.\n\nLa movilidad fue avalada sin notificación a Registro y Control.");
+                alert("Solicitud aprobada.\n\nLa movilidad fue avalada sin notificación a Registro y Control.");
             }
         }
 
@@ -1255,7 +1212,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
-            loadProgramasTable();
             cargarTiposMovilidad();
         });
 
@@ -1285,66 +1241,6 @@
             alert(msg);
             document.getElementById('formCredencialesExterno').reset();
             return false;
-        }
-
-        // ==========================================
-        // REQ-09: Programas con Nombre y Correo del Coordinador (Paz y Salvo)
-        // ==========================================
-        const LS_PROGRAMAS = 'CUE_PROGRAMAS';
-
-        function getProgramas() {
-            try {
-                const raw = localStorage.getItem(LS_PROGRAMAS);
-                if (!raw) return [];
-                const data = JSON.parse(raw);
-                if (!Array.isArray(data)) return [];
-                return data.map(p => typeof p === 'string' ? { nombre: p, correoCoordinador: '' } : p);
-            } catch { return []; }
-        }
-
-        function loadProgramasTable() {
-            const tbody = document.getElementById('programasTableBody');
-            if (!tbody) return;
-            let programas = getProgramas();
-            if (programas.length === 0) {
-                programas = [
-                    { nombre: 'Ingeniería de Software', correoCoordinador: 'coordinacion.acad@cue.edu.co' },
-                    { nombre: 'Medicina', correoCoordinador: 'coord.medicina@cue.edu.co' }
-                ];
-                localStorage.setItem(LS_PROGRAMAS, JSON.stringify(programas));
-            }
-            tbody.innerHTML = programas.map((p, i) => `
-                <tr class="hover:bg-gray-50">
-                    <td class="p-4 font-bold text-[#03045e]">${escapeHtml(p.nombre)}</td>
-                    <td class="p-4 text-gray-600">${escapeHtml(p.correoCoordinador || '—')}</td>
-                    <td class="p-4 text-center"><button onclick="eliminarProgramaANI(${i})" class="text-red-600 text-xs font-bold hover:underline">Eliminar</button></td>
-                </tr>
-            `).join('');
-        }
-
-        function agregarProgramaANI(e) {
-            e.preventDefault();
-            const nombre = (document.getElementById('progNombre')?.value || '').trim();
-            const correo = (document.getElementById('progCorreoCoord')?.value || '').trim();
-            if (!nombre || !correo) {
-                alert('Ingrese el nombre del programa y el correo del coordinador académico.');
-                return false;
-            }
-            let programas = getProgramas();
-            programas.push({ nombre, correoCoordinador: correo });
-            localStorage.setItem(LS_PROGRAMAS, JSON.stringify(programas));
-            document.getElementById('formPrograma').reset();
-            loadProgramasTable();
-            alert('Programa agregado. El coordinador recibirá la bandeja de Paz y Salvo.');
-            return false;
-        }
-
-        function eliminarProgramaANI(index) {
-            if (!confirm('¿Eliminar este programa?')) return;
-            let programas = getProgramas();
-            programas.splice(index, 1);
-            localStorage.setItem(LS_PROGRAMAS, JSON.stringify(programas));
-            loadProgramasTable();
         }
 
         // ==========================================

@@ -874,11 +874,11 @@
                 msg.classList.add('hidden');
                 listaEstudiantesSalida.forEach((est, index) => {
                     const badgeCurso = est.tieneCursoVial
-                        ? `<span class="inline-flex px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">✓</span>`
-                        : `<span class="inline-flex px-2 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">✗</span>`;
+                        ? `<span class="inline-flex px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">Sí</span>`
+                        : `<span class="inline-flex px-2 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">No</span>`;
                     const badgePoliza = est.tienePoliza
-                        ? `<span class="inline-flex px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">✓</span>`
-                        : `<span class="inline-flex px-2 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">✗</span>`;
+                        ? `<span class="inline-flex px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold">Sí</span>`
+                        : `<span class="inline-flex px-2 py-1 rounded-full bg-red-100 text-red-700 text-[10px] font-bold">No</span>`;
 
                     tbody.innerHTML += `
                         <tr class="hover:bg-gray-50 transition-colors">
