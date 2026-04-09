@@ -217,7 +217,7 @@
                     </h2>
                     
                     <form id="salidaForm" class="space-y-6">
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
                                 <label class="block text-xs font-bold text-gray-700 mb-1">Destino (Ciudad/Lugar) *</label>
@@ -245,46 +245,131 @@
                             </div>
                         </div>
 
+                        <div class="border border-gray-200 rounded-lg p-5 bg-white">
+                            <h3 class="text-sm font-bold text-[#03045e] mb-1 flex items-center gap-2">
+                                <i data-lucide="clipboard-list" class="w-4 h-4 text-[#0077b6]"></i>
+                                Datos de la salida (FO-DO-083)
+                            </h3>
+                            <p class="text-xs text-gray-500 mb-4">Asignaturas, objetivos y entregables para trazabilidad académica.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Asignatura(s) vinculada(s) *</label>
+                                    <input type="text" id="s_asignaturas" required placeholder="Ej: Ingeniería de Software II; Bases de Datos" class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none text-sm">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Objetivo y descripción detallada de la visita *</label>
+                                    <textarea id="s_objetivoDescripcion" required rows="3" placeholder="Describa el propósito pedagógico y el desarrollo previsto de la salida." class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none text-sm resize-y"></textarea>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Entregables académicos de la visita *</label>
+                                    <textarea id="s_entregables" required rows="2" placeholder="Informes, informes de campo, rúbricas, productos esperados, etc." class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none text-sm resize-y"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
                             <label class="block text-sm font-bold text-[#03045e] mb-2">
                                 ¿La salida requiere transporte suministrado/contratado por la Universidad? *
                             </label>
                             <div class="flex gap-6">
                                 <label class="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input type="radio" name="s_transporte" value="SI" required class="w-4 h-4 accent-[#0077b6]" onchange="toggleSoportesVehiculo()">
+                                    <input type="radio" name="s_transporte" value="SI" required class="w-4 h-4 accent-[#0077b6]" onchange="toggleSoportesVehiculo(); updateGuardarSalidaButton();">
                                     SÍ (Pasará a revisión de SST)
                                 </label>
                                 <label class="flex items-center gap-2 text-sm cursor-pointer">
-                                    <input type="radio" name="s_transporte" value="NO" class="w-4 h-4 accent-[#0077b6]" onchange="toggleSoportesVehiculo()">
+                                    <input type="radio" name="s_transporte" value="NO" class="w-4 h-4 accent-[#0077b6]" onchange="toggleSoportesVehiculo(); updateGuardarSalidaButton();">
                                     NO (Aprobación directa a ANI)
                                 </label>
                             </div>
                         </div>
 
-                        <div id="seccionSoportesVehiculo" class="hidden border border-gray-200 rounded-lg p-5 bg-gray-50">
-                            <h3 class="text-sm font-bold text-[#03045e] mb-4 flex items-center gap-2">
-                                <i data-lucide="file-check" class="w-4 h-4 text-[#0077b6]"></i>
-                                Soportes del Vehículo Contratado
-                            </h3>
-                            <p class="text-xs text-gray-500 mb-4">Coordinación Académica debe adjuntar los documentos del vehículo contratado. SST auditará su vigencia.</p>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Placa del Vehículo *</label>
-                                    <input type="text" id="veh_placa" class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none text-sm" placeholder="Ej: ABC123">
+                        <div id="seccionSoportesVehiculo" class="hidden border border-gray-200 rounded-lg p-5 bg-gray-50 space-y-6">
+                            <div class="bg-white border border-blue-100 rounded-lg p-4">
+                                <h3 class="text-xs font-bold text-[#03045e] uppercase tracking-wide mb-3">Transporte suministrado o contratado por la Universidad</h3>
+                                <p class="text-[11px] text-gray-500 mb-3">Indique el tipo de vehículo previsto y el costo estimado por estudiante. Requerido solo en este escenario.</p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1">Tipo de transporte *</label>
+                                        <select id="s_tipoTransporte" class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none text-sm bg-white">
+                                            <option value="">Seleccione…</option>
+                                            <option value="BUS">Bus</option>
+                                            <option value="MICROBUS">Microbús</option>
+                                            <option value="VAN">Van / Minibús</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-700 mb-1">Costo por estudiante (COP) *</label>
+                                        <input type="number" id="s_costoEstudiante" min="0" step="1000" placeholder="0" class="w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none text-sm">
+                                    </div>
                                 </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Documento SOAT *</label>
-                                    <input type="file" id="veh_soat" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Revisión Tecnomecánica *</label>
-                                    <input type="file" id="veh_tecnomecanica" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-bold text-gray-700 mb-1">Licencia del Conductor *</label>
-                                    <input type="file" id="veh_licencia" accept=".pdf,.jpg,.jpeg,.png" class="w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
-                                </div>
+                            </div>
 
+                            <div>
+                            <h3 class="text-sm font-bold text-[#03045e] mb-1 flex items-center gap-2">
+                                <i data-lucide="file-check" class="w-4 h-4 text-[#0077b6]"></i>
+                                Documentación del vehículo (GU-DO-003)
+                            </h3>
+                            <p class="text-xs text-gray-500 mb-4">Coordinación Académica debe adjuntar la documentación del vehículo contratado y los datos del conductor. SST auditará vigencia y coherencia.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="md:col-span-2">
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">Placa del vehículo *</label>
+                                    <input type="text" id="veh_placa" class="veh-sst-input w-full p-2 border border-gray-300 rounded focus:border-[#0077b6] outline-none text-sm" placeholder="Ej: ABC123" autocomplete="off">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">1. Tarjeta de operación del vehículo *</label>
+                                    <input type="file" id="veh_tarjeta_operacion" accept=".pdf,.jpg,.jpeg,.png" class="veh-sst-file w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">2. Licencia de tránsito *</label>
+                                    <input type="file" id="veh_licencia_transito" accept=".pdf,.jpg,.jpeg,.png" class="veh-sst-file w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">3. SOAT (seguro obligatorio de accidentes de tránsito) *</label>
+                                    <input type="file" id="veh_soat" accept=".pdf,.jpg,.jpeg,.png" class="veh-sst-file w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">4. Revisión tecnomecánica *</label>
+                                    <input type="file" id="veh_tecnomecanica" accept=".pdf,.jpg,.jpeg,.png" class="veh-sst-file w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">5. Póliza de responsabilidad civil *</label>
+                                    <input type="file" id="veh_poliza_rc" accept=".pdf,.jpg,.jpeg,.png" class="veh-sst-file w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">6. Ficha técnica del vehículo *</label>
+                                    <input type="file" id="veh_ficha_tecnica" accept=".pdf,.jpg,.jpeg,.png" class="veh-sst-file w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">7. Tarjeta de propiedad *</label>
+                                    <input type="file" id="veh_tarjeta_propiedad" accept=".pdf,.jpg,.jpeg,.png" class="veh-sst-file w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">8. Licencia de conducción del conductor *</label>
+                                    <input type="file" id="veh_licencia_conductor" accept=".pdf,.jpg,.jpeg,.png" class="veh-sst-file w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-700 mb-1">9. Afiliación a seguridad social del conductor *</label>
+                                    <input type="file" id="veh_afiliacion_social" accept=".pdf,.jpg,.jpeg,.png" class="veh-sst-file w-full p-2 border border-gray-300 rounded text-sm file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-sm file:bg-[#0077b6] file:text-white">
+                                </div>
+                                <div class="md:col-span-2 border border-dashed border-gray-300 rounded-lg p-4 bg-white">
+                                    <p class="text-xs font-bold text-gray-800 mb-3">10. Datos del conductor *</p>
+                                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Nombre completo</label>
+                                            <input type="text" id="cond_nombre" class="veh-sst-input w-full p-2 border border-gray-300 rounded text-sm" placeholder="Nombre y apellidos" autocomplete="name">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Número de licencia</label>
+                                            <input type="text" id="cond_licencia" class="veh-sst-input w-full p-2 border border-gray-300 rounded text-sm" placeholder="Número según licencia" autocomplete="off">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[11px] font-bold text-gray-600 mb-1">Teléfono de contacto</label>
+                                            <input type="tel" id="cond_telefono" class="veh-sst-input w-full p-2 border border-gray-300 rounded text-sm" placeholder="Ej: +57 300 000 0000" autocomplete="tel">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p id="vehSstHint" class="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded px-3 py-2 mt-4 hidden">Indique tipo de transporte y costo por estudiante, adjunte los 9 soportes y complete los datos del conductor para habilitar el envío a revisión SST.</p>
                             </div>
                         </div>
 
@@ -326,8 +411,8 @@
                         </div>
 
                         <div class="flex justify-end pt-4 border-t border-gray-200">
-                            <button type="submit" class="bg-[#0077b6] text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-[#03045e] transition shadow-md flex items-center gap-2">
-                                <i data-lucide="save" class="w-4 h-4"></i> Guardar Salida Académica
+                            <button type="submit" id="btnSubmitSalida" class="bg-[#0077b6] text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-[#03045e] transition shadow-md flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <i data-lucide="save" class="w-4 h-4"></i> <span id="btnSubmitSalidaLabel">Guardar Salida Académica</span>
                             </button>
                         </div>
                     </form>
@@ -901,13 +986,74 @@
             lucide.createIcons();
         }
 
+        const VEH_DOC_FILE_IDS = [
+            'veh_tarjeta_operacion',
+            'veh_licencia_transito',
+            'veh_soat',
+            'veh_tecnomecanica',
+            'veh_poliza_rc',
+            'veh_ficha_tecnica',
+            'veh_tarjeta_propiedad',
+            'veh_licencia_conductor',
+            'veh_afiliacion_social'
+        ];
+
+        function fileMetaFromInput(fileInput) {
+            const f = fileInput && fileInput.files && fileInput.files[0];
+            if (!f) return null;
+            return { name: f.name, size: f.size, type: f.type || '', lastModified: f.lastModified || 0 };
+        }
+
+        function soportesSstCompletos() {
+            const placa = (document.getElementById('veh_placa')?.value || '').trim();
+            if (!placa) return false;
+            for (const id of VEH_DOC_FILE_IDS) {
+                const el = document.getElementById(id);
+                if (!el || !el.files || !el.files[0]) return false;
+            }
+            const n = (document.getElementById('cond_nombre')?.value || '').trim();
+            const lic = (document.getElementById('cond_licencia')?.value || '').trim();
+            const tel = (document.getElementById('cond_telefono')?.value || '').trim();
+            if (!n || !lic || !tel) return false;
+            const tipoTr = (document.getElementById('s_tipoTransporte')?.value || '').trim();
+            if (!tipoTr) return false;
+            const costoRaw = document.getElementById('s_costoEstudiante')?.value;
+            const costoNum = costoRaw === '' || costoRaw === undefined ? NaN : Number(costoRaw);
+            if (Number.isNaN(costoNum) || costoNum < 0) return false;
+            return true;
+        }
+
         function updateGuardarSalidaButton() {
-            const btn = document.querySelector('#salidaForm button[type="submit"]');
+            const btn = document.getElementById('btnSubmitSalida');
+            const labelEl = document.getElementById('btnSubmitSalidaLabel');
+            const hint = document.getElementById('vehSstHint');
             if (!btn) return;
+
+            const radioSST = document.querySelector('input[name="s_transporte"][value="SI"]');
+            const requiereSST = radioSST && radioSST.checked;
+
+            if (labelEl) {
+                labelEl.textContent = requiereSST ? 'Enviar a Revisión SST' : 'Guardar Salida Académica';
+            }
+            if (hint) {
+                hint.classList.toggle('hidden', !requiereSST || soportesSstCompletos());
+            }
+
             const hayRojos = listaEstudiantesSalida.some(e => !e.autorizado);
-            btn.disabled = hayRojos || listaEstudiantesSalida.length === 0;
-            btn.classList.toggle('opacity-50', btn.disabled);
-            btn.classList.toggle('cursor-not-allowed', btn.disabled);
+            const sinEstudiantes = listaEstudiantesSalida.length === 0;
+            let disabled = hayRojos || sinEstudiantes;
+            if (requiereSST && !soportesSstCompletos()) {
+                disabled = true;
+            }
+
+            btn.disabled = disabled;
+            btn.classList.toggle('opacity-50', disabled);
+            btn.classList.toggle('cursor-not-allowed', disabled);
+            const icon = btn.querySelector('i[data-lucide]');
+            if (icon) {
+                icon.setAttribute('data-lucide', requiereSST ? 'send' : 'save');
+            }
+            lucide.createIcons();
         }
 
         function toggleSoportesVehiculo() {
@@ -916,7 +1062,23 @@
             if (seccion) {
                 seccion.classList.toggle('hidden', !radioSI || !radioSI.checked);
             }
+            updateGuardarSalidaButton();
             lucide.createIcons();
+        }
+
+        function bindVehiculoSstListeners() {
+            VEH_DOC_FILE_IDS.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('change', updateGuardarSalidaButton);
+            });
+            ['veh_placa', 'cond_nombre', 'cond_licencia', 'cond_telefono'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', updateGuardarSalidaButton);
+            });
+            const tipoSel = document.getElementById('s_tipoTransporte');
+            const costoIn = document.getElementById('s_costoEstudiante');
+            if (tipoSel) tipoSel.addEventListener('change', updateGuardarSalidaButton);
+            if (costoIn) costoIn.addEventListener('input', updateGuardarSalidaButton);
         }
 
         // =========================================================================
@@ -939,39 +1101,61 @@
             let vehiculo = null;
 
             if (requiereSST === 'SI') {
-                const placa = (document.getElementById('veh_placa')?.value || '').trim();
-                const soatFile = document.getElementById('veh_soat')?.files?.[0];
-                const tecnoFile = document.getElementById('veh_tecnomecanica')?.files?.[0];
-                const licenciaFile = document.getElementById('veh_licencia')?.files?.[0];
-                const tarjetaFile = document.getElementById('veh_tarjeta_propiedad')?.files?.[0];
-                const polizaRcFile = document.getElementById('veh_poliza_rc')?.files?.[0];
-
-                if (!placa) {
-                    mostrarAlerta('Cuando requiere transporte contratado debe indicar la placa del vehículo.', 'error');
-                    return;
-                }
-                if (!soatFile || !tecnoFile || !licenciaFile || !tarjetaFile || !polizaRcFile) {
-                    mostrarAlerta('Cuando requiere transporte contratado debe adjuntar los 5 documentos: SOAT, Revisión Tecnomecánica, Licencia del Conductor, Tarjeta de Propiedad y Póliza de Responsabilidad Civil.', 'error');
+                if (!soportesSstCompletos()) {
+                    mostrarAlerta('Para enviar a revisión SST debe indicar tipo de transporte y costo por estudiante, la placa, los nueve soportes del vehículo y los datos del conductor (nombre, número de licencia y teléfono).', 'error');
                     return;
                 }
 
+                const getFile = id => document.getElementById(id);
                 vehiculo = {
-                    placa,
-                    soatDoc: soatFile.name,
-                    revisionTecnomecanicaDoc: tecnoFile.name,
-                    licenciaConductorDoc: licenciaFile.name,
-                    tarjetaPropiedadDoc: tarjetaFile.name,
-                    polizaRcDoc: polizaRcFile.name
+                    placa: (document.getElementById('veh_placa').value || '').trim(),
+                    tarjetaOperacionDoc: fileMetaFromInput(getFile('veh_tarjeta_operacion')),
+                    licenciaTransitoDoc: fileMetaFromInput(getFile('veh_licencia_transito')),
+                    soatDoc: fileMetaFromInput(getFile('veh_soat')),
+                    revisionTecnomecanicaDoc: fileMetaFromInput(getFile('veh_tecnomecanica')),
+                    polizaResponsabilidadCivilDoc: fileMetaFromInput(getFile('veh_poliza_rc')),
+                    fichaTecnicaVehiculoDoc: fileMetaFromInput(getFile('veh_ficha_tecnica')),
+                    tarjetaPropiedadDoc: fileMetaFromInput(getFile('veh_tarjeta_propiedad')),
+                    licenciaConductorDoc: fileMetaFromInput(getFile('veh_licencia_conductor')),
+                    afiliacionSegSocialConductorDoc: fileMetaFromInput(getFile('veh_afiliacion_social')),
+                    conductor: {
+                        nombreCompleto: (document.getElementById('cond_nombre').value || '').trim(),
+                        numeroLicencia: (document.getElementById('cond_licencia').value || '').trim(),
+                        telefonoContacto: (document.getElementById('cond_telefono').value || '').trim()
+                    }
                 };
             }
 
             const estadoInicial = requiereSST === 'SI' ? 'EN_REVISION_SST' : 'APROBADA_POR_COORD';
             const profesorNombre = document.getElementById('s_profesor').value;
 
+            let tipoTransporteVal = null;
+            let costoPorEstudianteVal = null;
+            if (requiereSST === 'SI') {
+                tipoTransporteVal = (document.getElementById('s_tipoTransporte').value || '').trim();
+                const costoRaw = document.getElementById('s_costoEstudiante').value;
+                const costoNum = costoRaw === '' ? NaN : Number(costoRaw);
+                if (!tipoTransporteVal) {
+                    mostrarAlerta('Seleccione el tipo de transporte cuando la salida usa vehículo suministrado o contratado por la Universidad.', 'error');
+                    return;
+                }
+                if (Number.isNaN(costoNum) || costoNum < 0) {
+                    mostrarAlerta('Indique un costo por estudiante válido (número mayor o igual a cero).', 'error');
+                    return;
+                }
+                costoPorEstudianteVal = costoNum;
+            }
+
             const nuevaSalida = {
                 id: Date.now(),
                 creador: currentUser.name,
                 programa: programaCoordinador,
+                formularioReferencia: 'FO-DO-083',
+                asignaturasVinculadas: (document.getElementById('s_asignaturas').value || '').trim(),
+                objetivoDescripcionVisita: (document.getElementById('s_objetivoDescripcion').value || '').trim(),
+                entregablesAcademicosVisita: (document.getElementById('s_entregables').value || '').trim(),
+                tipoTransporte: tipoTransporteVal,
+                costoPorEstudiante: costoPorEstudianteVal,
                 destino: document.getElementById('s_destino').value,
                 direccion: document.getElementById('s_direccion').value,
                 fechaInicio: document.getElementById('s_fechaInicio').value,
@@ -1010,6 +1194,7 @@
             renderListaVisual();
             document.getElementById('seccionSoportesVehiculo').classList.add('hidden');
             toggleSoportesVehiculo();
+            updateGuardarSalidaButton();
         });
 
         function buildExpedienteHtmlCoord(req) {
@@ -1363,6 +1548,7 @@
         // INICIALIZACIÓN
         loadSolicitudes();
         renderListaVisual();
+        bindVehiculoSstListeners();
         loadEstadisticasPrograma();
         if (typeof CUECore !== 'undefined') CUECore.initCueNotificationUI(currentRole);
 

@@ -72,6 +72,7 @@
                         <th class="p-4 w-24">ID Salida</th>
                         <th class="p-4">Profesor responsable</th>
                         <th class="p-4">Destino / Fechas</th>
+                        <th class="p-4 min-w-[200px]">Auditoría documental (vehículo)</th>
                         <th class="p-4">Estado Revisión</th>
                         <th class="p-4 text-center">Acción</th>
                     </tr>
@@ -119,7 +120,7 @@
             </div>
             <div class="p-6 overflow-y-auto flex-grow">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
                     <div>
                         <span class="block text-[10px] font-bold text-gray-400 uppercase">Referencia</span>
                         <span class="font-mono font-bold text-[#03045e]" id="modalSstId"></span>
@@ -138,15 +139,47 @@
                         <span class="font-bold text-gray-800 text-sm" id="modalSstDates"></span>
                         <span class="text-xs text-gray-600 block mt-0.5" id="modalSstActividad"></span>
                     </div>
+                    <div>
+                        <span class="block text-[10px] font-bold text-gray-400 uppercase">Tipo de transporte / Costo por estudiante</span>
+                        <span class="font-bold text-gray-800 text-sm" id="modalSstTransporteCosto"></span>
+                    </div>
+                </div>
+
+                <div class="bg-blue-50/80 border border-blue-200 rounded-lg p-4 mb-6">
+                    <h4 class="text-xs font-bold text-[#03045e] uppercase tracking-wider mb-2">Datos académicos (FO-DO-083)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                        <div class="md:col-span-2">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Asignaturas vinculadas</span>
+                            <p class="text-gray-800 mt-0.5" id="modalSstAsignaturas">—</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Objetivo y descripción de la visita</span>
+                            <p class="text-gray-800 mt-0.5 whitespace-pre-wrap" id="modalSstObjetivo">—</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <span class="text-[10px] font-bold text-gray-500 uppercase">Entregables académicos</span>
+                            <p class="text-gray-800 mt-0.5 whitespace-pre-wrap" id="modalSstEntregables">—</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Sección 1: Auditoría del Vehículo -->
                 <div class="bg-gray-50 border border-gray-200 rounded-lg p-5 mb-6">
-                    <h4 class="font-bold text-gray-700 text-sm mb-3 border-b border-gray-200 pb-2 flex items-center gap-2"><i data-lucide="bus" class="w-4 h-4 text-[#0077b6]"></i> Auditoría del Vehículo</h4>
-                    <p class="text-xs text-gray-500 mb-4">Documentos subidos por Coordinación Académica. Verifique vigencia y marque como validados.</p>
-                    <div class="mb-4">
-                        <span class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Placa del vehículo</span>
-                        <span id="sstPlacaReadonly" class="font-mono font-bold text-[#03045e] text-lg">—</span>
+                    <h4 class="font-bold text-gray-700 text-sm mb-3 border-b border-gray-200 pb-2 flex items-center gap-2"><i data-lucide="bus" class="w-4 h-4 text-[#0077b6]"></i> Auditoría del vehículo (GU-DO-003)</h4>
+                    <p class="text-xs text-gray-500 mb-4">Nueve soportes documentales y verificación de datos del conductor. Marque cada ítem como vigente o validado tras la revisión.</p>
+                    <div class="mb-4 flex flex-wrap gap-6 items-start">
+                        <div>
+                            <span class="block text-[10px] font-bold text-gray-500 uppercase mb-1">Placa del vehículo</span>
+                            <span id="sstPlacaReadonly" class="font-mono font-bold text-[#03045e] text-lg">—</span>
+                        </div>
+                        <div class="border border-gray-200 rounded-lg p-3 bg-white min-w-[220px] flex-1 max-w-md">
+                            <span class="block text-[10px] font-bold text-gray-500 uppercase mb-2">Datos del conductor (declarados)</span>
+                            <dl class="text-xs text-gray-800 space-y-1">
+                                <div><dt class="inline font-semibold text-gray-600">Nombre:</dt> <dd class="inline" id="sstConductorNombre">—</dd></div>
+                                <div><dt class="inline font-semibold text-gray-600">N.º licencia:</dt> <dd class="inline font-mono" id="sstConductorLicencia">—</dd></div>
+                                <div><dt class="inline font-semibold text-gray-600">Teléfono:</dt> <dd class="inline" id="sstConductorTel">—</dd></div>
+                            </dl>
+                        </div>
                     </div>
                     <ul id="sstDocsVehiculoList" class="space-y-2">
                         <!-- Dinámico: documento + botón Ver + checkbox Vigente/Validado -->
@@ -432,7 +465,7 @@
             document.getElementById('pendingSSTCount').textContent = salidas.length;
 
             if (salidas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-400 italic">No hay salidas académicas en revisión SST.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400 italic">No hay salidas académicas en revisión SST.</td></tr>`;
                 return;
             }
 
@@ -440,10 +473,11 @@
                 const statusBadge = `<span class="bg-orange-100 text-orange-800 px-2 py-1 rounded text-xs font-bold border border-orange-200">En revisión SST</span>`;
                 const actionButtons = `
                     <div class="flex flex-col gap-2 items-stretch">
-                        <button onclick="openSSTModal('${salida.id}')" class="bg-red-700 text-white px-4 py-1 rounded text-xs font-bold hover:bg-red-800 transition shadow-sm w-full">Revisar Vehículo</button>
+                        <button onclick="openSSTModal('${salida.id}')" class="bg-red-700 text-white px-4 py-1 rounded text-xs font-bold hover:bg-red-800 transition shadow-sm w-full">Auditar documentación</button>
                         <button onclick="openEstadoSalida('${salida.id}')" class="border border-gray-300 text-gray-700 px-4 py-1 rounded text-xs font-semibold hover:bg-gray-50 transition w-full">Ver Estado</button>
                     </div>
                 `;
+                const audit = resumenAuditoriaVehiculo(salida);
 
                 tbody.innerHTML += `
                     <tr class="hover:bg-gray-50 transition border-b">
@@ -455,6 +489,10 @@
                         <td class="p-4 text-gray-600 text-xs">
                             <strong>Lugar:</strong> ${escapeHtml(salida.destino || 'N/A')}<br>
                             <strong>Inicio:</strong> ${escapeHtml(salida.fechaInicio || 'N/A')} | <strong>Fin:</strong> ${escapeHtml(salida.fechaFin || 'N/A')}
+                        </td>
+                        <td class="p-4 text-xs">
+                            <span class="font-semibold ${audit.completo ? 'text-green-700' : 'text-amber-700'}">${escapeHtml(audit.texto)}</span>
+                            <p class="text-[10px] text-gray-500 mt-1">${escapeHtml(audit.detalle)}</p>
                         </td>
                         <td class="p-4">${statusBadge}</td>
                         <td class="p-4 text-center">${actionButtons}</td>
@@ -550,18 +588,58 @@
             openExtramuralModal(index);
         }
 
-        // 2. APERTURA DEL PANEL DE AUDITORÍA
+        // 2. APERTURA DEL PANEL DE AUDITORÍA (GU-DO-003: 9 archivos + cotejo datos conductor)
         const DOC_LABELS = [
+            { key: 'tarjetaOperacionDoc', label: 'Tarjeta de operación del vehículo' },
+            { key: 'licenciaTransitoDoc', label: 'Licencia de tránsito' },
             { key: 'soatDoc', label: 'SOAT' },
-            { key: 'revisionTecnomecanicaDoc', label: 'Revisión Tecnomecánica' },
-            { key: 'licenciaConductorDoc', label: 'Licencia del Conductor' },
-            { key: 'tarjetaPropiedadDoc', label: 'Tarjeta de Propiedad' },
-            { key: 'polizaRcDoc', label: 'Póliza de Responsabilidad Civil' }
+            { key: 'revisionTecnomecanicaDoc', label: 'Revisión tecnomecánica' },
+            { key: 'polizaResponsabilidadCivilDoc', label: 'Póliza de responsabilidad civil', legacyKeys: ['polizaRcDoc'] },
+            { key: 'fichaTecnicaVehiculoDoc', label: 'Ficha técnica del vehículo' },
+            { key: 'tarjetaPropiedadDoc', label: 'Tarjeta de propiedad' },
+            { key: 'licenciaConductorDoc', label: 'Licencia de conducción del conductor' },
+            { key: 'afiliacionSegSocialConductorDoc', label: 'Afiliación a seguridad social del conductor' },
+            { key: 'conductorDatosVerificados', label: 'Cotejo de datos del conductor con la documentación', noFile: true }
         ];
+
+        function vehiculoDocNombre(vehiculo, docDef) {
+            if (!vehiculo) return '';
+            let raw = vehiculo[docDef.key];
+            if ((!raw || (typeof raw === 'object' && !raw.name)) && docDef.legacyKeys) {
+                for (let i = 0; i < docDef.legacyKeys.length; i++) {
+                    const alt = vehiculo[docDef.legacyKeys[i]];
+                    if (alt) {
+                        raw = alt;
+                        break;
+                    }
+                }
+            }
+            if (raw == null) return '';
+            if (typeof raw === 'string') return raw;
+            if (typeof raw === 'object' && raw.name) return raw.name;
+            return '';
+        }
+
+        function resumenAuditoriaVehiculo(salida) {
+            const v = salida && salida.vehiculo ? salida.vehiculo : {};
+            const fileDocs = DOC_LABELS.filter(d => !d.noFile);
+            let cargados = 0;
+            fileDocs.forEach(d => {
+                if (vehiculoDocNombre(v, d)) cargados++;
+            });
+            const c = v.conductor || {};
+            const datosCond = (c.nombreCompleto || c.numeroLicencia || c.telefonoContacto || '').length > 0;
+            const completo = cargados === fileDocs.length && datosCond && (v.placa || '').trim().length > 0;
+            return {
+                completo,
+                texto: completo ? 'Expediente completo' : 'Expediente incompleto',
+                detalle: `${cargados}/${fileDocs.length} soportes · ${datosCond ? 'Datos conductor' : 'Sin datos conductor'} · Placa ${(v.placa || '').trim() ? 'OK' : 'pend.'}`
+            };
+        }
 
         function openSSTModal(id) {
             currentSstId = id;
-            const salida = safeParseArray(LS_SALIDAS).find(s => s.id === id);
+            const salida = safeParseArray(LS_SALIDAS).find(s => String(s.id) === String(id));
             if (!salida) {
                 alert("No se encontró la salida académica.");
                 currentSstId = null;
@@ -575,26 +653,55 @@
             document.getElementById('modalSstDates').textContent = `${salida.fechaInicio || 'N/A'} – ${salida.fechaFin || 'N/A'}`;
             document.getElementById('modalSstActividad').textContent = salida.actividad || '—';
 
+            const transporteUni = salida.requiereSST === true
+                || String(salida.transporteUniversidad || '').toUpperCase() === 'SI';
+            const tcEl = document.getElementById('modalSstTransporteCosto');
+            if (tcEl) {
+                if (!transporteUni) {
+                    tcEl.textContent = 'No aplica (sin transporte suministrado o contratado por la Universidad)';
+                } else {
+                    const tipoTr = salida.tipoTransporte || '';
+                    const mapTipo = { BUS: 'Bus', MICROBUS: 'Microbús', VAN: 'Van / Minibús', OTRO_CONTRATADO: 'Otro (contratado)' };
+                    const tipoLabel = mapTipo[tipoTr] || tipoTr || '—';
+                    const costo = salida.costoPorEstudiante != null && salida.costoPorEstudiante !== ''
+                        ? String(salida.costoPorEstudiante)
+                        : '—';
+                    tcEl.textContent = `${tipoLabel} · COP ${costo} / estudiante`;
+                }
+            }
+
+            document.getElementById('modalSstAsignaturas').textContent = salida.asignaturasVinculadas || '—';
+            document.getElementById('modalSstObjetivo').textContent = salida.objetivoDescripcionVisita || '—';
+            document.getElementById('modalSstEntregables').textContent = salida.entregablesAcademicosVisita || '—';
+
             const vehiculo = salida.vehiculo || {};
             document.getElementById('sstPlacaReadonly').textContent = vehiculo.placa || '—';
+
+            const cond = vehiculo.conductor || {};
+            document.getElementById('sstConductorNombre').textContent = cond.nombreCompleto || '—';
+            document.getElementById('sstConductorLicencia').textContent = cond.numeroLicencia || '—';
+            document.getElementById('sstConductorTel').textContent = cond.telefonoContacto || '—';
 
             const docValidaciones = salida.sstReview?.docValidaciones || {};
             const listEl = document.getElementById('sstDocsVehiculoList');
             listEl.innerHTML = '';
             DOC_LABELS.forEach((doc, i) => {
-                const fileName = vehiculo[doc.key] || '—';
+                const fileName = doc.noFile
+                    ? '(revisión declarativa / cotejo)'
+                    : (vehiculoDocNombre(vehiculo, doc) || '—');
                 const checked = docValidaciones[doc.key] === true;
                 const li = document.createElement('li');
-                li.className = 'flex items-center justify-between gap-3 p-3 bg-white border border-gray-200 rounded-lg';
+                li.className = 'flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-white border border-gray-200 rounded-lg';
+                const verBtn = doc.noFile
+                    ? ''
+                    : `<button type="button" class="sst-btn-ver-doc shrink-0 text-xs text-[#0077b6] hover:underline flex items-center gap-1" title="Simulación: documento adjunto">Ver soporte</button>`;
                 li.innerHTML = `
-                    <div class="flex items-center gap-3 flex-1 min-w-0">
-                        <span class="text-sm font-medium text-gray-700 shrink-0">${escapeHtml(doc.label)}</span>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2 flex-1 min-w-0">
+                        <span class="text-sm font-medium text-gray-800 shrink-0">${escapeHtml(doc.label)}</span>
                         <span class="text-xs text-gray-500 truncate">${escapeHtml(fileName)}</span>
-                        <button type="button" class="sst-btn-ver-doc shrink-0 text-xs text-[#0077b6] hover:underline flex items-center gap-1" title="Simulación: documento adjunto">
-                            Ver documento adjunto
-                        </button>
+                        ${verBtn}
                     </div>
-                    <label class="flex items-center gap-2 shrink-0 cursor-pointer">
+                    <label class="flex items-center gap-2 shrink-0 cursor-pointer self-end sm:self-auto">
                         <input type="checkbox" class="sst-doc-vigente w-4 h-4 accent-green-600" data-doc="${escapeAttr(doc.key)}" ${checked ? 'checked' : ''}>
                         <span class="text-xs font-bold text-gray-600">Vigente / Validado</span>
                     </label>
@@ -685,7 +792,7 @@
             const allPartCurvial = Array.from(document.querySelectorAll('.sst-part-curvial')).every(cb => cb.checked);
 
             if (!allDocChecked) {
-                alert("Debe marcar \"Vigente / Validado\" en todos los documentos del vehículo para aprobar la salida.");
+                alert("Debe marcar \"Vigente / Validado\" en los nueve soportes del vehículo y en el cotejo de datos del conductor para aprobar la salida.");
                 return;
             }
             if (!allPartSalud || !allPartCurvial) {
@@ -694,7 +801,7 @@
             }
 
             const salidas = safeParseArray(LS_SALIDAS);
-            const salida = salidas.find(s => s.id === currentSstId);
+            const salida = salidas.find(s => String(s.id) === String(currentSstId));
             const destino = salida?.destino || 'la salida académica';
 
             updateSalidaSst('APROBADO', 'Validación exitosa.');
@@ -725,7 +832,7 @@
 
         function openEstadoSalida(id) {
             const salidas = safeParseArray(LS_SALIDAS);
-            const salida = salidas.find(s => s.id === id);
+            const salida = salidas.find(s => String(s.id) === String(id));
             if (!salida) {
                 alert('No se encontró la salida académica en el sistema.');
                 return;
@@ -806,7 +913,7 @@
         function updateSalidaSst(newStatus, sstNote = '') {
             const reviewer = AuthService.checkAuth();
             const salidas = safeParseArray(LS_SALIDAS);
-            const idx = salidas.findIndex(s => s.id === currentSstId);
+            const idx = salidas.findIndex(s => String(s.id) === String(currentSstId));
             if (idx === -1) {
                 alert("No se pudo actualizar: no se encontró la salida en el almacenamiento.");
                 return;
